@@ -6,8 +6,8 @@ import { fetchAPI } from '@/lib/api';
 
 export default function SuperAdminPage() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [adminPhone, setAdminPhone] = useState('9999999999');
-  const [adminPassword, setAdminPassword] = useState('admin123');
+  const [adminPhone, setAdminPhone] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
@@ -28,6 +28,7 @@ export default function SuperAdminPage() {
   const [formOwnerName, setFormOwnerName] = useState('');
   const [formOwnerPhone, setFormOwnerPhone] = useState('');
   const [formOwnerPassword, setFormOwnerPassword] = useState('');
+  const [formUpiId, setFormUpiId] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   // QR Preview Modal
@@ -113,7 +114,9 @@ export default function SuperAdminPage() {
         ownerPhone: ownerPh,
         owner_phone: ownerPh,
         ownerPassword: ownerPass,
-        owner_password: ownerPass
+        owner_password: ownerPass,
+        upi_id: formUpiId.trim() || `${cleanSlug}@okhdfcbank`,
+        upiId: formUpiId.trim() || `${cleanSlug}@okhdfcbank`
       };
 
       const res = await fetchAPI('/admin/restaurants', {
@@ -206,11 +209,6 @@ export default function SuperAdminPage() {
             >
               {loginLoading ? 'Authenticating...' : 'Enter Admin Console'}
             </button>
-
-            <div style={{ background: '#F8F9FA', border: '1px solid #ECEEF2', padding: '10px 14px', borderRadius: 10, marginTop: 10, fontSize: 12, color: '#4F4F4F' }}>
-              <strong style={{ color: '#1C1C1C' }}>Platform Master Access:</strong><br />
-              Authorized Phone: <code>9999999999</code> • Access Key: <code>admin123</code>
-            </div>
           </form>
         </div>
       </div>
@@ -532,6 +530,18 @@ export default function SuperAdminPage() {
                     style={{ height: 40 }}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 12, color: '#4F4F4F', fontWeight: 600, marginBottom: 4 }}>Restaurant UPI ID (Google Pay / PhonePe Settlement)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. restaurant@okhdfcbank or 9820123456@upi"
+                  value={formUpiId}
+                  onChange={(e) => setFormUpiId(e.target.value)}
+                  className="input-field"
+                  style={{ height: 40 }}
+                />
               </div>
 
               <div style={{ borderTop: '1px solid #ECEEF2', paddingTop: 14, marginTop: 4 }}>

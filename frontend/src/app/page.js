@@ -165,16 +165,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* LIVE DEMO RESTAURANTS SHOWCASE */}
+      {/* FEATURED RESTAURANT SHOWCASE */}
       <section style={{ marginBottom: 64 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-              LIVE PRODUCTION STORES
+              FEATURED RESTAURANT PARTNERS
             </div>
-            <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Explore Pre-Configured Restaurants</h2>
+            <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Order Directly from Top Kitchens</h2>
           </div>
-          <span style={{ color: '#696969', fontSize: 13 }}>Click to experience the full customer flow</span>
+          <span style={{ color: '#696969', fontSize: 13 }}>Zero aggregator markup • 100% direct delivery</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 24 }}>

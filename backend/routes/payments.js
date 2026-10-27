@@ -95,4 +95,51 @@ router.post('/verify', asyncHandler(async (req, res) => {
   res.json({ success: true, orderId: result.orderId });
 }));
 
+// POST /api/payments/confirm-upi — Direct UPI Payment Confirmation
+const { customerAuth } = require('../middleware/auth');
+router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
+  const { orderId, order_id, utr, upiTxnId } = req.body;
+  const targetOrderId = orderId || order_id;
+  if (!targetOrderId) throw new ApiError(400, 'Order ID is required');
+
+  const { rows: [order] } = await query('SELECT * FROM orders WHERE id = $1 AND customer_id = $2', [targetOrderId, req.customer.id]);
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  const txnRef = utr || upiTxnId || `upi_${Date.now()}`;
+
+  // Update payment status
+  await query(
+    `UPDATE payments 
+     SET status = 'success', razorpay_payment_id = $1, paid_at = now()
+     WHERE order_id = $2`,
+    [txnRef, targetOrderId]
+  );
+
+  // Update order status
+  await query(
+    `UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`,
+    [targetOrderId]
+  );
+  await query(
+    `INSERT INTO order_status_history (order_id, from_status, to_status, changed_by)
+     VALUES ($1, 'placed', 'paid', 'customer_upi')`,
+    [targetOrderId]
+  );
+
+  // Notify restaurant & customer
+  const fullOrder = await orderService.getOrderWithItems(targetOrderId);
+  if (fullOrder) {
+    try {
+      await notificationService.notifyOrderStatusChange(fullOrder, fullOrder.items, 'placed', 'paid');
+    } catch (e) {}
+  }
+
+  res.json({
+    success: true,
+    message: 'UPI Payment confirmed successfully',
+    orderId: targetOrderId,
+    publicToken: order.public_token
+  });
+}));
+
 module.exports = router;

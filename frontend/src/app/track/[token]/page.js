@@ -173,6 +173,28 @@ function TrackingContent() {
         )}
       </div>
 
+      {/* PENDING UPI PAYMENT BANNER */}
+      {order.payment?.method === 'upi' && order.payment?.status !== 'success' && !isCancelled && (
+        <div style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A', borderRadius: 14, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#92400E' }}>⚡ UPI Payment Pending</span>
+            <span style={{ fontSize: 16, fontWeight: 900, color: '#B45309' }}>₹{(order.total_paise / 100).toFixed(2)}</span>
+          </div>
+          <p style={{ fontSize: 12.5, color: '#78350F', marginBottom: 12, lineHeight: 1.4 }}>
+            Complete payment directly to <strong>{order.restaurant_name}</strong>:
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <a
+              href={`upi://pay?pa=${order.restaurant_upi_id || 'directdine@okhdfcbank'}&pn=${encodeURIComponent(order.restaurant_name)}&am=${(order.total_paise / 100).toFixed(2)}&cu=INR&tn=${encodeURIComponent(`Order #${order.order_no}`)}`}
+              className="btn-primary"
+              style={{ flex: 1, padding: '10px 14px', fontSize: 13, borderRadius: 8, textDecoration: 'none', textAlign: 'center', background: '#15803D' }}
+            >
+              🟢 Pay via Google Pay / PhonePe
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* ANIMATED PROGRESS STEPPER */}
       {!isCancelled && (
         <div style={{ background: '#FFFFFF', borderRadius: 16, padding: '24px 20px', marginBottom: 20, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>

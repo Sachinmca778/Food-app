@@ -15,7 +15,7 @@ router.get('/:slug', asyncHandler(async (req, res) => {
             address_line, city, pincode, latitude, longitude,
             delivery_radius_m, delivery_fee_paise, free_delivery_above_paise,
             min_order_paise, avg_prep_minutes, accepts_cod, accepts_pickup,
-            gst_percent, is_open, is_active
+            gst_percent, is_open, is_active, upi_id
      FROM restaurants WHERE slug = $1`,
     [req.params.slug]
   );
@@ -43,7 +43,7 @@ router.get('/:slug/menu', asyncHandler(async (req, res) => {
     `SELECT id, slug, name, logo_url, cover_url, description, phone,
             address_line, city, pincode, delivery_radius_m, delivery_fee_paise,
             free_delivery_above_paise, min_order_paise, avg_prep_minutes,
-            is_open, is_active
+            is_open, is_active, upi_id
      FROM restaurants WHERE slug = $1`,
     [req.params.slug]
   );

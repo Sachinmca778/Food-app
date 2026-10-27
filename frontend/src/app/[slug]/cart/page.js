@@ -42,6 +42,11 @@ function CartContent() {
   const [submitting, setSubmitting] = useState(false);
   const [orderError, setOrderError] = useState('');
 
+  // UPI Payment Modal State
+  const [upiPaymentModal, setUpiPaymentModal] = useState(null);
+  const [upiConfirming, setUpiConfirming] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
   useEffect(() => {
     const savedCustomer = localStorage.getItem('customer_info');
     const token = localStorage.getItem('customer_token');
@@ -223,9 +228,30 @@ function CartContent() {
 
         clearCart();
 
-        setTimeout(() => {
-          router.push(`/track/${res.order.public_token}`);
-        }, 600);
+        if (paymentMethod === 'upi') {
+          // Open Direct UPI Payment Sheet (Google Pay / PhonePe / Paytm / QR)
+          const upiId = restaurant?.upi_id || res.payment?.upiId || 'directdine@okhdfcbank';
+          const payeeName = restaurant?.name || res.payment?.payeeName || 'Restaurant';
+          const amountRupees = (grandTotalPaise / 100).toFixed(2);
+          const upiUri = res.payment?.upiUri || `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountRupees}&cu=INR&tn=${encodeURIComponent(`Order #${res.order.order_no}`)}`;
+          const qrUrl = res.payment?.qrUrl || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+
+          setUpiPaymentModal({
+            order: res.order,
+            payment: {
+              upiId,
+              payeeName,
+              amountRupees,
+              upiUri,
+              qrUrl
+            }
+          });
+          setSubmitting(false);
+        } else {
+          setTimeout(() => {
+            router.push(`/track/${res.order.public_token}`);
+          }, 600);
+        }
       } else {
         setOrderError(res.error || 'Failed to place order');
         setSubmitting(false);
@@ -233,6 +259,33 @@ function CartContent() {
     } catch (err) {
       setOrderError(err.message);
       setSubmitting(false);
+    }
+  };
+
+  const handleCopyUpiId = (id) => {
+    try {
+      navigator.clipboard.writeText(id);
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2000);
+    } catch (e) {}
+  };
+
+  const handleConfirmUpiPayment = async () => {
+    if (!upiPaymentModal?.order?.id) return;
+    setUpiConfirming(true);
+    try {
+      await fetchAPI('/payments/confirm-upi', {
+        method: 'POST',
+        body: JSON.stringify({ orderId: upiPaymentModal.order.id })
+      });
+      try {
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      } catch (e) {}
+      router.push(`/track/${upiPaymentModal.order.public_token}`);
+    } catch (err) {
+      router.push(`/track/${upiPaymentModal.order.public_token}`);
+    } finally {
+      setUpiConfirming(false);
     }
   };
 
@@ -722,9 +775,186 @@ function CartContent() {
           : `Pay ₹${(grandTotalPaise / 100).toFixed(2)} & Place Order ➔`}
       </button>
 
-      <p style={{ textAlign: 'center', fontSize: 12, color: '#696969', marginTop: 12 }}>
-        🔒 256-bit Encrypted Checkout. Payment goes directly to the restaurant.
-      </p>
+      {/* REAL DIRECT UPI PAYMENT MODAL (Google Pay / PhonePe / Paytm / QR) */}
+      {upiPaymentModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.72)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 20,
+            maxWidth: 440,
+            width: '100%',
+            padding: '24px 22px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+            maxHeight: '92vh',
+            overflowY: 'auto',
+            textAlign: 'center'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ textAlign: 'left' }}>
+                <span style={{ fontSize: 11, background: '#EDF8F0', color: '#1B7A32', fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                  ⚡ Instant UPI Payment
+                </span>
+                <h3 style={{ fontSize: 18, color: '#1C1C1C', marginTop: 4, margin: 0 }}>
+                  Order #{upiPaymentModal.order.order_no} Confirmed
+                </h3>
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary)' }}>
+                ₹{upiPaymentModal.payment.amountRupees}
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: '#4F4F4F', marginBottom: 18, textAlign: 'left' }}>
+              Pay directly to <strong>{upiPaymentModal.payment.payeeName}</strong> using your mobile UPI app:
+            </p>
+
+            {/* DIRECT MOBILE 1-TAP UPI APP LAUNCHERS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+              <a
+                href={upiPaymentModal.payment.upiUri}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  background: '#F0FDF4',
+                  border: '1.5px solid #86EFAC',
+                  textDecoration: 'none',
+                  color: '#15803D',
+                  fontWeight: 800,
+                  fontSize: 14.5,
+                  boxShadow: '0 2px 6px rgba(34, 197, 94, 0.12)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>🟢</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div>Pay with Google Pay (GPay)</div>
+                    <div style={{ fontSize: 11, color: '#166534', fontWeight: 500 }}>Auto-opens Google Pay app</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 16 }}>➔</span>
+              </a>
+
+              <a
+                href={upiPaymentModal.payment.upiUri}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  background: '#FAF5FF',
+                  border: '1.5px solid #D8B4FE',
+                  textDecoration: 'none',
+                  color: '#6B21A8',
+                  fontWeight: 800,
+                  fontSize: 14.5,
+                  boxShadow: '0 2px 6px rgba(168, 85, 247, 0.12)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>🟣</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div>Pay with PhonePe</div>
+                    <div style={{ fontSize: 11, color: '#581C87', fontWeight: 500 }}>Auto-opens PhonePe app</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 16 }}>➔</span>
+              </a>
+
+              <a
+                href={upiPaymentModal.payment.upiUri}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  background: '#F0F9FF',
+                  border: '1.5px solid #BAE6FD',
+                  textDecoration: 'none',
+                  color: '#0369A1',
+                  fontWeight: 800,
+                  fontSize: 14.5
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 22 }}>🔵</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div>Pay with Paytm / Any UPI App</div>
+                    <div style={{ fontSize: 11, color: '#075985', fontWeight: 500 }}>Paytm, BHIM, CRED, WhatsApp Pay</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 16 }}>➔</span>
+              </a>
+            </div>
+
+            {/* DYNAMIC UPI QR CODE SECTION */}
+            <div style={{ background: '#F8F9FA', borderRadius: 14, padding: 14, marginBottom: 18, border: '1px solid #ECEEF2' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#696969', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Or Scan Dynamic QR Code with Any Phone
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                <div style={{ background: '#FFFFFF', padding: 8, borderRadius: 12, border: '1.5px solid #E3E5EB', display: 'inline-block' }}>
+                  <img
+                    src={upiPaymentModal.payment.qrUrl}
+                    alt="UPI Payment QR"
+                    width={180}
+                    height={180}
+                    style={{ display: 'block', borderRadius: 8 }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 12, color: '#4F4F4F' }}>
+                <span>UPI ID: <strong>{upiPaymentModal.payment.upiId}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => handleCopyUpiId(upiPaymentModal.payment.upiId)}
+                  style={{ background: '#FFFFFF', border: '1px solid #D1D5DB', borderRadius: 6, padding: '3px 8px', fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                >
+                  {copiedUpi ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+
+            {/* CONFIRMATION ACTIONS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                type="button"
+                onClick={handleConfirmUpiPayment}
+                disabled={upiConfirming}
+                className="btn-primary"
+                style={{ width: '100%', padding: '14px', fontSize: 15, fontWeight: 800, borderRadius: 12 }}
+              >
+                {upiConfirming ? 'Verifying...' : '✓ I Have Paid (Confirm & Track Order)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/track/${upiPaymentModal.order.public_token}`)}
+                style={{ background: 'transparent', border: 'none', color: '#696969', fontSize: 13, cursor: 'pointer', padding: 8, textDecoration: 'underline' }}
+              >
+                I will pay on delivery / Continue to live tracking ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

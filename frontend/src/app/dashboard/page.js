@@ -8,8 +8,8 @@ import { FOOD_PRESETS, getFoodImageUrl } from '@/lib/foodImages';
 
 export default function RestaurantDashboardPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginPhone, setLoginPhone] = useState('9876543210');
-  const [loginPassword, setLoginPassword] = useState('spice123');
+  const [loginPhone, setLoginPhone] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
@@ -460,12 +460,6 @@ export default function RestaurantDashboardPage() {
             >
               {loginLoading ? 'Authenticating...' : 'Sign In to Kitchen Dashboard'}
             </button>
-
-            <div style={{ background: '#F8F9FA', padding: '10px 14px', borderRadius: 10, border: '1px solid #ECEEF2', fontSize: 12, color: '#4F4F4F', marginTop: 10 }}>
-              <div style={{ fontWeight: 700, marginBottom: 2, color: '#1C1C1C' }}>Authorized Merchant Login:</div>
-              <div>Partner Phone: <strong>9876543210</strong> (Spice Garden)</div>
-              <div>Security Key: <strong>spice123</strong></div>
-            </div>
           </form>
         </div>
       </div>

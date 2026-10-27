@@ -35,12 +35,37 @@ async function createPaymentOrder(orderId, restaurantId, method, amountPaise) {
     [orderId, restaurantId, method, amountPaise, razorpayOrderId]
   );
 
+  // Fetch restaurant and order info for real UPI payment details
+  const { rows: [rest] } = await query('SELECT name, upi_id FROM restaurants WHERE id = $1', [restaurantId]);
+  const { rows: [order] } = await query('SELECT order_no FROM orders WHERE id = $1', [orderId]);
+
+  const upiId = rest?.upi_id || 'directdine@okhdfcbank';
+  const payeeName = rest?.name || 'Restaurant';
+  const amountRupees = (amountPaise / 100).toFixed(2);
+  const note = `Order #${order?.order_no || ''} at ${payeeName}`;
+
+  // Standard NPCI UPI URI specifications
+  const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountRupees}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const gpayUri = `intent://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountRupees}&cu=INR&tn=${encodeURIComponent(note)}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+  const phonepeUri = `intent://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountRupees}&cu=INR&tn=${encodeURIComponent(note)}#Intent;scheme=upi;package=com.phonepe.app;end`;
+  const paytmUri = `intent://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountRupees}&cu=INR&tn=${encodeURIComponent(note)}#Intent;scheme=upi;package=net.one97.paytm;end`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+
   return {
     paymentId: payment.id,
     razorpayOrderId,
     razorpayKeyId: process.env.RAZORPAY_KEY_ID || 'rzp_mock_key',
     amount: amountPaise,
+    amountRupees,
     currency: 'INR',
+    method,
+    upiId,
+    payeeName,
+    upiUri,
+    gpayUri,
+    phonepeUri,
+    paytmUri,
+    qrUrl,
     isMock: isMockMode
   };
 }

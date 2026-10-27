@@ -4,7 +4,7 @@
  * Expires orders in 'placed' status (online payment) that are older than 15 minutes
  */
 const { query } = require('../db/pool');
-const { transitionStatus } = require('../services/orderService');
+const { updateOrderStatus } = require('../services/orderService');
 
 async function expireUnpaidOrders() {
   try {
@@ -23,11 +23,10 @@ async function expireUnpaidOrders() {
       [cutoffDate]
     );
 
-
     for (const order of expiredOrders) {
       console.log(`⏰ Expiring unpaid order #${order.order_no} (${order.id})`);
       try {
-        await transitionStatus(order.id, 'expired', null, 'Payment window expired (15m)');
+        await updateOrderStatus(order.id, 'expired', 'cron', 'Payment window expired (15m)');
       } catch (err) {
         console.error(`Error expiring order ${order.id}:`, err.message);
       }

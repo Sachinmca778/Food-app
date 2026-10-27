@@ -81,6 +81,8 @@ router.post('/restaurants', staffAuth, asyncHandler(async (req, res) => {
   const ownerPassword = req.body.ownerPassword || req.body.owner_password;
   const hours = req.body.hours;
 
+  const upiId = req.body.upiId || req.body.upi_id || 'directdine@okhdfcbank';
+
   if (!slug || !name || !phone || !addressLine || !city) {
     throw new ApiError(400, 'Required: slug, name, phone, address, city');
   }
@@ -95,13 +97,13 @@ router.post('/restaurants', staffAuth, asyncHandler(async (req, res) => {
         slug, name, description, phone, address_line, city, pincode,
         latitude, longitude, delivery_radius_m, delivery_fee_paise,
         free_delivery_above_paise, min_order_paise, avg_prep_minutes,
-        accepts_cod, accepts_pickup, gst_percent, fssai_number, gstin, plan
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+        accepts_cod, accepts_pickup, gst_percent, fssai_number, gstin, plan, upi_id
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
       RETURNING *`,
       [slug, name, description, phone, addressLine, city, pincode,
        latitude, longitude, deliveryRadiusM, deliveryFeePaise,
        freeDeliveryAbovePaise, minOrderPaise, avgPrepMinutes,
-       acceptsCod, acceptsPickup, gstPercent, fssaiNumber, gstin, plan]
+       acceptsCod, acceptsPickup, gstPercent, fssaiNumber, gstin, plan, upiId]
     );
 
     // 2. Create owner staff user
@@ -157,7 +159,8 @@ router.put('/restaurants/:id', staffAuth, asyncHandler(async (req, res) => {
   const {
     name, description, phone, addressLine, city, pincode,
     latitude, longitude, isActive, isOpen, plan,
-    whatsappPhoneNumberId, whatsappWabaId, razorpayAccountId
+    whatsappPhoneNumberId, whatsappWabaId, razorpayAccountId,
+    upiId, upi_id
   } = req.body;
 
   const { rows: [restaurant] } = await query(
@@ -175,11 +178,13 @@ router.put('/restaurants/:id', staffAuth, asyncHandler(async (req, res) => {
       plan = COALESCE($11, plan),
       whatsapp_phone_number_id = COALESCE($12, whatsapp_phone_number_id),
       whatsapp_waba_id = COALESCE($13, whatsapp_waba_id),
-      razorpay_account_id = COALESCE($14, razorpay_account_id)
-     WHERE id = $15 RETURNING *`,
+      razorpay_account_id = COALESCE($14, razorpay_account_id),
+      upi_id = COALESCE($15, upi_id)
+     WHERE id = $16 RETURNING *`,
     [name, description, phone, addressLine, city, pincode,
      latitude, longitude, isActive, isOpen, plan,
      whatsappPhoneNumberId, whatsappWabaId, razorpayAccountId,
+     upiId || upi_id,
      req.params.id]
   );
 
