@@ -48,7 +48,7 @@ router.post('/login', asyncHandler(async (req, res) => {
       role: staff.role,
       isSuperAdmin: staff.is_super_admin
     },
-    process.env.STAFF_JWT_SECRET,
+    process.env.STAFF_JWT_SECRET || 'dev-staff-secret-food-app-2024',
     { expiresIn: process.env.STAFF_JWT_EXPIRES_IN || '24h' }
   );
 

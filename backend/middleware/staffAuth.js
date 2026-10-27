@@ -15,7 +15,7 @@ const staffAuth = (req, res, next) => {
 
   try {
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.STAFF_JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.STAFF_JWT_SECRET || 'dev-staff-secret-food-app-2024');
     req.staff = {
       id: decoded.staffId,
       restaurantId: decoded.restaurantId,

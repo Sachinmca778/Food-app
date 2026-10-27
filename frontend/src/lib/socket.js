@@ -9,7 +9,8 @@ export function getSocket() {
   if (typeof window === 'undefined') return null;
 
   if (!socket) {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5001';
+    const rawSocketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5001';
+    const socketUrl = rawSocketUrl.trim().replace(/\/+$/, '');
     socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 10,

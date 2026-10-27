@@ -104,7 +104,7 @@ router.post('/verify-otp', asyncHandler(async (req, res) => {
   // Generate JWT
   const token = jwt.sign(
     { customerId: customer.id, phone: customer.phone },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'dev-jwt-secret-food-app-2024',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 

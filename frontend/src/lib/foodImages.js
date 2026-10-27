@@ -107,7 +107,16 @@ export const DEFAULT_NONVEG_IMG = 'https://images.unsplash.com/photo-16038945843
  */
 export function getFoodImageUrl(item) {
   if (item?.image_url && typeof item.image_url === 'string' && item.image_url.trim().length > 5) {
-    return item.image_url.trim();
+    let img = item.image_url.trim();
+    if (img.startsWith('/uploads')) {
+      const backendUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, '') || '';
+      return `${backendUrl}${img}`;
+    }
+    if (img.includes('localhost:5001/uploads') && process.env.NEXT_PUBLIC_API_URL) {
+      const backendUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '');
+      return img.replace(/http:\/\/localhost:5001/, backendUrl);
+    }
+    return img;
   }
 
   const name = (item?.name || '').toLowerCase();

@@ -11,11 +11,13 @@ const hasPostgres = process.env.USE_POSTGRES === 'true';
 
 if (hasPostgres) {
   const { Pool } = require('pg');
+  const isRemote = process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost') && !process.env.DATABASE_URL.includes('127.0.0.1');
   pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000,
+    ...(isRemote ? { ssl: { rejectUnauthorized: false } } : {})
   });
 
   pgPool.on('error', (err) => {
