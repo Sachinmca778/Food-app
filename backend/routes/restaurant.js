@@ -38,9 +38,13 @@ router.get('/:slug', asyncHandler(async (req, res) => {
 
 // GET /api/restaurant/:slug/menu — Full menu
 router.get('/:slug/menu', asyncHandler(async (req, res) => {
-  // Get restaurant ID
+  // Get restaurant ID & rich details
   const { rows: [restaurant] } = await query(
-    'SELECT id, slug, name, is_open, is_active FROM restaurants WHERE slug = $1',
+    `SELECT id, slug, name, logo_url, cover_url, description, phone,
+            address_line, city, pincode, delivery_radius_m, delivery_fee_paise,
+            free_delivery_above_paise, min_order_paise, avg_prep_minutes,
+            is_open, is_active
+     FROM restaurants WHERE slug = $1`,
     [req.params.slug]
   );
   if (!restaurant || !restaurant.is_active) {

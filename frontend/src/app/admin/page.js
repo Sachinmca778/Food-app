@@ -18,16 +18,16 @@ export default function SuperAdminPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formPhone, setFormPhone] = useState('+919876500000');
-  const [formAddress, setFormAddress] = useState('Shop 4, Main Market, Mumbai');
+  const [formPhone, setFormPhone] = useState('');
+  const [formAddress, setFormAddress] = useState('');
   const [formCity, setFormCity] = useState('Mumbai');
   const [formPincode, setFormPincode] = useState('400050');
   const [formRadiusKm, setFormRadiusKm] = useState('5');
   const [formDeliveryFee, setFormDeliveryFee] = useState('40');
   const [formMinOrder, setFormMinOrder] = useState('150');
-  const [formOwnerName, setFormOwnerName] = useState('Owner Name');
-  const [formOwnerPhone, setFormOwnerPhone] = useState('+919876500000');
-  const [formOwnerPassword, setFormOwnerPassword] = useState('pass123');
+  const [formOwnerName, setFormOwnerName] = useState('');
+  const [formOwnerPhone, setFormOwnerPhone] = useState('');
+  const [formOwnerPassword, setFormOwnerPassword] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   // QR Preview Modal
@@ -189,9 +189,9 @@ export default function SuperAdminPage() {
               {loginLoading ? 'Authenticating...' : 'Enter Admin Console'}
             </button>
 
-            <div style={{ background: '#F8F9FA', border: '1px solid #ECEEF2', padding: 12, borderRadius: 10, marginTop: 8, fontSize: 12, color: '#4F4F4F' }}>
-              <strong style={{ color: '#1C1C1C' }}>Super Admin Demo Credentials:</strong><br />
-              Phone: <code>9999999999</code> • Password: <code>admin123</code>
+            <div style={{ background: '#F8F9FA', border: '1px solid #ECEEF2', padding: '10px 14px', borderRadius: 10, marginTop: 10, fontSize: 12, color: '#4F4F4F' }}>
+              <strong style={{ color: '#1C1C1C' }}>Platform Master Access:</strong><br />
+              Authorized Phone: <code>9999999999</code> • Access Key: <code>admin123</code>
             </div>
           </form>
         </div>

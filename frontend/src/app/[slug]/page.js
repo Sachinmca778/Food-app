@@ -122,10 +122,12 @@ function MenuContent() {
         overflow: 'hidden',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        {/* Soft Banner Cover */}
+        {/* Gorgeous Restaurant Cover Banner */}
         <div style={{
-          height: 120,
-          background: 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FEE2E2 100%)',
+          height: 150,
+          background: restaurant.cover_url
+            ? `linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%), url(${restaurant.cover_url}) center/cover no-repeat`
+            : 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FEE2E2 100%)',
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',

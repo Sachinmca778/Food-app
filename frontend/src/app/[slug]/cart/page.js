@@ -333,10 +333,15 @@ function CartContent() {
           </div>
 
           {otpSent && !isLoggedIn && (
-            <div style={{ background: '#FFF1F2', padding: 12, borderRadius: 10, border: '1px solid #FBCED2' }}>
-              <label style={{ display: 'block', fontSize: 12, color: 'var(--primary)', fontWeight: 700, marginBottom: 5 }}>
-                Enter OTP sent to your WhatsApp (Demo OTP: 123456)
-              </label>
+            <div style={{ background: '#F8F9FA', padding: 12, borderRadius: 10, border: '1px solid #E3E5EB' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: 12, color: '#1C1C1C', fontWeight: 700 }}>
+                  Enter 6-digit Verification Code
+                </label>
+                <span style={{ fontSize: 11, color: '#24963F', fontWeight: 700 }}>
+                  📲 Sent to {customerPhone}
+                </span>
+              </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   type="text"
