@@ -81,21 +81,39 @@ export default function SuperAdminPage() {
 
   const handleCreateRestaurant = async (e) => {
     e.preventDefault();
+    if (!formName || !formPhone || !formAddress) {
+      alert('Please fill Restaurant Name, Phone, and Address');
+      return;
+    }
+    const cleanSlug = (formSlug.trim() || formName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/^-+|-+$/g, '');
+    const ownerPh = formOwnerPhone.trim() || formPhone.trim();
+    const ownerPass = formOwnerPassword.trim() || 'pass123';
+
     setFormSubmitting(true);
     try {
       const payload = {
-        name: formName,
-        slug: formSlug || formName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        phone: formPhone,
-        address_line: formAddress,
-        city: formCity,
-        pincode: formPincode,
-        delivery_radius_m: parseInt(formRadiusKm) * 1000,
-        delivery_fee_paise: parseInt(formDeliveryFee) * 100,
-        min_order_paise: parseInt(formMinOrder) * 100,
-        owner_name: formOwnerName,
-        owner_phone: formOwnerPhone,
-        owner_password: formOwnerPassword
+        name: formName.trim(),
+        slug: cleanSlug,
+        phone: formPhone.trim(),
+        address: formAddress.trim(),
+        addressLine: formAddress.trim(),
+        address_line: formAddress.trim(),
+        city: formCity.trim() || 'Mumbai',
+        pincode: formPincode.trim() || '400001',
+        latitude: 19.076090,
+        longitude: 72.877426,
+        deliveryRadiusM: (parseInt(formRadiusKm) || 5) * 1000,
+        delivery_radius_m: (parseInt(formRadiusKm) || 5) * 1000,
+        deliveryFeePaise: (parseInt(formDeliveryFee) || 30) * 100,
+        delivery_fee_paise: (parseInt(formDeliveryFee) || 30) * 100,
+        minOrderPaise: (parseInt(formMinOrder) || 150) * 100,
+        min_order_paise: (parseInt(formMinOrder) || 150) * 100,
+        ownerName: formOwnerName.trim() || `${formName.trim()} Owner`,
+        owner_name: formOwnerName.trim() || `${formName.trim()} Owner`,
+        ownerPhone: ownerPh,
+        owner_phone: ownerPh,
+        ownerPassword: ownerPass,
+        owner_password: ownerPass
       };
 
       const res = await fetchAPI('/admin/restaurants', {

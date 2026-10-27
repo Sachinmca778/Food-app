@@ -54,20 +54,35 @@ router.get('/restaurants/:id', staffAuth, asyncHandler(async (req, res) => {
 router.post('/restaurants', staffAuth, asyncHandler(async (req, res) => {
   if (!req.staff.isSuperAdmin) throw new ApiError(403, 'Super admin only');
 
-  const {
-    slug, name, description, phone, addressLine, city, pincode,
-    latitude, longitude, deliveryRadiusM = 3000, deliveryFeePaise = 0,
-    freeDeliveryAbovePaise, minOrderPaise = 0, avgPrepMinutes = 25,
-    acceptsCod = true, acceptsPickup = true, gstPercent = 5.00,
-    fssaiNumber, gstin, plan = 'pilot',
-    // Owner details
-    ownerName, ownerPhone, ownerEmail, ownerPassword,
-    // Hours
-    hours
-  } = req.body;
+  const slug = req.body.slug;
+  const name = req.body.name;
+  const description = req.body.description || '';
+  const phone = req.body.phone;
+  const addressLine = req.body.addressLine || req.body.address_line || req.body.address || '';
+  const city = req.body.city || 'Mumbai';
+  const pincode = req.body.pincode || '400001';
+  const latitude = req.body.latitude || 19.076090;
+  const longitude = req.body.longitude || 72.877426;
+  const deliveryRadiusM = req.body.deliveryRadiusM || req.body.delivery_radius_m || 5000;
+  const deliveryFeePaise = req.body.deliveryFeePaise !== undefined ? req.body.deliveryFeePaise : (req.body.delivery_fee_paise !== undefined ? req.body.delivery_fee_paise : 3000);
+  const freeDeliveryAbovePaise = req.body.freeDeliveryAbovePaise || req.body.free_delivery_above_paise || 50000;
+  const minOrderPaise = req.body.minOrderPaise !== undefined ? req.body.minOrderPaise : (req.body.min_order_paise !== undefined ? req.body.min_order_paise : 15000);
+  const avgPrepMinutes = req.body.avgPrepMinutes || req.body.avg_prep_minutes || 25;
+  const acceptsCod = req.body.acceptsCod ?? req.body.accepts_cod ?? true;
+  const acceptsPickup = req.body.acceptsPickup ?? req.body.accepts_pickup ?? true;
+  const gstPercent = req.body.gstPercent || req.body.gst_percent || 5.00;
+  const fssaiNumber = req.body.fssaiNumber || req.body.fssai_number || '';
+  const gstin = req.body.gstin || '';
+  const plan = req.body.plan || 'pilot';
 
-  if (!slug || !name || !phone || !addressLine || !city || !latitude || !longitude) {
-    throw new ApiError(400, 'Required: slug, name, phone, address, city, latitude, longitude');
+  const ownerName = req.body.ownerName || req.body.owner_name || (name + ' Owner');
+  const ownerPhone = req.body.ownerPhone || req.body.owner_phone || phone;
+  const ownerEmail = req.body.ownerEmail || req.body.owner_email || `${slug}@foodapp.in`;
+  const ownerPassword = req.body.ownerPassword || req.body.owner_password;
+  const hours = req.body.hours;
+
+  if (!slug || !name || !phone || !addressLine || !city) {
+    throw new ApiError(400, 'Required: slug, name, phone, address, city');
   }
   if (!ownerPhone || !ownerPassword) {
     throw new ApiError(400, 'Owner phone and password required');
