@@ -98,36 +98,49 @@ router.post('/verify', asyncHandler(async (req, res) => {
 // POST /api/payments/confirm-upi — Direct UPI Payment Confirmation
 const { customerAuth } = require('../middleware/auth');
 router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
-  const { orderId, order_id, utr, upiTxnId } = req.body;
-  const targetOrderId = orderId || order_id;
-  if (!targetOrderId) throw new ApiError(400, 'Order ID is required');
+  const { orderId, order_id, publicToken, public_token, utr, upiTxnId } = req.body;
+  const targetRef = orderId || order_id || publicToken || public_token;
+  if (!targetRef) throw new ApiError(400, 'Order identifier is required');
 
-  const { rows: [order] } = await query('SELECT * FROM orders WHERE id = $1 AND customer_id = $2', [targetOrderId, req.customer.id]);
+  const { rows: [order] } = await query(
+    'SELECT * FROM orders WHERE (id::text = $1 OR public_token = $1) AND customer_id = $2',
+    [String(targetRef), req.customer.id]
+  );
   if (!order) throw new ApiError(404, 'Order not found');
 
-  const txnRef = utr || upiTxnId || `upi_${Date.now()}`;
+  const txnRef = utr 
+    ? `upi_${utr}_${order.order_no || Date.now()}`
+    : (upiTxnId || `upi_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
 
-  // Update payment status
-  await query(
+  // Update payment status (or insert if not present)
+  const { rowCount } = await query(
     `UPDATE payments 
      SET status = 'success', razorpay_payment_id = $1, paid_at = now()
      WHERE order_id = $2`,
-    [txnRef, targetOrderId]
+    [txnRef, order.id]
   );
+
+  if (rowCount === 0) {
+    await query(
+      `INSERT INTO payments (order_id, restaurant_id, method, amount_paise, status, razorpay_payment_id, paid_at)
+       VALUES ($1, $2, 'upi', $3, 'success', $4, now())`,
+      [order.id, order.restaurant_id, order.total_paise, txnRef]
+    );
+  }
 
   // Update order status
   await query(
     `UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`,
-    [targetOrderId]
+    [order.id]
   );
   await query(
     `INSERT INTO order_status_history (order_id, from_status, to_status, changed_by)
      VALUES ($1, 'placed', 'paid', 'customer_upi')`,
-    [targetOrderId]
+    [order.id]
   );
 
   // Notify restaurant & customer
-  const fullOrder = await orderService.getOrderWithItems(targetOrderId);
+  const fullOrder = await orderService.getOrderWithItems(order.id);
   if (fullOrder) {
     try {
       await notificationService.notifyOrderStatusChange(fullOrder, fullOrder.items, 'placed', 'paid');
@@ -137,7 +150,7 @@ router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: 'UPI Payment confirmed successfully',
-    orderId: targetOrderId,
+    orderId: order.id,
     publicToken: order.public_token
   });
 }));

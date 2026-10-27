@@ -10,7 +10,8 @@ const { asyncHandler, ApiError } = require('../middleware/errorHandler');
 // GET /api/track/:token
 router.get('/:token', asyncHandler(async (req, res) => {
   const { rows: [order] } = await query(
-    `SELECT o.id, o.order_no, o.status, o.order_type, o.total_paise,
+    `SELECT o.id, o.order_no, o.status, o.order_type, o.subtotal_paise, o.delivery_fee_paise,
+            o.tax_paise, o.discount_paise, o.total_paise, o.delivery_phone, o.customer_note,
             o.prep_minutes, o.estimated_ready_at, o.rider_name, o.rider_phone,
             o.delivery_address, o.placed_at, o.accepted_at, o.ready_at, o.delivered_at,
             o.cancel_reason, o.public_token,
@@ -26,7 +27,7 @@ router.get('/:token', asyncHandler(async (req, res) => {
 
   // Get items
   const { rows: items } = await query(
-    'SELECT item_name, variant_name, quantity, unit_price_paise, line_total_paise, addons FROM order_items WHERE order_id = $1',
+    'SELECT id, item_name, variant_name, quantity, unit_price_paise, line_total_paise, addons, note FROM order_items WHERE order_id = $1',
     [order.id]
   );
 

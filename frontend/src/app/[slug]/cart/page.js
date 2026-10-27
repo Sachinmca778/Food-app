@@ -12,7 +12,7 @@ function CartContent() {
   const slug = params?.slug;
   const router = useRouter();
 
-  const { cart, restaurant, updateQuantity, removeItem, clearCart, itemCount, cartSubtotalPaise } = useCart();
+  const { cart, restaurant, updateQuantity, removeItem, clearCart, itemCount, cartSubtotalPaise, setRestaurantInfo } = useCart();
 
   // Order Details
   const [orderType, setOrderType] = useState('delivery'); // 'delivery' or 'pickup'
@@ -46,6 +46,20 @@ function CartContent() {
   const [upiPaymentModal, setUpiPaymentModal] = useState(null);
   const [upiConfirming, setUpiConfirming] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
+  const [upiUtr, setUpiUtr] = useState('');
+
+  // Ensure restaurant data is loaded even on direct page reload
+  useEffect(() => {
+    if (slug && (!restaurant || restaurant.slug !== slug)) {
+      fetchAPI(`/restaurant/${slug}`)
+        .then(res => {
+          if (res.success && res.restaurant) {
+            setRestaurantInfo(res.restaurant);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [slug, restaurant, setRestaurantInfo]);
 
   useEffect(() => {
     const savedCustomer = localStorage.getItem('customer_info');
@@ -155,8 +169,13 @@ function CartContent() {
     }
   };
 
-  // CALCULATE TOTALS
-  const deliveryFeePaise = orderType === 'delivery' ? (restaurant?.delivery_fee_paise || 4000) : 0;
+  // CALCULATE TOTALS & THRESHOLDS
+  const minOrderPaise = restaurant?.min_order_paise || 0;
+  const isBelowMinOrder = minOrderPaise > 0 && cartSubtotalPaise < minOrderPaise;
+  const amountNeededForMinOrder = (minOrderPaise - cartSubtotalPaise) / 100;
+
+  const isFreeDelivery = Boolean(restaurant?.free_delivery_above_paise && cartSubtotalPaise >= restaurant.free_delivery_above_paise);
+  const deliveryFeePaise = orderType === 'delivery' ? (isFreeDelivery ? 0 : (restaurant?.delivery_fee_paise || 3000)) : 0;
   const gstPercent = restaurant?.gst_percent || 5;
   const gstPaise = Math.round((cartSubtotalPaise * gstPercent) / 100);
   const discountPaise = appliedCoupon?.discountPaise || 0;
@@ -176,6 +195,11 @@ function CartContent() {
       if (customerPhone && customerPhone.length === 10 && !otpSent) {
         handleSendOtp();
       }
+      return;
+    }
+
+    if (isBelowMinOrder) {
+      setOrderError(`Minimum order value for ${restaurant?.name || 'this restaurant'} is ₹${(minOrderPaise / 100).toFixed(0)}. Please add ₹${amountNeededForMinOrder.toFixed(0)} more dishes.`);
       return;
     }
 
@@ -203,7 +227,7 @@ function CartContent() {
           addons: item.addons?.map(a => a.id) || [],
           quantity: item.quantity,
           unit_price_paise: item.unitPricePaise,
-          special_instructions: item.specialNotes
+          special_instructions: item.notes || item.specialNotes || ''
         })),
         address: orderType === 'delivery' ? {
           address_line: addressLine,
@@ -213,7 +237,8 @@ function CartContent() {
         table_no: tableNo || null,
         coupon_code: appliedCoupon ? appliedCoupon.code : null,
         loyalty_points_redeemed: useLoyalty ? Math.min(loyaltyPoints, Math.floor(cartSubtotalPaise / 100)) : 0,
-        payment_method: paymentMethod
+        payment_method: paymentMethod,
+        customer_note: cookingNotes || ''
       };
 
       const res = await fetchAPI('/orders', {
@@ -276,7 +301,11 @@ function CartContent() {
     try {
       await fetchAPI('/payments/confirm-upi', {
         method: 'POST',
-        body: JSON.stringify({ orderId: upiPaymentModal.order.id })
+        body: JSON.stringify({
+          orderId: upiPaymentModal.order.id,
+          publicToken: upiPaymentModal.order.public_token,
+          utr: upiUtr.trim() || undefined
+        })
       });
       try {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
@@ -386,6 +415,21 @@ function CartContent() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* COOKING & DELIVERY INSTRUCTIONS */}
+      <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '16px 20px', marginBottom: 18, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
+        <label style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: '#1C1C1C', marginBottom: 6 }}>
+          📝 Cooking & Delivery Instructions (Optional)
+        </label>
+        <textarea
+          value={cookingNotes}
+          onChange={(e) => setCookingNotes(e.target.value)}
+          placeholder="e.g. Less spicy, extra green chutney, please don't ring the doorbell"
+          rows={2}
+          className="input-field"
+          style={{ width: '100%', resize: 'none', fontSize: 13, padding: '10px 12px' }}
+        />
       </div>
 
       {/* CUSTOMER & DELIVERY INFO */}
@@ -703,8 +747,27 @@ function CartContent() {
       </div>
 
       {/* ITEMIZED BILL BREAKDOWN */}
-      <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 24, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
+      <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 20, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>📋 Bill Details</h2>
+
+        {/* Free Delivery / Threshold callout */}
+        {restaurant?.free_delivery_above_paise && (
+          <div style={{
+            background: isFreeDelivery ? '#F0FDF4' : '#F8F9FA',
+            border: isFreeDelivery ? '1px solid #BBF7D0' : '1px dashed #D1D5DB',
+            borderRadius: 8,
+            padding: '8px 12px',
+            marginBottom: 12,
+            fontSize: 12.5,
+            color: isFreeDelivery ? '#15803D' : '#4F4F4F',
+            fontWeight: isFreeDelivery ? 700 : 500
+          }}>
+            {isFreeDelivery
+              ? '🎉 FREE Delivery Unlocked!'
+              : `🚚 Add ₹${(((restaurant.free_delivery_above_paise - cartSubtotalPaise) / 100)).toFixed(0)} more for FREE Delivery!`}
+          </div>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#4F4F4F' }}>Item Total</span>
@@ -714,7 +777,9 @@ function CartContent() {
           {orderType === 'delivery' && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#4F4F4F' }}>Delivery Partner Fee</span>
-              <span style={{ fontWeight: 600, color: '#1C1C1C' }}>₹{(deliveryFeePaise / 100).toFixed(2)}</span>
+              <span style={{ fontWeight: 600, color: isFreeDelivery ? '#15803D' : '#1C1C1C' }}>
+                {isFreeDelivery ? 'FREE' : `₹${(deliveryFeePaise / 100).toFixed(2)}`}
+              </span>
             </div>
           )}
 
@@ -746,6 +811,21 @@ function CartContent() {
         </div>
       </div>
 
+      {/* MINIMUM ORDER VALUE WARNING */}
+      {isBelowMinOrder && (
+        <div style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A', borderRadius: 12, padding: '12px 16px', marginBottom: 18, fontSize: 13, color: '#92400E', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <strong>Min Order Required:</strong> ₹{(minOrderPaise / 100).toFixed(0)}
+            <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>
+              Add ₹{amountNeededForMinOrder.toFixed(0)} more dishes to checkout.
+            </div>
+          </div>
+          <Link href={`/${slug}`} style={{ background: '#D97706', color: '#FFFFFF', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+            + Add Dishes
+          </Link>
+        </div>
+      )}
+
       {orderError && (
         <div style={{ background: '#FEECEE', border: '1px solid #FBCED2', color: 'var(--status-cancel)', padding: 12, borderRadius: 10, marginBottom: 20, fontSize: 13.5 }}>
           ⚠️ {orderError}
@@ -755,7 +835,7 @@ function CartContent() {
       {/* PLACE ORDER ACTION */}
       <button
         onClick={handlePlaceOrder}
-        disabled={submitting}
+        disabled={submitting || isBelowMinOrder}
         className="btn-primary"
         style={{
           width: '100%',
@@ -763,13 +843,15 @@ function CartContent() {
           fontSize: 16,
           fontWeight: 900,
           borderRadius: 12,
-          cursor: submitting ? 'not-allowed' : 'pointer',
-          opacity: submitting ? 0.7 : 1,
-          background: !isLoggedIn ? '#1C1C1C' : undefined
+          cursor: (submitting || isBelowMinOrder) ? 'not-allowed' : 'pointer',
+          opacity: (submitting || isBelowMinOrder) ? 0.65 : 1,
+          background: isBelowMinOrder ? '#6B7280' : !isLoggedIn ? '#1C1C1C' : undefined
         }}
       >
         {submitting
           ? 'Placing Order...'
+          : isBelowMinOrder
+          ? `Add ₹${amountNeededForMinOrder.toFixed(0)} more (Min Order ₹${(minOrderPaise / 100).toFixed(0)})`
           : !isLoggedIn
           ? `🔒 Verify Mobile to Place Order (₹${(grandTotalPaise / 100).toFixed(2)}) ➔`
           : `Pay ₹${(grandTotalPaise / 100).toFixed(2)} & Place Order ➔`}
@@ -930,6 +1012,21 @@ function CartContent() {
                   {copiedUpi ? '✓ Copied' : 'Copy'}
                 </button>
               </div>
+            </div>
+
+            {/* OPTIONAL UTR / TRANSACTION ID INPUT */}
+            <div style={{ marginBottom: 14, textAlign: 'left' }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#4F4F4F', marginBottom: 5 }}>
+                UPI Ref / UTR No. (Optional)
+              </label>
+              <input
+                type="text"
+                value={upiUtr}
+                onChange={(e) => setUpiUtr(e.target.value.replace(/\D/g, '').slice(0, 12))}
+                placeholder="12-digit UTR from GPay / PhonePe"
+                className="input-field"
+                style={{ width: '100%', height: 40, fontSize: 13, letterSpacing: 1 }}
+              />
             </div>
 
             {/* CONFIRMATION ACTIONS */}

@@ -15,11 +15,12 @@ const customerAuth = (req, res, next) => {
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-jwt-secret-food-app-2024');
-    if (!decoded || !decoded.customerId) {
+    const customerId = decoded?.customerId || decoded?.id;
+    if (!decoded || !customerId) {
       throw new ApiError(401, 'Invalid customer session. Please login with OTP.');
     }
     req.customer = {
-      id: decoded.customerId,
+      id: customerId,
       phone: decoded.phone
     };
     next();

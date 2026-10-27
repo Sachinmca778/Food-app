@@ -28,7 +28,9 @@ async function expireUnpaidOrders() {
       try {
         await updateOrderStatus(order.id, 'expired', 'cron', 'Payment window expired (15m)');
       } catch (err) {
-        console.error(`Error expiring order ${order.id}:`, err.message);
+        if (!err.message?.includes('Cannot change order from "expired"')) {
+          console.error(`Error expiring order ${order.id}:`, err.message);
+        }
       }
     }
   } catch (err) {

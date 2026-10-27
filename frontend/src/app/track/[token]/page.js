@@ -20,7 +20,7 @@ function TrackingContent() {
       const res = await fetchAPI(`/track/${token}`);
       if (res.success && res.order) {
         setOrder(res.order);
-        setItems(res.items || []);
+        setItems(res.order.items || res.items || []);
       } else {
         setError(res.error || 'Order not found');
       }
@@ -283,30 +283,47 @@ function TrackingContent() {
       {/* ORDER ITEMS & BILL BREAKDOWN */}
       <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '20px', marginBottom: 20, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>Order Items ({items.length})</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, borderBottom: '1px solid #F0F1F4', paddingBottom: 14 }}>
-          {items.map(item => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <div>
-                <span style={{ fontWeight: 700, color: '#1C1C1C' }}>{item.quantity}× {item.item_name}</span>
-                {item.variant_name && <span style={{ color: '#696969', fontSize: 12 }}> ({item.variant_name})</span>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 14, borderBottom: '1px solid #F0F1F4', paddingBottom: 14 }}>
+          {items.map((item, idx) => {
+            const itemPrice = (item.line_total_paise || item.total_paise || (item.unit_price_paise * item.quantity) || 0) / 100;
+            return (
+              <div key={item.id || idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', fontSize: 14 }}>
+                <div style={{ flex: 1, paddingRight: 10 }}>
+                  <div style={{ fontWeight: 700, color: '#1C1C1C' }}>
+                    {item.quantity}× {item.item_name}
+                    {item.variant_name && <span style={{ color: '#696969', fontSize: 12.5, fontWeight: 500 }}> ({item.variant_name})</span>}
+                  </div>
+                  {item.addons && Array.isArray(item.addons) && item.addons.length > 0 && (
+                    <div style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>
+                      + {item.addons.map(a => typeof a === 'object' ? a.name : a).join(', ')}
+                    </div>
+                  )}
+                  {item.note && (
+                    <div style={{ fontSize: 11.5, color: '#D97706', fontStyle: 'italic', marginTop: 2 }}>
+                      Note: {item.note}
+                    </div>
+                  )}
+                </div>
+                <span style={{ fontWeight: 700, color: '#1C1C1C', whiteSpace: 'nowrap' }}>
+                  ₹{itemPrice.toFixed(0)}
+                </span>
               </div>
-              <span style={{ fontWeight: 700, color: '#1C1C1C' }}>₹{(item.total_paise / 100).toFixed(0)}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13.5, color: '#4F4F4F' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Subtotal</span>
-            <span>₹{(order.subtotal_paise / 100).toFixed(0)}</span>
+            <span>₹{((order.subtotal_paise || 0) / 100).toFixed(0)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Delivery Fee</span>
-            <span>₹{(order.delivery_fee_paise / 100).toFixed(0)}</span>
+            <span>{order.delivery_fee_paise > 0 ? `₹${(order.delivery_fee_paise / 100).toFixed(0)}` : 'FREE'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Taxes & GST</span>
-            <span>₹{(order.tax_paise / 100).toFixed(0)}</span>
+            <span>₹{((order.tax_paise || 0) / 100).toFixed(0)}</span>
           </div>
           {order.discount_paise > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--veg-color)', fontWeight: 700 }}>
@@ -315,10 +332,23 @@ function TrackingContent() {
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 17, fontWeight: 900, color: '#1C1C1C', borderTop: '1px solid #ECEEF2', paddingTop: 10, marginTop: 4 }}>
-            <span>Total Paid ({order.payment_method?.toUpperCase()})</span>
-            <span style={{ color: 'var(--primary)' }}>₹{(order.total_paise / 100).toFixed(2)}</span>
+            <span>Total ({order.payment?.method ? order.payment.method.toUpperCase() : (order.payment_method || 'UPI').toUpperCase()})</span>
+            <span style={{ color: 'var(--primary)' }}>₹{((order.total_paise || 0) / 100).toFixed(2)}</span>
           </div>
         </div>
+
+        {order.delivery_address && (
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px dashed #ECEEF2', fontSize: 12.5, color: '#696969' }}>
+            <span style={{ fontWeight: 700, color: '#1C1C1C' }}>📍 Delivery Address: </span>
+            {order.delivery_address}
+          </div>
+        )}
+        {order.customer_note && (
+          <div style={{ marginTop: 6, fontSize: 12.5, color: '#696969' }}>
+            <span style={{ fontWeight: 700, color: '#1C1C1C' }}>📝 Special Instructions: </span>
+            {order.customer_note}
+          </div>
+        )}
       </div>
 
       {/* WHATSAPP CALLOUT */}

@@ -147,7 +147,7 @@ async function sendOrderConfirmation(order, restaurantName) {
  */
 async function sendOrderToRestaurant(order, orderItems, restaurantPhone) {
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const itemsList = (orderItems || []).map(i => `• ${i.quantity}x ${i.item_name}`).join('\n');
+  const itemsList = (orderItems || []).map(i => `• ${i.quantity}x ${i.item_name || i.itemName || 'Dish'}${i.variant_name || i.variantName ? ` (${i.variant_name || i.variantName})` : ''}`).join('\n');
   const body = `🔔 *NEW ORDER RECEIVED! (#${order.order_no})*\n\n` +
     `Items:\n${itemsList}\n\n` +
     `💰 Total: *₹${(order.total_paise / 100).toFixed(2)}*\n` +
