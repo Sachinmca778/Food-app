@@ -1,0 +1,55 @@
+services:
+  # 1. Backend Web Service (Node.js + WebSockets)
+  - type: web
+    name: directdine-backend
+    env: node
+    plan: starter
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: USE_POSTGRES
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: directdine-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STAFF_JWT_SECRET
+        generateValue: true
+      - key: WHATSAPP_VERIFY_TOKEN
+        value: food-app-wa-verify-token
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+
+  # 2. Frontend Next.js Service
+  - type: web
+    name: directdine-frontend
+    env: node
+    plan: starter
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: directdine-backend
+          property: host
+          path: /api
+
+databases:
+  # Managed PostgreSQL Database
+  - name: directdine-db
+    plan: free
+    databaseName: food_app
+    user: directdine_user

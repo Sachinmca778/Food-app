@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: directdine-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: food_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Backend Express API & WebSockets
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: directdine-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      USE_POSTGRES: "true"
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/food_app
+      JWT_SECRET: production-secret-key-change-me-12345
+      STAFF_JWT_SECRET: production-staff-key-change-me-67890
+      APP_URL: http://localhost:3000
+      API_URL: http://localhost:5001
+      # Meta WhatsApp Cloud API credentials (fill in when ready)
+      WHATSAPP_PHONE_NUMBER_ID: ""
+      WHATSAPP_ACCESS_TOKEN: ""
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ""
+      WHATSAPP_VERIFY_TOKEN: "food-app-wa-verify-token"
+
+  # 3. Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: directdine-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:5001/api
+      NEXT_PUBLIC_WS_URL: http://localhost:5001
+
+volumes:
+  postgres_data:
