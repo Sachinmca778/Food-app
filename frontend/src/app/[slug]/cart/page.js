@@ -44,7 +44,8 @@ function CartContent() {
 
   useEffect(() => {
     const savedCustomer = localStorage.getItem('customer_info');
-    if (savedCustomer) {
+    const token = localStorage.getItem('customer_token');
+    if (savedCustomer && token) {
       try {
         const c = JSON.parse(savedCustomer);
         setCustomerPhone(c.phone || '');
@@ -55,16 +56,29 @@ function CartContent() {
           setPincode(c.address.pincode || '400050');
         }
         setIsLoggedIn(true);
-      } catch (e) {}
+      } catch (e) {
+        setIsLoggedIn(false);
+      }
+    } else {
+      setIsLoggedIn(false);
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('customer_token');
+    localStorage.removeItem('customer_info');
+    setIsLoggedIn(false);
+    setOtpSent(false);
+    setOtpCode('');
+  };
+
   const handleSendOtp = async () => {
     if (!customerPhone || customerPhone.length < 10) {
-      alert('Please enter a valid 10-digit mobile number');
+      setOrderError('Please enter a valid 10-digit mobile number to verify.');
       return;
     }
     setAuthLoading(true);
+    setOrderError('');
     try {
       const res = await fetchAPI('/auth/send-otp', {
         method: 'POST',
@@ -75,14 +89,19 @@ function CartContent() {
         setOtpCode(res.demo_otp);
       }
     } catch (err) {
-      alert(err.message);
+      setOrderError(err.message || 'Failed to send verification OTP');
     } finally {
       setAuthLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.length < 4) {
+      setOrderError('Please enter the 6-digit OTP code');
+      return;
+    }
     setAuthLoading(true);
+    setOrderError('');
     try {
       const res = await fetchAPI('/auth/verify-otp', {
         method: 'POST',
@@ -93,17 +112,20 @@ function CartContent() {
         localStorage.setItem('customer_info', JSON.stringify({
           phone: customerPhone,
           name: res.customer?.name || customerName,
-          address: res.addresses?.[0]
+          address: res.customer?.addresses?.[0] || res.addresses?.[0]
         }));
         setIsLoggedIn(true);
-        if (res.addresses?.[0]) {
-          setAddressLine(res.addresses[0].address_line);
-          setLandmark(res.addresses[0].landmark || '');
-          setPincode(res.addresses[0].pincode || '400050');
+        setOtpSent(false);
+        setOrderError('');
+        if (res.customer?.addresses?.[0] || res.addresses?.[0]) {
+          const addr = res.customer?.addresses?.[0] || res.addresses?.[0];
+          setAddressLine(addr.address_line || '');
+          setLandmark(addr.landmark || '');
+          setPincode(addr.pincode || '400050');
         }
       }
     } catch (err) {
-      alert(err.message);
+      setOrderError(err.message || 'OTP verification failed');
     } finally {
       setAuthLoading(false);
     }
@@ -138,6 +160,20 @@ function CartContent() {
   const grandTotalPaise = Math.max(0, cartSubtotalPaise + deliveryFeePaise + gstPaise - discountPaise - loyaltyDiscountPaise);
 
   const handlePlaceOrder = async () => {
+    // 1. Mandatory Customer Login check
+    const token = typeof window !== 'undefined' ? localStorage.getItem('customer_token') : null;
+    if (!isLoggedIn || !token) {
+      setOrderError('🔒 Customer Login Required: Please verify your mobile number with OTP before placing your order.');
+      const contactSection = document.getElementById('customer-contact-section');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if (customerPhone && customerPhone.length === 10 && !otpSent) {
+        handleSendOtp();
+      }
+      return;
+    }
+
     if (!customerPhone || customerPhone.length < 10) {
       setOrderError('Please provide a valid 10-digit WhatsApp number');
       return;
@@ -300,46 +336,84 @@ function CartContent() {
       </div>
 
       {/* CUSTOMER & DELIVERY INFO */}
-      <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 18, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
-        <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>
-          {orderType === 'delivery' ? '📍 Delivery Address' : '👤 Customer Contact'}
-        </h2>
+      <div id="customer-contact-section" style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 18, border: isLoggedIn ? '1.5px solid #BBF7D0' : '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <h2 style={{ fontSize: 16, color: '#1C1C1C', margin: 0 }}>
+            {orderType === 'delivery' ? '📍 Delivery Address & Contact' : '👤 Customer Contact'}
+          </h2>
+          {isLoggedIn ? (
+            <span style={{ fontSize: 11, background: '#DCFCE7', color: '#15803D', fontWeight: 800, padding: '3px 9px', borderRadius: 20 }}>
+              ✓ Verified Customer
+            </span>
+          ) : (
+            <span style={{ fontSize: 11, background: '#FEF3C7', color: '#B45309', fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>
+              🔒 Login Required
+            </span>
+          )}
+        </div>
+
+        {isLoggedIn ? (
+          <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 14px', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#166534' }}>
+                Logged in as {customerName || 'Customer'}
+              </div>
+              <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>
+                📱 +91 {customerPhone} (OTP Verified)
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Switch Number
+            </button>
+          </div>
+        ) : (
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: 12.5, color: '#92400E' }}>
+            🔒 <strong>Mobile verification required:</strong> Enter your 10-digit number to receive an instant OTP before placing order.
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-              WhatsApp Phone Number (for order alerts)
+              WhatsApp Phone Number {isLoggedIn && '✓'}
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
+                id="phone-input-field"
                 type="tel"
+                disabled={isLoggedIn}
                 placeholder="10-digit mobile number"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className="input-field"
-                style={{ flex: 1, height: 42 }}
+                style={{ flex: 1, height: 42, background: isLoggedIn ? '#F9FAFB' : '#FFFFFF' }}
               />
               {!isLoggedIn && (
                 <button
+                  type="button"
                   onClick={handleSendOtp}
-                  disabled={authLoading}
+                  disabled={authLoading || customerPhone.length < 10}
                   className="btn-secondary"
-                  style={{ padding: '8px 16px', fontSize: 12.5, whiteSpace: 'nowrap', borderRadius: 8 }}
+                  style={{ padding: '8px 16px', fontSize: 12.5, whiteSpace: 'nowrap', borderRadius: 8, opacity: customerPhone.length < 10 ? 0.6 : 1 }}
                 >
-                  {otpSent ? 'Resend' : 'Send OTP'}
+                  {authLoading ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
                 </button>
               )}
             </div>
           </div>
 
           {otpSent && !isLoggedIn && (
-            <div style={{ background: '#F8F9FA', padding: 12, borderRadius: 10, border: '1px solid #E3E5EB' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ background: '#F8F9FA', padding: 14, borderRadius: 10, border: '1.5px solid #24963F' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <label style={{ fontSize: 12, color: '#1C1C1C', fontWeight: 700 }}>
                   Enter 6-digit Verification Code
                 </label>
                 <span style={{ fontSize: 11, color: '#24963F', fontWeight: 700 }}>
-                  📲 Sent to {customerPhone}
+                  📲 Sent to +91 {customerPhone}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -347,17 +421,18 @@ function CartContent() {
                   type="text"
                   placeholder="Enter 6-digit OTP"
                   value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="input-field"
-                  style={{ flex: 1, height: 40 }}
+                  style={{ flex: 1, height: 42, letterSpacing: 4, fontWeight: 700, textAlign: 'center', fontSize: 16 }}
                 />
                 <button
+                  type="button"
                   onClick={handleVerifyOtp}
-                  disabled={authLoading}
+                  disabled={authLoading || otpCode.length < 4}
                   className="btn-primary"
-                  style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 8 }}
+                  style={{ padding: '8px 20px', fontSize: 13, borderRadius: 8 }}
                 >
-                  Verify
+                  {authLoading ? 'Verifying...' : 'Verify OTP ✓'}
                 </button>
               </div>
             </div>
@@ -636,10 +711,15 @@ function CartContent() {
           fontWeight: 900,
           borderRadius: 12,
           cursor: submitting ? 'not-allowed' : 'pointer',
-          opacity: submitting ? 0.7 : 1
+          opacity: submitting ? 0.7 : 1,
+          background: !isLoggedIn ? '#1C1C1C' : undefined
         }}
       >
-        {submitting ? 'Placing Order...' : `Pay ₹${(grandTotalPaise / 100).toFixed(2)} & Place Order ➔`}
+        {submitting
+          ? 'Placing Order...'
+          : !isLoggedIn
+          ? `🔒 Verify Mobile to Place Order (₹${(grandTotalPaise / 100).toFixed(2)}) ➔`
+          : `Pay ₹${(grandTotalPaise / 100).toFixed(2)} & Place Order ➔`}
       </button>
 
       <p style={{ textAlign: 'center', fontSize: 12, color: '#696969', marginTop: 12 }}>

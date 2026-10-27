@@ -9,19 +9,22 @@ const { ApiError } = require('./errorHandler');
 const customerAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new ApiError(401, 'Authentication required. Please login.');
+    throw new ApiError(401, 'Customer authentication required. Please login with your mobile OTP.');
   }
 
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-jwt-secret-food-app-2024');
+    if (!decoded || !decoded.customerId) {
+      throw new ApiError(401, 'Invalid customer session. Please login with OTP.');
+    }
     req.customer = {
       id: decoded.customerId,
       phone: decoded.phone
     };
     next();
   } catch (err) {
-    throw new ApiError(401, 'Invalid or expired token. Please login again.');
+    throw new ApiError(401, err.statusCode === 401 ? err.message : 'Invalid or expired session. Please login with OTP again.');
   }
 };
 

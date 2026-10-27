@@ -46,17 +46,18 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
   }
   if (!restaurantId) throw new ApiError(400, 'Restaurant identifier (restaurantId or restaurant_slug) required');
 
-  // 2. Resolve Customer ID (auto create guest profile if not logged in)
-  let customerId = req.customer?.id;
+  // 2. Strict Customer Authentication (No anonymous orders allowed)
+  const customerId = req.customer?.id;
   if (!customerId) {
-    if (!cPhone) throw new ApiError(400, 'Customer phone number is required');
-    const { rows: [c] } = await query(
-      `INSERT INTO customers (phone, name) VALUES ($1, $2)
-       ON CONFLICT (phone) DO UPDATE SET name = COALESCE(customers.name, EXCLUDED.name)
-       RETURNING id`,
-      [cPhone, cName]
+    throw new ApiError(401, 'Customer authentication required. Please verify your mobile number with OTP before placing an order.');
+  }
+
+  // Update customer name if provided
+  if (cName && cName !== 'Valued Guest') {
+    await query(
+      `UPDATE customers SET name = $1 WHERE id = $2 AND (name IS NULL OR name = '' OR name = 'Valued Guest')`,
+      [cName, customerId]
     );
-    customerId = c.id;
   }
 
   // 3. Resolve Items format (supports { itemId } and { item_id })
@@ -167,9 +168,9 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
   });
 });
 
-// Support both POST /api/orders and POST /api/orders/create
-router.post('/', optionalCustomerAuth, handleOrderCreation);
-router.post('/create', optionalCustomerAuth, handleOrderCreation);
+// Support both POST /api/orders and POST /api/orders/create with mandatory customer authentication
+router.post('/', customerAuth, handleOrderCreation);
+router.post('/create', customerAuth, handleOrderCreation);
 
 // POST /api/orders/mock-pay/:orderId — Mock payment (development only)
 router.post('/mock-pay/:orderId', asyncHandler(async (req, res) => {

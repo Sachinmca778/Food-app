@@ -192,6 +192,32 @@ async function runAuthAudit() {
   assert(unauthCheck.status === 401,
     'SECURITY CHECK: Anonymous requests to protected routes rejected with 401');
 
+  // 3.7 Order Creation Without Login (Strict Check)
+  const anonymousOrder = await apiCall({
+    method: 'POST',
+    path: '/orders',
+    body: {
+      restaurant_slug: 'spice-garden',
+      items: [{ item_id: 'some-id', quantity: 1, unit_price_paise: 25000 }],
+      customer_phone: '9820111111'
+    }
+  });
+  assert(anonymousOrder.status === 401,
+    'SECURITY CHECK: Placing order without login is strictly BLOCKED (401 Unauthorized)');
+
+  // 3.8 Order Creation With Customer Token (Allowed through auth layer)
+  const authenticatedOrderCheck = await apiCall({
+    method: 'POST',
+    path: '/orders',
+    token: customerToken,
+    body: {
+      restaurant_slug: 'spice-garden',
+      items: [] // Will trigger 400 Bad Request (at least one item required), proving auth passed!
+    }
+  });
+  assert(authenticatedOrderCheck.status === 400 && authenticatedOrderCheck.data.error.includes('item'),
+    'SECURITY CHECK: Customer token successfully passes authentication for placing orders');
+
   console.log('\n====================================================');
   console.log(`🏁 AUDIT COMPLETE: ${passedTests}/${totalTests} TESTS PASSED (100% SUCCESS)`);
   console.log('====================================================');

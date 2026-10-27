@@ -23,8 +23,6 @@ export async function fetchAPI(endpoint, options = {}) {
     } else {
       if (customerToken) {
         headers['Authorization'] = `Bearer ${customerToken}`;
-      } else if (staffToken) {
-        headers['Authorization'] = `Bearer ${staffToken}`;
       }
     }
   }
