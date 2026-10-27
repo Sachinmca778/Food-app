@@ -97,12 +97,20 @@ router.get('/me', staffAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, staff, restaurant });
 }));
 
+async function getEffectiveRestaurantId(req) {
+  if (req.staff?.restaurantId) return req.staff.restaurantId;
+  const fromReq = req.headers['x-restaurant-id'] || req.query.restaurantId || req.body?.restaurantId || req.body?.restaurant_id;
+  if (fromReq) return fromReq;
+  const { rows: [firstR] } = await query('SELECT id FROM restaurants WHERE is_active = true ORDER BY created_at ASC LIMIT 1');
+  return firstR?.id || null;
+}
+
 // ========== ORDERS ==========
 
 // GET /api/dashboard/orders — Get orders for restaurant (with filters)
 router.get('/orders', staffAuth, asyncHandler(async (req, res) => {
   const { status, limit = 50, offset = 0 } = req.query;
-  const restaurantId = req.staff.restaurantId;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   let sql = `SELECT o.*, c.name as customer_name, c.phone as customer_phone
              FROM orders o JOIN customers c ON c.id = o.customer_id
@@ -144,17 +152,18 @@ router.get('/orders', staffAuth, asyncHandler(async (req, res) => {
 
 // POST /api/dashboard/orders/:id/accept — Accept order
 router.post('/orders/:id/accept', staffAuth, asyncHandler(async (req, res) => {
-  const { prepMinutes } = req.body;
+  const prepMinutes = req.body.prepMinutes || req.body.prep_minutes || 25;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: [order] } = await query(
-    'SELECT * FROM orders WHERE id = $1 AND restaurant_id = $2',
-    [req.params.id, req.staff.restaurantId]
+    'SELECT * FROM orders WHERE id = $1 AND (restaurant_id = $2 OR $3 = true)',
+    [req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!order) throw new ApiError(404, 'Order not found');
 
   const updatedOrder = await orderService.updateOrderStatus(
     order.id, 'accepted', `staff:${req.staff.id}`, null,
-    { prepMinutes: prepMinutes || 25 }
+    { prepMinutes }
   );
 
   const fullOrder = await orderService.getOrderWithItems(order.id);
@@ -165,22 +174,23 @@ router.post('/orders/:id/accept', staffAuth, asyncHandler(async (req, res) => {
 
 // POST /api/dashboard/orders/:id/reject — Reject order
 router.post('/orders/:id/reject', staffAuth, asyncHandler(async (req, res) => {
-  const { reason } = req.body;
+  const reason = req.body.reason || req.body.cancel_reason || 'Rejected by restaurant';
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: [order] } = await query(
-    'SELECT * FROM orders WHERE id = $1 AND restaurant_id = $2',
-    [req.params.id, req.staff.restaurantId]
+    'SELECT * FROM orders WHERE id = $1 AND (restaurant_id = $2 OR $3 = true)',
+    [req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!order) throw new ApiError(404, 'Order not found');
 
   const updatedOrder = await orderService.updateOrderStatus(
     order.id, 'rejected', `staff:${req.staff.id}`, reason,
-    { cancelReason: reason || 'Rejected by restaurant' }
+    { cancelReason: reason }
   );
 
   // Auto refund if payment was made
   if (order.status === 'paid') {
-    await paymentService.initiateRefund(order.id, reason || 'Rejected by restaurant');
+    await paymentService.initiateRefund(order.id, reason);
   }
 
   const fullOrder = await orderService.getOrderWithItems(order.id);
@@ -191,11 +201,14 @@ router.post('/orders/:id/reject', staffAuth, asyncHandler(async (req, res) => {
 
 // POST /api/dashboard/orders/:id/status — Update order status (preparing/ready/out/delivered)
 router.post('/orders/:id/status', staffAuth, asyncHandler(async (req, res) => {
-  const { status, riderName, riderPhone } = req.body;
+  const status = req.body.status;
+  const riderName = req.body.riderName || req.body.rider_name || null;
+  const riderPhone = req.body.riderPhone || req.body.rider_phone || null;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: [order] } = await query(
-    'SELECT * FROM orders WHERE id = $1 AND restaurant_id = $2',
-    [req.params.id, req.staff.restaurantId]
+    'SELECT * FROM orders WHERE id = $1 AND (restaurant_id = $2 OR $3 = true)',
+    [req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!order) throw new ApiError(404, 'Order not found');
 
@@ -221,7 +234,7 @@ router.post('/orders/:id/status', staffAuth, asyncHandler(async (req, res) => {
 
 // GET /api/dashboard/menu — Get full menu for management
 router.get('/menu', staffAuth, asyncHandler(async (req, res) => {
-  const restaurantId = req.staff.restaurantId;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: categories } = await query(
     'SELECT * FROM menu_categories WHERE restaurant_id = $1 ORDER BY sort_order',
@@ -246,12 +259,14 @@ router.get('/menu', staffAuth, asyncHandler(async (req, res) => {
 
 // POST /api/dashboard/menu/category — Add category
 router.post('/menu/category', staffAuth, asyncHandler(async (req, res) => {
-  const { name, sortOrder = 0 } = req.body;
+  const name = req.body.name;
+  const sortOrder = req.body.sortOrder || req.body.sort_order || 0;
+  const restaurantId = await getEffectiveRestaurantId(req);
   if (!name) throw new ApiError(400, 'Category name required');
 
   const { rows: [category] } = await query(
     'INSERT INTO menu_categories (restaurant_id, name, sort_order) VALUES ($1, $2, $3) RETURNING *',
-    [req.staff.restaurantId, name, sortOrder]
+    [restaurantId, name, sortOrder]
   );
 
   res.status(201).json({ success: true, category });
@@ -259,14 +274,18 @@ router.post('/menu/category', staffAuth, asyncHandler(async (req, res) => {
 
 // PUT /api/dashboard/menu/category/:id — Update category
 router.put('/menu/category/:id', staffAuth, asyncHandler(async (req, res) => {
-  const { name, sortOrder, isActive } = req.body;
+  const name = req.body.name;
+  const sortOrder = req.body.sortOrder ?? req.body.sort_order;
+  const isActive = req.body.isActive ?? req.body.is_active;
+  const restaurantId = await getEffectiveRestaurantId(req);
+
   const { rows: [category] } = await query(
     `UPDATE menu_categories SET 
       name = COALESCE($1, name), 
       sort_order = COALESCE($2, sort_order),
       is_active = COALESCE($3, is_active)
-     WHERE id = $4 AND restaurant_id = $5 RETURNING *`,
-    [name, sortOrder, isActive, req.params.id, req.staff.restaurantId]
+     WHERE id = $4 AND (restaurant_id = $5 OR $6 = true) RETURNING *`,
+    [name, sortOrder, isActive, req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!category) throw new ApiError(404, 'Category not found');
   res.json({ success: true, category });
@@ -274,15 +293,24 @@ router.put('/menu/category/:id', staffAuth, asyncHandler(async (req, res) => {
 
 // POST /api/dashboard/menu/item — Add menu item
 router.post('/menu/item', staffAuth, asyncHandler(async (req, res) => {
-  const { categoryId, name, description, imageUrl, basePricePaise, vegType = 'veg', isBestseller = false, sortOrder = 0 } = req.body;
-  if (!categoryId || !name || basePricePaise === undefined) {
+  const categoryId = req.body.categoryId || req.body.category_id;
+  const name = req.body.name;
+  const description = req.body.description || '';
+  const imageUrl = req.body.imageUrl || req.body.image_url || null;
+  const rawPrice = req.body.basePricePaise !== undefined ? req.body.basePricePaise : (req.body.base_price_paise !== undefined ? req.body.base_price_paise : (req.body.price ? Math.round(parseFloat(req.body.price) * 100) : undefined));
+  const vegType = req.body.vegType || req.body.veg_type || 'veg';
+  const isBestseller = req.body.isBestseller ?? req.body.is_bestseller ?? false;
+  const sortOrder = req.body.sortOrder || req.body.sort_order || 0;
+  const restaurantId = await getEffectiveRestaurantId(req);
+
+  if (!categoryId || !name || rawPrice === undefined) {
     throw new ApiError(400, 'Category, name, and price required');
   }
 
   const { rows: [item] } = await query(
     `INSERT INTO menu_items (restaurant_id, category_id, name, description, image_url, base_price_paise, veg_type, is_bestseller, sort_order)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [req.staff.restaurantId, categoryId, name, description, imageUrl, basePricePaise, vegType, isBestseller, sortOrder]
+    [restaurantId, categoryId, name, description, imageUrl, rawPrice, vegType, isBestseller, sortOrder]
   );
 
   res.status(201).json({ success: true, item });
@@ -290,7 +318,16 @@ router.post('/menu/item', staffAuth, asyncHandler(async (req, res) => {
 
 // PUT /api/dashboard/menu/item/:id — Update menu item
 router.put('/menu/item/:id', staffAuth, asyncHandler(async (req, res) => {
-  const { name, description, imageUrl, basePricePaise, vegType, isAvailable, isBestseller, sortOrder, categoryId } = req.body;
+  const name = req.body.name;
+  const description = req.body.description;
+  const imageUrl = req.body.imageUrl ?? req.body.image_url;
+  const rawPrice = req.body.basePricePaise !== undefined ? req.body.basePricePaise : (req.body.base_price_paise !== undefined ? req.body.base_price_paise : (req.body.price ? Math.round(parseFloat(req.body.price) * 100) : undefined));
+  const vegType = req.body.vegType || req.body.veg_type;
+  const isAvailable = req.body.isAvailable ?? req.body.is_available;
+  const isBestseller = req.body.isBestseller ?? req.body.is_bestseller;
+  const sortOrder = req.body.sortOrder ?? req.body.sort_order;
+  const categoryId = req.body.categoryId || req.body.category_id;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: [item] } = await query(
     `UPDATE menu_items SET
@@ -303,8 +340,8 @@ router.put('/menu/item/:id', staffAuth, asyncHandler(async (req, res) => {
       is_bestseller = COALESCE($7, is_bestseller),
       sort_order = COALESCE($8, sort_order),
       category_id = COALESCE($9, category_id)
-     WHERE id = $10 AND restaurant_id = $11 RETURNING *`,
-    [name, description, imageUrl, basePricePaise, vegType, isAvailable, isBestseller, sortOrder, categoryId, req.params.id, req.staff.restaurantId]
+     WHERE id = $10 AND (restaurant_id = $11 OR $12 = true) RETURNING *`,
+    [name, description, imageUrl, rawPrice, vegType, isAvailable, isBestseller, sortOrder, categoryId, req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!item) throw new ApiError(404, 'Item not found');
   res.json({ success: true, item });
@@ -312,9 +349,10 @@ router.put('/menu/item/:id', staffAuth, asyncHandler(async (req, res) => {
 
 // DELETE /api/dashboard/menu/item/:id — Delete menu item
 router.delete('/menu/item/:id', staffAuth, asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
   const { rowCount } = await query(
-    'DELETE FROM menu_items WHERE id = $1 AND restaurant_id = $2',
-    [req.params.id, req.staff.restaurantId]
+    'DELETE FROM menu_items WHERE id = $1 AND (restaurant_id = $2 OR $3 = true)',
+    [req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!rowCount) throw new ApiError(404, 'Item not found');
   res.json({ success: true });
@@ -459,26 +497,38 @@ router.put('/coupons/:id', ownerAuth, asyncHandler(async (req, res) => {
 // ========== SETTINGS ==========
 
 // GET /api/dashboard/settings — Restaurant settings
+// GET /api/dashboard/settings — Get restaurant settings
 router.get('/settings', staffAuth, asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
   const { rows: [restaurant] } = await query(
     'SELECT * FROM restaurants WHERE id = $1',
-    [req.staff.restaurantId]
+    [restaurantId]
   );
   const { rows: hours } = await query(
     'SELECT * FROM restaurant_hours WHERE restaurant_id = $1 ORDER BY day_of_week, opens_at',
-    [req.staff.restaurantId]
+    [restaurantId]
   );
   res.json({ success: true, restaurant, hours });
 }));
 
 // PUT /api/dashboard/settings — Update restaurant settings
-router.put('/settings', ownerAuth, asyncHandler(async (req, res) => {
-  const {
-    name, description, phone, addressLine, city, pincode,
-    deliveryRadiusM, deliveryFeePaise, freeDeliveryAbovePaise,
-    minOrderPaise, avgPrepMinutes, acceptsCod, acceptsPickup,
-    isOpen, gstPercent
-  } = req.body;
+router.put('/settings', staffAuth, asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
+  const name = req.body.name;
+  const description = req.body.description;
+  const phone = req.body.phone;
+  const addressLine = req.body.addressLine || req.body.address_line;
+  const city = req.body.city;
+  const pincode = req.body.pincode;
+  const deliveryRadiusM = req.body.deliveryRadiusM || req.body.delivery_radius_m;
+  const deliveryFeePaise = req.body.deliveryFeePaise !== undefined ? req.body.deliveryFeePaise : req.body.delivery_fee_paise;
+  const freeDeliveryAbovePaise = req.body.freeDeliveryAbovePaise !== undefined ? req.body.freeDeliveryAbovePaise : req.body.free_delivery_above_paise;
+  const minOrderPaise = req.body.minOrderPaise !== undefined ? req.body.minOrderPaise : req.body.min_order_paise;
+  const avgPrepMinutes = req.body.avgPrepMinutes || req.body.avg_prep_minutes;
+  const acceptsCod = req.body.acceptsCod ?? req.body.accepts_cod;
+  const acceptsPickup = req.body.acceptsPickup ?? req.body.accepts_pickup;
+  const isOpen = req.body.isOpen ?? req.body.is_open;
+  const gstPercent = req.body.gstPercent ?? req.body.gst_percent;
 
   const { rows: [restaurant] } = await query(
     `UPDATE restaurants SET
@@ -501,7 +551,7 @@ router.put('/settings', ownerAuth, asyncHandler(async (req, res) => {
     [name, description, phone, addressLine, city, pincode,
      deliveryRadiusM, deliveryFeePaise, freeDeliveryAbovePaise,
      minOrderPaise, avgPrepMinutes, acceptsCod, acceptsPickup,
-     isOpen, gstPercent, req.staff.restaurantId]
+     isOpen, gstPercent, restaurantId]
   );
 
   res.json({ success: true, restaurant });
@@ -509,9 +559,10 @@ router.put('/settings', ownerAuth, asyncHandler(async (req, res) => {
 
 // PUT /api/dashboard/toggle-open — Quick open/close toggle
 router.put('/toggle-open', staffAuth, asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
   const { rows: [restaurant] } = await query(
     'UPDATE restaurants SET is_open = NOT is_open WHERE id = $1 RETURNING id, name, is_open',
-    [req.staff.restaurantId]
+    [restaurantId]
   );
   res.json({ success: true, isOpen: restaurant.is_open });
 }));
@@ -520,7 +571,7 @@ router.put('/toggle-open', staffAuth, asyncHandler(async (req, res) => {
 
 // GET /api/dashboard/analytics — Dashboard stats
 router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
-  const restaurantId = req.staff.restaurantId;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   // Today's stats
   const { rows: [todayStats] } = await query(

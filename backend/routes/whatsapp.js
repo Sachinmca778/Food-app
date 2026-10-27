@@ -64,10 +64,10 @@ async function handleIncomingMessage(fromPhone, text, restaurantPhone = null) {
   const { rows: custRows } = await query(
     `SELECT c.*, 
        (SELECT json_agg(o.*) FROM (
-          SELECT id, order_no, total_paise, status, public_token, created_at, order_type
+          SELECT id, order_no, total_paise, status, public_token, placed_at as created_at, order_type
           FROM orders 
           WHERE customer_id = c.id AND restaurant_id = $1 
-          ORDER BY created_at DESC LIMIT 3
+          ORDER BY placed_at DESC LIMIT 3
        ) o) as recent_orders
      FROM customers c
      WHERE c.phone = $2`,

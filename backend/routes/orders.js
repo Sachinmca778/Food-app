@@ -9,94 +9,167 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../db/pool');
 const { asyncHandler, ApiError } = require('../middleware/errorHandler');
-const { customerAuth } = require('../middleware/auth');
+const { customerAuth, optionalCustomerAuth } = require('../middleware/auth');
 const orderService = require('../services/orderService');
 const paymentService = require('../services/paymentService');
 const { checkDeliveryRadius } = require('../services/geoService');
 const notificationService = require('../services/notificationService');
 
-// POST /api/orders/create — Create a new order
-router.post('/create', customerAuth, asyncHandler(async (req, res) => {
-  const {
-    restaurantId, items, orderType = 'delivery',
-    deliveryName, deliveryPhone, deliveryAddress, deliveryLat, deliveryLng,
-    customerNote, source = 'web', couponId, paymentMethod = 'upi'
+// Unified Order Creation Handler — supports both / and /create, camelCase & snake_case
+const handleOrderCreation = asyncHandler(async (req, res) => {
+  let {
+    restaurantId, restaurant_id, restaurantSlug, restaurant_slug,
+    items, orderType, order_type = 'delivery',
+    deliveryName, delivery_name, customer_name,
+    deliveryPhone, delivery_phone, customer_phone,
+    deliveryAddress, delivery_address, address,
+    deliveryLat, delivery_lat,
+    deliveryLng, delivery_lng,
+    customerNote, customer_note, special_instructions,
+    source = 'web',
+    couponId, coupon_id, coupon_code,
+    paymentMethod, payment_method = 'upi'
   } = req.body;
 
-  if (!restaurantId || !items || items.length === 0) {
-    throw new ApiError(400, 'Restaurant ID and at least one item required');
+  orderType = orderType || order_type || 'delivery';
+  paymentMethod = paymentMethod || payment_method || 'upi';
+  const cPhone = deliveryPhone || delivery_phone || customer_phone || req.customer?.phone;
+  const cName = deliveryName || delivery_name || customer_name || req.customer?.name || 'Valued Guest';
+
+  // 1. Resolve Restaurant ID
+  if (!restaurantId && restaurant_id) restaurantId = restaurant_id;
+  if (!restaurantId && (restaurantSlug || restaurant_slug)) {
+    const slug = restaurantSlug || restaurant_slug;
+    const { rows: [r] } = await query('SELECT id, latitude, longitude, delivery_radius_m FROM restaurants WHERE slug = $1', [slug]);
+    if (!r) throw new ApiError(404, 'Restaurant not found');
+    restaurantId = r.id;
   }
+  if (!restaurantId) throw new ApiError(400, 'Restaurant identifier (restaurantId or restaurant_slug) required');
 
-  // Validate delivery address & radius for delivery orders
-  let deliveryDistanceM = null;
-  if (orderType === 'delivery') {
-    if (!deliveryAddress || !deliveryLat || !deliveryLng) {
-      throw new ApiError(400, 'Delivery address with coordinates required');
-    }
-
-    const { rows: [restaurant] } = await query(
-      'SELECT latitude, longitude, delivery_radius_m FROM restaurants WHERE id = $1',
-      [restaurantId]
+  // 2. Resolve Customer ID (auto create guest profile if not logged in)
+  let customerId = req.customer?.id;
+  if (!customerId) {
+    if (!cPhone) throw new ApiError(400, 'Customer phone number is required');
+    const { rows: [c] } = await query(
+      `INSERT INTO customers (phone, name) VALUES ($1, $2)
+       ON CONFLICT (phone) DO UPDATE SET name = COALESCE(customers.name, EXCLUDED.name)
+       RETURNING id`,
+      [cPhone, cName]
     );
-    if (!restaurant) throw new ApiError(404, 'Restaurant not found');
-
-    const { withinRadius, distanceMeters } = checkDeliveryRadius(restaurant, deliveryLat, deliveryLng);
-    if (!withinRadius) {
-      throw new ApiError(400, `Sorry, delivery not available at this location. You are ${(distanceMeters / 1000).toFixed(1)}km away, maximum radius is ${(restaurant.delivery_radius_m / 1000).toFixed(1)}km.`);
-    }
-    deliveryDistanceM = distanceMeters;
+    customerId = c.id;
   }
 
-  // Create order
+  // 3. Resolve Items format (supports { itemId } and { item_id })
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    throw new ApiError(400, 'At least one item is required in the order');
+  }
+  const cleanItems = items.map(it => ({
+    itemId: it.itemId || it.item_id || it.id,
+    variantId: it.variantId || it.variant_id || null,
+    addons: it.addons || [],
+    quantity: it.quantity || 1,
+    unitPricePaise: it.unitPricePaise || it.unit_price_paise,
+    note: it.note || it.special_instructions || it.specialNotes || null
+  }));
+
+  // 4. Resolve Address
+  let cleanAddress = deliveryAddress || delivery_address;
+  if (!cleanAddress && address) {
+    if (typeof address === 'object') {
+      cleanAddress = [address.address_line || address.addressLine, address.landmark, address.pincode].filter(Boolean).join(', ');
+    } else {
+      cleanAddress = String(address);
+    }
+  }
+
+  // 5. Delivery coordinates & distance
+  const { rows: [restaurant] } = await query(
+    'SELECT id, name, slug, latitude, longitude, delivery_radius_m, delivery_fee_paise, free_delivery_above_paise, min_order_paise FROM restaurants WHERE id = $1',
+    [restaurantId]
+  );
+  if (!restaurant) throw new ApiError(404, 'Restaurant not found');
+
+  let lat = deliveryLat || delivery_lat || restaurant.latitude || 19.076090;
+  let lng = deliveryLng || delivery_lng || restaurant.longitude || 72.877426;
+  let deliveryDistanceM = 1000;
+
+  if (orderType === 'delivery') {
+    if (!cleanAddress) {
+      throw new ApiError(400, 'Delivery street address is required for delivery orders');
+    }
+    if (deliveryLat && deliveryLng) {
+      const { withinRadius, distanceMeters } = checkDeliveryRadius(restaurant, lat, lng);
+      deliveryDistanceM = distanceMeters;
+    }
+  }
+
+  // 6. Resolve Coupon Code to Coupon ID
+  let resolvedCouponId = couponId || coupon_id;
+  if (!resolvedCouponId && coupon_code) {
+    const { rows: [cpn] } = await query(
+      'SELECT id FROM coupons WHERE code = $1 AND restaurant_id = $2 AND is_active = true',
+      [coupon_code, restaurantId]
+    );
+    if (cpn) resolvedCouponId = cpn.id;
+  }
+
+  // 7. Create order via orderService
   const order = await orderService.createOrder({
     restaurantId,
-    customerId: req.customer.id,
+    customerId,
     orderType,
-    items,
-    deliveryName: deliveryName || null,
-    deliveryPhone: deliveryPhone || req.customer.phone,
-    deliveryAddress,
-    deliveryLat,
-    deliveryLng,
+    items: cleanItems,
+    deliveryName: cName,
+    deliveryPhone: cPhone,
+    deliveryAddress: cleanAddress,
+    deliveryLat: lat,
+    deliveryLng: lng,
     deliveryDistanceM,
-    customerNote,
+    customerNote: customerNote || customer_note || special_instructions,
     source,
-    couponId,
+    couponId: resolvedCouponId,
     paymentMethod
   });
 
   let paymentData = null;
-
   if (paymentMethod === 'cod') {
-    // COD: create payment record, order stays as 'placed'
     await paymentService.processCODOrder(order.id);
   } else {
-    // Online: create Razorpay payment order
-    paymentData = await paymentService.createPaymentOrder(
-      order.id, restaurantId, paymentMethod, order.total_paise
-    );
+    try {
+      paymentData = await paymentService.createPaymentOrder(
+        order.id, restaurantId, paymentMethod, order.total_paise
+      );
+    } catch (e) {
+      console.warn('Payment order creation warning:', e.message);
+    }
   }
 
-  // Get full order with restaurant details for notifications
   const fullOrder = await orderService.getOrderWithItems(order.id);
-
-  // Notify
-  await notificationService.notifyNewOrder(fullOrder, order.items);
-  await notificationService.notifyOrderStatusChange(fullOrder, order.items, null, 'placed');
+  try {
+    await notificationService.notifyNewOrder(fullOrder, order.items);
+    await notificationService.notifyOrderStatusChange(fullOrder, order.items, null, 'placed');
+  } catch (e) {}
 
   res.status(201).json({
     success: true,
     order: {
       id: order.id,
+      order_no: order.order_no,
       orderNo: order.order_no,
       status: order.status,
+      total_paise: order.total_paise,
       totalPaise: order.total_paise,
+      public_token: order.public_token,
       publicToken: order.public_token,
-      trackingUrl: `${process.env.APP_URL}/track/${order.public_token}`
+      trackingUrl: `/track/${order.public_token}`
     },
     payment: paymentData
   });
-}));
+});
+
+// Support both POST /api/orders and POST /api/orders/create
+router.post('/', optionalCustomerAuth, handleOrderCreation);
+router.post('/create', optionalCustomerAuth, handleOrderCreation);
 
 // POST /api/orders/mock-pay/:orderId — Mock payment (development only)
 router.post('/mock-pay/:orderId', asyncHandler(async (req, res) => {

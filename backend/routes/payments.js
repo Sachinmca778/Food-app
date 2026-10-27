@@ -74,10 +74,12 @@ router.post('/webhook', asyncHandler(async (req, res) => {
 
 // POST /api/payments/verify — Client-side verification after Razorpay checkout
 router.post('/verify', asyncHandler(async (req, res) => {
-  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+  const razorpayOrderId = req.body.razorpayOrderId || req.body.razorpay_order_id;
+  const razorpayPaymentId = req.body.razorpayPaymentId || req.body.razorpay_payment_id;
+  const razorpaySignature = req.body.razorpaySignature || req.body.razorpay_signature;
 
   if (!razorpayOrderId || !razorpayPaymentId) {
-    throw new ApiError(400, 'Payment details required');
+    throw new ApiError(400, 'Payment details required (razorpayOrderId & razorpayPaymentId)');
   }
 
   const result = await paymentService.processPaymentSuccess(

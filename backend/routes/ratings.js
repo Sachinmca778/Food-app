@@ -29,6 +29,8 @@ router.get('/:token', asyncHandler(async (req, res) => {
     [order.id]
   );
 
+  const formattedRating = existing ? { ...existing, stars: existing.food_rating } : null;
+
   res.json({
     success: true,
     order: {
@@ -38,16 +40,18 @@ router.get('/:token', asyncHandler(async (req, res) => {
       restaurantLogo: order.restaurant_logo
     },
     alreadyRated: !!existing,
-    rating: existing || null
+    rating: formattedRating
   });
 }));
 
 // POST /api/ratings/:token — Submit rating
 router.post('/:token', asyncHandler(async (req, res) => {
-  const { foodRating, deliveryRating, comment } = req.body;
+  const foodRating = req.body.foodRating || req.body.stars || req.body.food_rating;
+  const deliveryRating = req.body.deliveryRating || req.body.delivery_rating || foodRating;
+  const comment = req.body.comment;
 
   if (!foodRating || foodRating < 1 || foodRating > 5) {
-    throw new ApiError(400, 'Food rating (1-5) is required');
+    throw new ApiError(400, 'Rating (1-5 stars) is required');
   }
 
   const { rows: [order] } = await query(
@@ -74,7 +78,7 @@ router.post('/:token', asyncHandler(async (req, res) => {
     [order.id, order.restaurant_id, order.customer_id, foodRating, deliveryRating || null, comment || null]
   );
 
-  res.json({ success: true, rating });
+  res.json({ success: true, rating: { ...rating, stars: rating.food_rating } });
 }));
 
 module.exports = router;

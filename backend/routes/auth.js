@@ -36,12 +36,12 @@ router.post('/send-otp', asyncHandler(async (req, res) => {
     console.log(`📲 OTP for ${normalizedPhone}: ${otp}`);
   }
 
-  // TODO: Send OTP via SMS/WhatsApp in production
+  const hasLiveSMS = Boolean(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
 
   res.json({
     success: true,
     message: 'OTP sent successfully',
-    ...(process.env.NODE_ENV === 'development' && { otp }) // Only in dev
+    ...(!hasLiveSMS && { demo_otp: otp, otp })
   });
 }));
 
