@@ -12,14 +12,20 @@ export async function fetchAPI(endpoint, options = {}) {
     ...(options.headers || {})
   };
 
-  // Add staff token if present in localStorage (client-side only)
-  if (typeof window !== 'undefined') {
-    const staffToken = localStorage.getItem('staff_token');
+  // Smart role-based token attachment (client-side only)
+  if (typeof window !== 'undefined' && !headers['Authorization']) {
+    const isStaffRoute = endpoint.startsWith('/dashboard') || endpoint.startsWith('/admin');
+    const staffToken = localStorage.getItem('staff_token') || localStorage.getItem('super_admin_token');
     const customerToken = localStorage.getItem('customer_token');
-    if (staffToken && !headers['Authorization']) {
-      headers['Authorization'] = `Bearer ${staffToken}`;
-    } else if (customerToken && !headers['Authorization']) {
-      headers['Authorization'] = `Bearer ${customerToken}`;
+
+    if (isStaffRoute) {
+      if (staffToken) headers['Authorization'] = `Bearer ${staffToken}`;
+    } else {
+      if (customerToken) {
+        headers['Authorization'] = `Bearer ${customerToken}`;
+      } else if (staffToken) {
+        headers['Authorization'] = `Bearer ${staffToken}`;
+      }
     }
   }
 

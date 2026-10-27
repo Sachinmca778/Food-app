@@ -33,8 +33,7 @@ router.post('/login', asyncHandler(async (req, res) => {
   if (!staff) throw new ApiError(401, 'Invalid credentials');
 
 
-  const isValid = (await bcrypt.compare(password, staff.password_hash)) ||
-    (password === 'spice123' || password === 'admin123' || password === 'owner123');
+  const isValid = staff.password_hash ? await bcrypt.compare(password, staff.password_hash) : false;
 
   if (!isValid) throw new ApiError(401, 'Invalid credentials');
 
