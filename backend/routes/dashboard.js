@@ -198,8 +198,8 @@ router.post('/orders/:id/reject', staffAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, order: updatedOrder });
 }));
 
-// POST /api/dashboard/orders/:id/status — Update order status (preparing/ready/out/delivered)
-router.post('/orders/:id/status', staffAuth, asyncHandler(async (req, res) => {
+// POST / PATCH / PUT /api/dashboard/orders/:id/status — Update order status (preparing/ready/out/delivered)
+const handleUpdateOrderStatus = asyncHandler(async (req, res) => {
   const status = req.body.status;
   const riderName = req.body.riderName || req.body.rider_name || null;
   const riderPhone = req.body.riderPhone || req.body.rider_phone || null;
@@ -227,7 +227,11 @@ router.post('/orders/:id/status', staffAuth, asyncHandler(async (req, res) => {
   await notificationService.notifyOrderStatusChange(fullOrder, fullOrder.items, order.status, status);
 
   res.json({ success: true, order: updatedOrder });
-}));
+});
+
+router.post('/orders/:id/status', staffAuth, handleUpdateOrderStatus);
+router.patch('/orders/:id/status', staffAuth, handleUpdateOrderStatus);
+router.put('/orders/:id/status', staffAuth, handleUpdateOrderStatus);
 
 // ========== MENU MANAGEMENT ==========
 
@@ -357,16 +361,36 @@ router.delete('/menu/item/:id', staffAuth, asyncHandler(async (req, res) => {
   res.json({ success: true });
 }));
 
-// PUT /api/dashboard/menu/item/:id/toggle — Quick toggle availability
-router.put('/menu/item/:id/toggle', staffAuth, asyncHandler(async (req, res) => {
-  const { rows: [item] } = await query(
-    `UPDATE menu_items SET is_available = NOT is_available 
-     WHERE id = $1 AND restaurant_id = $2 RETURNING id, name, is_available`,
-    [req.params.id, req.staff.restaurantId]
-  );
+// Toggle / Set menu item availability (supports /menu/:id/availability and /menu/item/:id/toggle)
+const handleItemAvailability = asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
+  const isAvailable = req.body.is_available !== undefined ? req.body.is_available : req.body.isAvailable;
+  
+  let item;
+  if (isAvailable !== undefined) {
+    const { rows: [it] } = await query(
+      `UPDATE menu_items SET is_available = $1 
+       WHERE id = $2 AND (restaurant_id = $3 OR $4 = true) RETURNING id, name, is_available`,
+      [Boolean(isAvailable), req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
+    );
+    item = it;
+  } else {
+    const { rows: [it] } = await query(
+      `UPDATE menu_items SET is_available = NOT is_available 
+       WHERE id = $1 AND (restaurant_id = $2 OR $3 = true) RETURNING id, name, is_available`,
+      [req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
+    );
+    item = it;
+  }
   if (!item) throw new ApiError(404, 'Item not found');
   res.json({ success: true, item });
-}));
+});
+
+router.patch('/menu/:id/availability', staffAuth, handleItemAvailability);
+router.put('/menu/:id/availability', staffAuth, handleItemAvailability);
+router.post('/menu/:id/availability', staffAuth, handleItemAvailability);
+router.put('/menu/item/:id/toggle', staffAuth, handleItemAvailability);
+router.patch('/menu/item/:id/toggle', staffAuth, handleItemAvailability);
 
 // POST /api/dashboard/upload — Upload food picture
 router.post('/upload', staffAuth, asyncHandler(async (req, res) => {
@@ -406,19 +430,24 @@ router.post('/upload', staffAuth, asyncHandler(async (req, res) => {
   });
 }));
 
-// PUT /api/dashboard/menu/item/:id/photo — Quick update food photo
-router.put('/menu/item/:id/photo', staffAuth, asyncHandler(async (req, res) => {
+// PUT / PATCH /api/dashboard/menu/item/:id/photo — Quick update food photo
+const handleItemPhoto = asyncHandler(async (req, res) => {
   const { imageUrl } = req.body;
   if (!imageUrl) throw new ApiError(400, 'imageUrl is required');
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   const { rows: [item] } = await query(
     `UPDATE menu_items SET image_url = $1, updated_at = now()
-     WHERE id = $2 AND restaurant_id = $3 RETURNING id, name, image_url`,
-    [imageUrl, req.params.id, req.staff.restaurantId]
+     WHERE id = $2 AND (restaurant_id = $3 OR $4 = true) RETURNING id, name, image_url`,
+    [imageUrl, req.params.id, restaurantId, Boolean(req.staff.isSuperAdmin)]
   );
   if (!item) throw new ApiError(404, 'Item not found');
   res.json({ success: true, item });
-}));
+});
+
+router.put('/menu/item/:id/photo', staffAuth, handleItemPhoto);
+router.patch('/menu/item/:id/photo', staffAuth, handleItemPhoto);
+router.post('/menu/item/:id/photo', staffAuth, handleItemPhoto);
 
 
 // ========== CUSTOMERS CRM ==========
@@ -510,8 +539,8 @@ router.get('/settings', staffAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, restaurant, hours });
 }));
 
-// PUT /api/dashboard/settings — Update restaurant settings
-router.put('/settings', staffAuth, asyncHandler(async (req, res) => {
+// PUT / PATCH /api/dashboard/settings — Update restaurant settings
+const handleUpdateSettings = asyncHandler(async (req, res) => {
   const restaurantId = await getEffectiveRestaurantId(req);
   const name = req.body.name;
   const description = req.body.description;
@@ -528,6 +557,7 @@ router.put('/settings', staffAuth, asyncHandler(async (req, res) => {
   const acceptsPickup = req.body.acceptsPickup ?? req.body.accepts_pickup;
   const isOpen = req.body.isOpen ?? req.body.is_open;
   const gstPercent = req.body.gstPercent ?? req.body.gst_percent;
+  const upiId = req.body.upiId || req.body.upi_id;
 
   const { rows: [restaurant] } = await query(
     `UPDATE restaurants SET
@@ -545,16 +575,20 @@ router.put('/settings', staffAuth, asyncHandler(async (req, res) => {
       accepts_cod = COALESCE($12, accepts_cod),
       accepts_pickup = COALESCE($13, accepts_pickup),
       is_open = COALESCE($14, is_open),
-      gst_percent = COALESCE($15, gst_percent)
-     WHERE id = $16 RETURNING *`,
+      gst_percent = COALESCE($15, gst_percent),
+      upi_id = COALESCE($16, upi_id)
+     WHERE id = $17 RETURNING *`,
     [name, description, phone, addressLine, city, pincode,
-     deliveryRadiusM, deliveryFeePaise, freeDeliveryAbovePaise,
-     minOrderPaise, avgPrepMinutes, acceptsCod, acceptsPickup,
-     isOpen, gstPercent, restaurantId]
+     deliveryRadiusM, deliveryFeePaise, freeDeliveryAbovePaise, minOrderPaise,
+     avgPrepMinutes, acceptsCod, acceptsPickup, isOpen, gstPercent, upiId,
+     restaurantId]
   );
-
   res.json({ success: true, restaurant });
-}));
+});
+
+router.put('/settings', staffAuth, handleUpdateSettings);
+router.patch('/settings', staffAuth, handleUpdateSettings);
+router.post('/settings', staffAuth, handleUpdateSettings);
 
 // PUT /api/dashboard/toggle-open — Quick open/close toggle
 router.put('/toggle-open', staffAuth, asyncHandler(async (req, res) => {
