@@ -31,17 +31,24 @@ async function notifyOrderStatusChange(order, orderItems, fromStatus, toStatus) 
     // 2. WhatsApp messages based on status
     switch (toStatus) {
       case 'placed':
-        // Notify restaurant owner
+        // If Cash on Delivery (COD), order is confirmed immediately upon placement
+        const isCOD = order.payment_method === 'cod' || order.payment?.method === 'cod' || !order.expires_at;
+        if (isCOD) {
+          await whatsappService.sendOrderToRestaurant(
+            order, orderItems || [],
+            order.restaurant_phone
+          );
+          await whatsappService.sendOrderConfirmation(order, order.restaurant_name);
+        }
+        break;
+
+      case 'paid':
+        // Online payment (UPI / Card) verified & confirmed!
         await whatsappService.sendOrderToRestaurant(
           order, orderItems || [],
           order.restaurant_phone
         );
-        // Notify customer
         await whatsappService.sendOrderConfirmation(order, order.restaurant_name);
-        break;
-
-      case 'paid':
-        // Notify restaurant of payment received
         if (io) {
           io.to(`restaurant:${order.restaurant_id}`).emit('order:paid', {
             orderId: order.id,

@@ -185,8 +185,43 @@ async function testFullFlow() {
   }
   console.log(`✅ 9. COD Order Placed Successfully! Order #${codOrderRes.data.order.order_no}, Total: ₹${codOrderRes.data.order.total_paise/100}`);
 
+  // 9. Place Real Card Order & Confirm Card Payment
+  const cardOrderRes = await apiCall('/orders', 'POST', {
+    restaurant_slug: 'spice-garden',
+    order_type: 'delivery',
+    customer_phone: testPhone,
+    customer_name: 'Rahul Sharma',
+    items: [
+      {
+        item_id: dish1.id,
+        quantity: 2,
+        unit_price_paise: dish1.base_price_paise
+      }
+    ],
+    address: 'Flat 101, Hill Crest, Bandra, Mumbai 400050',
+    payment_method: 'card'
+  }, customerToken);
+
+  if (cardOrderRes.status !== 201 || !cardOrderRes.data.success) {
+    throw new Error('Failed to place Card order: ' + JSON.stringify(cardOrderRes.data));
+  }
+  const cardOrder = cardOrderRes.data.order;
+  console.log(`✅ 9. Card Order Placed Successfully! Order #${cardOrder.order_no}, Total: ₹${cardOrder.total_paise/100}`);
+
+  const cardConfirmRes = await apiCall('/payments/confirm-card', 'POST', {
+    orderId: cardOrder.id,
+    publicToken: cardOrder.public_token,
+    last4: '4242',
+    cardBrand: 'Visa'
+  }, customerToken);
+
+  if (cardConfirmRes.status !== 200 || !cardConfirmRes.data.success) {
+    throw new Error('Card Confirmation failed: ' + JSON.stringify(cardConfirmRes.data));
+  }
+  console.log(`✅ 10. Card Payment Confirmed via /confirm-card! Status transitioned to "paid"`);
+
   console.log('\n==========================================');
-  console.log('🎉 ALL 9/9 ORDER-TO-PAYMENT FLOW TESTS PASSED!');
+  console.log('🎉 ALL 10/10 ORDER-TO-PAYMENT FLOW TESTS PASSED!');
   console.log('==========================================');
 }
 

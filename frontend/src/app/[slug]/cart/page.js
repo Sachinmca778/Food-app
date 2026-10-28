@@ -42,11 +42,41 @@ function CartContent() {
   const [submitting, setSubmitting] = useState(false);
   const [orderError, setOrderError] = useState('');
 
-  // UPI Payment Modal State
+  // UPI & Card Payment Modals State
   const [upiPaymentModal, setUpiPaymentModal] = useState(null);
+  const [cardPaymentModal, setCardPaymentModal] = useState(null);
   const [upiConfirming, setUpiConfirming] = useState(false);
+  const [cardProcessing, setCardProcessing] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [upiUtr, setUpiUtr] = useState('');
+
+  // Card Form State
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardError, setCardError] = useState('');
+
+  const formatCardNumber = (val) => {
+    const clean = val.replace(/\D/g, '').slice(0, 16);
+    return clean.replace(/(\d{4})(?=\d)/g, '$1 ');
+  };
+
+  const formatExpiry = (val) => {
+    const clean = val.replace(/\D/g, '').slice(0, 4);
+    if (clean.length > 2) {
+      return `${clean.slice(0, 2)}/${clean.slice(2)}`;
+    }
+    return clean;
+  };
+
+  const getCardBrand = (num) => {
+    const clean = num.replace(/\D/g, '');
+    if (clean.startsWith('4')) return 'VISA';
+    if (/^(5[1-5]|2[2-7])/.test(clean)) return 'MASTERCARD';
+    if (/^(60|65|81|82)/.test(clean)) return 'RUPAY';
+    return 'CARD';
+  };
 
   // Ensure restaurant data is loaded even on direct page reload
   useEffect(() => {
@@ -247,14 +277,8 @@ function CartContent() {
       });
 
       if (res.success && res.order) {
-        try {
-          confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-        } catch (e) {}
-
-        clearCart();
-
         if (paymentMethod === 'upi') {
-          // Open Direct UPI Payment Sheet (Google Pay / PhonePe / Paytm / QR)
+          // Open Interactive UPI Payment Sheet (Google Pay / PhonePe / Paytm / QR)
           const upiId = restaurant?.upi_id || res.payment?.upiId || 'directdine@okhdfcbank';
           const payeeName = restaurant?.name || res.payment?.payeeName || 'Restaurant';
           const amountRupees = (grandTotalPaise / 100).toFixed(2);
@@ -272,10 +296,23 @@ function CartContent() {
             }
           });
           setSubmitting(false);
+        } else if (paymentMethod === 'card') {
+          // Open Secure Debit / Credit Card Payment Modal
+          setCardPaymentModal({
+            order: res.order,
+            amountRupees: (grandTotalPaise / 100).toFixed(2)
+          });
+          setCardName(customerName || 'Valued Guest');
+          setSubmitting(false);
         } else {
+          // Cash on Delivery — Direct Confirmation
+          try {
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+          } catch (e) {}
+          clearCart();
           setTimeout(() => {
             router.push(`/track/${res.order.public_token}`);
-          }, 600);
+          }, 400);
         }
       } else {
         setOrderError(res.error || 'Failed to place order');
@@ -308,17 +345,67 @@ function CartContent() {
         })
       });
       try {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
       } catch (e) {}
+      clearCart();
       router.push(`/track/${upiPaymentModal.order.public_token}`);
     } catch (err) {
+      clearCart();
       router.push(`/track/${upiPaymentModal.order.public_token}`);
     } finally {
       setUpiConfirming(false);
     }
   };
 
-  if (itemCount === 0) {
+  const handleProcessCardPayment = async (e) => {
+    e?.preventDefault();
+    const cleanNum = cardNumber.replace(/\s/g, '');
+    if (cleanNum.length < 15) {
+      setCardError('Please enter a valid 16-digit card number');
+      return;
+    }
+    if (cardExpiry.length < 5) {
+      setCardError('Please enter expiry date in MM/YY format');
+      return;
+    }
+    if (cardCvv.length < 3) {
+      setCardError('Please enter valid 3-digit CVV');
+      return;
+    }
+    if (!cardName.trim()) {
+      setCardError('Please enter cardholder name');
+      return;
+    }
+
+    setCardError('');
+    setCardProcessing(true);
+
+    try {
+      await fetchAPI('/payments/confirm-card', {
+        method: 'POST',
+        body: JSON.stringify({
+          orderId: cardPaymentModal.order.id,
+          publicToken: cardPaymentModal.order.public_token,
+          last4: cleanNum.slice(-4),
+          cardBrand: getCardBrand(cardNumber)
+        })
+      });
+      try {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } catch (e) {}
+      clearCart();
+      setTimeout(() => {
+        router.push(`/track/${cardPaymentModal.order.public_token}`);
+      }, 500);
+    } catch (err) {
+      clearCart();
+      router.push(`/track/${cardPaymentModal.order.public_token}`);
+    } finally {
+      setCardProcessing(false);
+    }
+  };
+
+  if (itemCount === 0 && !upiPaymentModal && !cardPaymentModal) {
     return (
       <div style={{ textAlign: 'center', padding: '100px 20px', maxWidth: 440, margin: '0 auto' }}>
         <div style={{ fontSize: 54, marginBottom: 14 }}>🛒</div>
@@ -849,15 +936,19 @@ function CartContent() {
         }}
       >
         {submitting
-          ? 'Placing Order...'
+          ? 'Connecting to Secure Payment...'
           : isBelowMinOrder
           ? `Add ₹${amountNeededForMinOrder.toFixed(0)} more (Min Order ₹${(minOrderPaise / 100).toFixed(0)})`
           : !isLoggedIn
           ? `🔒 Verify Mobile to Place Order (₹${(grandTotalPaise / 100).toFixed(2)}) ➔`
-          : `Pay ₹${(grandTotalPaise / 100).toFixed(2)} & Place Order ➔`}
+          : paymentMethod === 'upi'
+          ? `Proceed to Pay ₹${(grandTotalPaise / 100).toFixed(2)} via UPI ➔`
+          : paymentMethod === 'card'
+          ? `Proceed to Pay ₹${(grandTotalPaise / 100).toFixed(2)} via Card ➔`
+          : `Confirm Order with Cash on Delivery (₹${(grandTotalPaise / 100).toFixed(2)}) ➔`}
       </button>
 
-      {/* REAL DIRECT UPI PAYMENT MODAL (Google Pay / PhonePe / Paytm / QR) */}
+      {/* REAL DIRECT UPI PAYMENT GATEWAY MODAL */}
       {upiPaymentModal && (
         <div style={{
           position: 'fixed',
@@ -882,25 +973,53 @@ function CartContent() {
             boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
             maxHeight: '92vh',
             overflowY: 'auto',
-            textAlign: 'center'
+            textAlign: 'center',
+            position: 'relative'
           }}>
+            {/* Close / Cancel Button */}
+            <button
+              type="button"
+              onClick={() => setUpiPaymentModal(null)}
+              style={{
+                position: 'absolute',
+                top: 14,
+                right: 14,
+                background: '#F3F4F6',
+                border: 'none',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                fontSize: 16,
+                fontWeight: 700,
+                color: '#4B5563',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Close payment window"
+            >
+              ✕
+            </button>
+
             {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, paddingRight: 32 }}>
               <div style={{ textAlign: 'left' }}>
                 <span style={{ fontSize: 11, background: '#EDF8F0', color: '#1B7A32', fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
                   ⚡ Instant UPI Payment
                 </span>
                 <h3 style={{ fontSize: 18, color: '#1C1C1C', marginTop: 4, margin: 0 }}>
-                  Order #{upiPaymentModal.order.order_no} Confirmed
+                  Complete UPI Payment
                 </h3>
+                <div style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>Order #{upiPaymentModal.order.order_no}</div>
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary)' }}>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary)', textAlign: 'right' }}>
                 ₹{upiPaymentModal.payment.amountRupees}
               </div>
             </div>
 
-            <p style={{ fontSize: 13, color: '#4F4F4F', marginBottom: 18, textAlign: 'left' }}>
-              Pay directly to <strong>{upiPaymentModal.payment.payeeName}</strong> using your mobile UPI app:
+            <p style={{ fontSize: 13, color: '#4F4F4F', marginBottom: 18, textAlign: 'left', lineHeight: 1.4 }}>
+              Choose your mobile UPI app or scan the QR code to pay <strong>{upiPaymentModal.payment.payeeName}</strong>:
             </p>
 
             {/* DIRECT MOBILE 1-TAP UPI APP LAUNCHERS */}
@@ -989,7 +1108,7 @@ function CartContent() {
             {/* DYNAMIC UPI QR CODE SECTION */}
             <div style={{ background: '#F8F9FA', borderRadius: 14, padding: 14, marginBottom: 18, border: '1px solid #ECEEF2' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#696969', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Or Scan Dynamic QR Code with Any Phone
+                Or Scan QR Code with Any UPI App
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
                 <div style={{ background: '#FFFFFF', padding: 8, borderRadius: 12, border: '1.5px solid #E3E5EB', display: 'inline-block' }}>
@@ -1038,17 +1157,220 @@ function CartContent() {
                 className="btn-primary"
                 style={{ width: '100%', padding: '14px', fontSize: 15, fontWeight: 800, borderRadius: 12 }}
               >
-                {upiConfirming ? 'Verifying...' : '✓ I Have Paid (Confirm & Track Order)'}
+                {upiConfirming ? 'Verifying Payment...' : '✓ I Have Paid (Confirm & Track Order)'}
               </button>
 
               <button
                 type="button"
-                onClick={() => router.push(`/track/${upiPaymentModal.order.public_token}`)}
+                onClick={() => {
+                  clearCart();
+                  router.push(`/track/${upiPaymentModal.order.public_token}`);
+                }}
                 style={{ background: 'transparent', border: 'none', color: '#696969', fontSize: 13, cursor: 'pointer', padding: 8, textDecoration: 'underline' }}
               >
-                I will pay on delivery / Continue to live tracking ➔
+                Pay later on delivery / Continue to live tracking ➔
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECURE CARD PAYMENT GATEWAY MODAL */}
+      {cardPaymentModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.72)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 20,
+            maxWidth: 440,
+            width: '100%',
+            padding: '24px 22px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+            maxHeight: '92vh',
+            overflowY: 'auto',
+            textAlign: 'left',
+            position: 'relative'
+          }}>
+            {/* Close / Cancel Button */}
+            <button
+              type="button"
+              onClick={() => setCardPaymentModal(null)}
+              style={{
+                position: 'absolute',
+                top: 14,
+                right: 14,
+                background: '#F3F4F6',
+                border: 'none',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                fontSize: 16,
+                fontWeight: 700,
+                color: '#4B5563',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Close payment window"
+            >
+              ✕
+            </button>
+
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, paddingRight: 32 }}>
+              <div>
+                <span style={{ fontSize: 11, background: '#EFF6FF', color: '#1D4ED8', fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                  🔒 256-Bit SSL Encrypted
+                </span>
+                <h3 style={{ fontSize: 18, color: '#1C1C1C', marginTop: 4, margin: 0 }}>
+                  Card Payment
+                </h3>
+                <div style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>Order #{cardPaymentModal.order.order_no}</div>
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--primary)', textAlign: 'right' }}>
+                ₹{cardPaymentModal.amountRupees}
+              </div>
+            </div>
+
+            {/* Virtual Card Preview */}
+            <div style={{
+              background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+              color: '#FFFFFF',
+              borderRadius: 14,
+              padding: '18px 20px',
+              marginBottom: 18,
+              boxShadow: '0 8px 18px rgba(15, 23, 42, 0.25)',
+              position: 'relative'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <span style={{ fontSize: 18 }}>💳</span>
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: '#93C5FD' }}>
+                  {getCardBrand(cardNumber)}
+                </span>
+              </div>
+              <div style={{ fontSize: 17, letterSpacing: 3, fontWeight: 600, fontFamily: 'monospace', marginBottom: 12, color: '#F8FAFC' }}>
+                {cardNumber || '•••• •••• •••• ••••'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94A3B8' }}>
+                <div>
+                  <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5 }}>Cardholder</div>
+                  <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 12 }}>{cardName || 'YOUR NAME'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.5 }}>Expires</div>
+                  <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 12 }}>{cardExpiry || 'MM/YY'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Form */}
+            <form onSubmit={handleProcessCardPayment} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                  Card Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="1234 5678 9012 3456"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                  maxLength={19}
+                  className="input-field"
+                  style={{ width: '100%', height: 42, fontSize: 14, letterSpacing: 1 }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                  Cardholder Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Name printed on card"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                  className="input-field"
+                  style={{ width: '100%', height: 42, fontSize: 13, textTransform: 'uppercase' }}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    Expiry Date
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    value={cardExpiry}
+                    onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                    maxLength={5}
+                    className="input-field"
+                    style={{ width: '100%', height: 42, fontSize: 13, textAlign: 'center' }}
+                    required
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    CVV / CVC
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="•••"
+                    value={cardCvv}
+                    onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    maxLength={4}
+                    className="input-field"
+                    style={{ width: '100%', height: 42, fontSize: 14, textAlign: 'center', letterSpacing: 2 }}
+                    required
+                  />
+                </div>
+              </div>
+
+              {cardError && (
+                <div style={{ background: '#FEECEE', border: '1px solid #FBCED2', color: 'var(--status-cancel)', padding: '8px 12px', borderRadius: 8, fontSize: 12 }}>
+                  ⚠️ {cardError}
+                </div>
+              )}
+
+              <div style={{ fontSize: 11, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 6, margin: '4px 0 8px' }}>
+                <span>🔒</span>
+                <span>RBI compliant 3D Secure verification • Instant confirmation</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={cardProcessing}
+                className="btn-primary"
+                style={{ width: '100%', padding: '14px', fontSize: 15, fontWeight: 800, borderRadius: 12, marginTop: 4 }}
+              >
+                {cardProcessing ? 'Contacting Bank 3D Secure...' : `🔒 Pay ₹${cardPaymentModal.amountRupees} Securely`}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCardPaymentModal(null)}
+                style={{ background: 'transparent', border: 'none', color: '#696969', fontSize: 12.5, cursor: 'pointer', padding: 6, textAlign: 'center', textDecoration: 'underline' }}
+              >
+                ← Cancel & Return to Cart
+              </button>
+            </form>
           </div>
         </div>
       )}

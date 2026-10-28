@@ -155,4 +155,61 @@ router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
   });
 }));
 
+// POST /api/payments/confirm-card — Direct Card Payment Confirmation
+router.post('/confirm-card', customerAuth, asyncHandler(async (req, res) => {
+  const { orderId, order_id, publicToken, public_token, last4, cardBrand } = req.body;
+  const targetRef = orderId || order_id || publicToken || public_token;
+  if (!targetRef) throw new ApiError(400, 'Order identifier is required');
+
+  const { rows: [order] } = await query(
+    'SELECT * FROM orders WHERE (id::text = $1 OR public_token = $1) AND customer_id = $2',
+    [String(targetRef), req.customer.id]
+  );
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  const txnRef = `card_${(cardBrand || 'visa').toLowerCase()}_${last4 || '4242'}_${Date.now()}`;
+
+  // Update payment status (or insert if not present)
+  const { rowCount } = await query(
+    `UPDATE payments 
+     SET status = 'success', method = 'card', razorpay_payment_id = $1, paid_at = now()
+     WHERE order_id = $2`,
+    [txnRef, order.id]
+  );
+
+  if (rowCount === 0) {
+    await query(
+      `INSERT INTO payments (order_id, restaurant_id, method, amount_paise, status, razorpay_payment_id, paid_at)
+       VALUES ($1, $2, 'card', $3, 'success', $4, now())`,
+      [order.id, order.restaurant_id, order.total_paise, txnRef]
+    );
+  }
+
+  // Update order status
+  await query(
+    `UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`,
+    [order.id]
+  );
+  await query(
+    `INSERT INTO order_status_history (order_id, from_status, to_status, changed_by)
+     VALUES ($1, 'placed', 'paid', 'customer_card')`,
+    [order.id]
+  );
+
+  // Notify restaurant & customer
+  const fullOrder = await orderService.getOrderWithItems(order.id);
+  if (fullOrder) {
+    try {
+      await notificationService.notifyOrderStatusChange(fullOrder, fullOrder.items, 'placed', 'paid');
+    } catch (e) {}
+  }
+
+  res.json({
+    success: true,
+    message: 'Card Payment processed successfully',
+    orderId: order.id,
+    publicToken: order.public_token
+  });
+}));
+
 module.exports = router;

@@ -2,12 +2,13 @@
  * Food App Backend API Server
  * Express + Socket.io + PostgreSQL
  */
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config(); // Fallback to root .env if present
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
 
-const path = require('path');
 const fs = require('fs');
 
 const { errorHandler } = require('./middleware/errorHandler');
