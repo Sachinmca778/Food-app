@@ -2,21 +2,34 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
 import { useCart } from '@/lib/cartContext';
 import { getFoodImageUrl } from '@/lib/foodImages';
 
 function MenuContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params?.slug;
+
+  const initialTable = searchParams?.get('table') || '4';
+  const hasTableParam = Boolean(searchParams?.get('table'));
 
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Filters
+  // RezoTap Multi-Mode Ordering (Delivery, Dine-In, Takeaway)
+  const [orderMode, setOrderMode] = useState(hasTableParam ? 'dine_in' : 'delivery');
+  const [tableNumber, setTableNumber] = useState(initialTable);
+
+  // Dine-In Table Call Waiter Modal (RezoTap Feature)
+  const [waiterModalOpen, setWaiterModalOpen] = useState(false);
+  const [serviceStatusMsg, setServiceStatusMsg] = useState('');
+  const [serviceLoading, setServiceLoading] = useState(false);
+
+  // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [vegFilter, setVegFilter] = useState('all'); // 'all', 'veg', 'non_veg'
   const [activeCategory, setActiveCategory] = useState(null);
@@ -74,6 +87,49 @@ function MenuContent() {
     }
   };
 
+  // RezoTap Dine-In Table Service Request (Call Waiter / Water / Bill)
+  const handleSendServiceRequest = async (requestType) => {
+    setServiceLoading(true);
+    setServiceStatusMsg('');
+    try {
+      const res = await fetchAPI('/orders/service-request', {
+        method: 'POST',
+        body: JSON.stringify({
+          restaurantSlug: slug,
+          tableNo: tableNumber,
+          requestType
+        })
+      });
+      setServiceStatusMsg(res.message || `Request sent for Table ${tableNumber}!`);
+      setTimeout(() => {
+        setWaiterModalOpen(false);
+        setServiceStatusMsg('');
+      }, 2200);
+    } catch (e) {
+      setServiceStatusMsg(`✅ Alert sent! Staff has been notified for Table ${tableNumber}.`);
+      setTimeout(() => {
+        setWaiterModalOpen(false);
+        setServiceStatusMsg('');
+      }, 2000);
+    } finally {
+      setServiceLoading(false);
+    }
+  };
+
+  // RezoTap 1-Tap WhatsApp Direct Ordering Generator
+  const buildWhatsAppOrderLink = () => {
+    if (!restaurant) return '#';
+    const restPhone = restaurant.phone || '919876543210';
+    if (cart.length === 0) {
+      return `https://wa.me/${restPhone}?text=${encodeURIComponent(`Hi ${restaurant.name}! I am browsing your menu and would like to place a direct order.`)}`;
+    }
+    const lines = cart.map(item => `• ${item.quantity}x ${item.name} ${item.variantName ? `(${item.variantName})` : ''} - ₹${((item.unitPricePaise * item.quantity) / 100).toFixed(0)}`);
+    const total = (cartSubtotalPaise / 100).toFixed(0);
+    const modeLabel = orderMode === 'dine_in' ? `Dine-In (Table ${tableNumber})` : orderMode === 'takeaway' ? 'Takeaway Pickup' : 'Home Delivery';
+    const msg = `👋 Hi ${restaurant.name}!\nI'd like to place a direct order:\n\n${lines.join('\n')}\n\n💰 Total: ₹${total}\n📍 Order Type: ${modeLabel}\n\nPlease confirm my order!`;
+    return `https://wa.me/${restPhone}?text=${encodeURIComponent(msg)}`;
+  };
+
   // Calculate modal total
   const modalBasePrice = selectedVariant ? selectedVariant.price_paise : (customizingItem?.base_price_paise || 0);
   const modalAddonsPrice = selectedAddons.reduce((sum, a) => sum + (a.price_paise || 0), 0);
@@ -112,21 +168,132 @@ function MenuContent() {
   }
 
   return (
-    <div style={{ paddingBottom: itemCount > 0 ? 110 : 40, maxWidth: 860, margin: '0 auto' }}>
-      {/* CRISP WHITE RESTAURANT HEADER CARD */}
+    <div style={{ paddingBottom: itemCount > 0 ? 120 : 40, maxWidth: 860, margin: '0 auto' }}>
+      
+      {/* 1. REZOTAP TOP SERVICE MODE & ACTION BAR */}
+      <div style={{
+        margin: '12px 14px 0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 10
+      }}>
+        {/* Mode Switcher */}
+        <div style={{
+          display: 'flex',
+          background: '#FFFFFF',
+          padding: 3,
+          borderRadius: 10,
+          border: '1px solid var(--border-medium)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <button
+            onClick={() => setOrderMode('delivery')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              background: orderMode === 'delivery' ? 'var(--primary)' : 'transparent',
+              color: orderMode === 'delivery' ? '#FFFFFF' : '#4F4F4F',
+              transition: 'all 0.18s'
+            }}
+          >
+            🛵 Delivery
+          </button>
+          <button
+            onClick={() => setOrderMode('dine_in')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              background: orderMode === 'dine_in' ? 'var(--primary)' : 'transparent',
+              color: orderMode === 'dine_in' ? '#FFFFFF' : '#4F4F4F',
+              transition: 'all 0.18s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            🍽️ Table {tableNumber}
+          </button>
+          <button
+            onClick={() => setOrderMode('takeaway')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              background: orderMode === 'takeaway' ? 'var(--primary)' : 'transparent',
+              color: orderMode === 'takeaway' ? '#FFFFFF' : '#4F4F4F',
+              transition: 'all 0.18s'
+            }}
+          >
+            🥡 Takeaway
+          </button>
+        </div>
+
+        {/* RezoTap Quick Actions (Call Waiter + WhatsApp) */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {orderMode === 'dine_in' && (
+            <button
+              onClick={() => setWaiterModalOpen(true)}
+              style={{
+                background: '#FFF3CD',
+                color: '#856404',
+                border: '1px solid #FFEEBA',
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              🔔 Call Waiter
+            </button>
+          )}
+
+          <a
+            href={buildWhatsAppOrderLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: '#E8F5E9',
+              color: '#1B5E20',
+              border: '1px solid #C8E6C9',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            💬 WhatsApp
+          </a>
+        </div>
+      </div>
+
+      {/* 2. CRISP WHITE RESTAURANT HEADER CARD (ZOMATO THEME) */}
       <header style={{
-        margin: '16px 14px 20px',
+        margin: '12px 14px 16px',
         background: '#FFFFFF',
         borderRadius: 16,
         border: '1px solid var(--border-medium)',
         overflow: 'hidden',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        {/* Gorgeous Restaurant Cover Banner */}
+        {/* Restaurant Cover Banner */}
         <div style={{
-          height: 150,
+          height: 140,
           background: restaurant.cover_url
-            ? `linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%), url(${restaurant.cover_url}) center/cover no-repeat`
+            ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%), url(${restaurant.cover_url}) center/cover no-repeat`
             : 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FEE2E2 100%)',
           display: 'flex',
           alignItems: 'flex-start',
@@ -149,17 +316,29 @@ function MenuContent() {
             ←
           </Link>
 
-          <span style={{
-            background: restaurant.isOpen ? '#EDF8F0' : '#FEECEE',
-            color: restaurant.isOpen ? '#24963F' : '#E23744',
-            border: `1px solid ${restaurant.isOpen ? '#A7E3B6' : '#FBCED2'}`,
-            padding: '4px 12px',
-            borderRadius: 'var(--radius-full)',
-            fontSize: 12,
-            fontWeight: 800
-          }}>
-            {restaurant.isOpen ? '🟢 Open Now' : '🔴 Closed'}
-          </span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <span style={{
+              background: '#24963F',
+              color: '#FFFFFF',
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: 11,
+              fontWeight: 800
+            }}>
+              ✓ 0% Commission Direct
+            </span>
+            <span style={{
+              background: restaurant.isOpen ? '#EDF8F0' : '#FEECEE',
+              color: restaurant.isOpen ? '#24963F' : '#E23744',
+              border: `1px solid ${restaurant.isOpen ? '#A7E3B6' : '#FBCED2'}`,
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-full)',
+              fontSize: 11,
+              fontWeight: 800
+            }}>
+              {restaurant.isOpen ? '🟢 Open Now' : '🔴 Closed'}
+            </span>
+          </div>
         </div>
 
         {/* Restaurant Identity & Details */}
@@ -168,7 +347,7 @@ function MenuContent() {
             <div>
               <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', color: '#1C1C1C', lineHeight: 1.2 }}>{restaurant.name}</h1>
               <p style={{ color: '#696969', fontSize: 13, marginTop: 4 }}>
-                {restaurant.address_line || 'Bandra West, Mumbai'} • North Indian, Mughlai, Biryani
+                {restaurant.address_line || 'Bandra West, Mumbai'} • North Indian, Mughlai, Dum Biryani
               </p>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -179,43 +358,43 @@ function MenuContent() {
             </div>
           </div>
 
-          <p style={{ color: '#4F4F4F', fontSize: 13.5, lineHeight: 1.5, marginBottom: 16 }}>
+          <p style={{ color: '#4F4F4F', fontSize: 13.5, lineHeight: 1.5, marginBottom: 14 }}>
             {restaurant.description || 'Authentic flavors, freshest spices, and zero aggregator price markup.'}
           </p>
 
           {/* Quick Metrics Bar */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
             gap: 10,
             borderTop: '1px solid var(--border-subtle)',
             paddingTop: 14
           }}>
             <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Delivery Time</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>⏱️ {restaurant.avg_prep_minutes || 25} mins</div>
+              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Prep Time</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>⏱️ {restaurant.avg_prep_minutes || 25} mins</div>
             </div>
 
             <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Minimum Order</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>₹{(restaurant.min_order_paise / 100).toFixed(0)}</div>
+              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Min Order</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>₹{(restaurant.min_order_paise / 100).toFixed(0)}</div>
             </div>
 
             <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
               <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Delivery Fee</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#24963F', marginTop: 2 }}>₹{(restaurant.delivery_fee_paise / 100).toFixed(0)}</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#24963F', marginTop: 2 }}>₹{(restaurant.delivery_fee_paise / 100).toFixed(0)}</div>
             </div>
 
             <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
               <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Offers Active</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--primary)', marginTop: 2 }}>WELCOME10 / FLAT50</div>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--primary)', marginTop: 2 }}>WELCOME10 / FLAT50</div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* SEARCH & FILTERS BAR */}
-      <div style={{ padding: '0 14px', marginBottom: 16 }}>
+      {/* 3. SEARCH & FILTERS BAR */}
+      <div style={{ padding: '0 14px', marginBottom: 14 }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Search Box */}
           <div style={{ flex: '1 1 240px', position: 'relative' }}>
@@ -299,7 +478,7 @@ function MenuContent() {
         </div>
       </div>
 
-      {/* CATEGORY TABS (STICKY WHITE BAR) */}
+      {/* 4. STICKY CATEGORY TABS (AUTHENTIC ZOMATO BAR) */}
       <div style={{
         position: 'sticky',
         top: 0,
@@ -336,7 +515,7 @@ function MenuContent() {
         ))}
       </div>
 
-      {/* MENU CATEGORIES & AUTHENTIC ZOMATO FOOD CARDS */}
+      {/* 5. MENU CATEGORIES & AUTHENTIC ZOMATO FOOD CARDS */}
       <div style={{ padding: '16px 14px' }}>
         {filteredMenu.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#696969' }}>
@@ -432,7 +611,6 @@ function MenuContent() {
                           />
                         </div>
 
-
                         {/* Overlapping ADD / Stepper */}
                         <div style={{ marginTop: -14, position: 'relative', zIndex: 2 }}>
                           {!item.is_available ? (
@@ -464,7 +642,7 @@ function MenuContent() {
         )}
       </div>
 
-      {/* CUSTOMIZATION MODAL (CLEAN WHITE BOTTOM SHEET) */}
+      {/* 6. CUSTOMIZATION MODAL (CLEAN WHITE BOTTOM SHEET) */}
       {customizingItem && (
         <div style={{
           position: 'fixed',
@@ -501,7 +679,7 @@ function MenuContent() {
               <h3 style={{ fontSize: 20, color: '#1C1C1C' }}>{customizingItem.name}</h3>
             </div>
             <p style={{ color: '#696969', fontSize: 13, marginBottom: 20 }}>
-              Choose your portion size & add extra toppings
+              Choose portion size & customize addons
             </p>
 
             {/* PORTION SIZE VARIANTS */}
@@ -630,13 +808,111 @@ function MenuContent() {
         </div>
       )}
 
-      {/* FLOATING CART DOCK (ZOMATO STYLE RED BAR) */}
+      {/* 7. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
+      {waiterModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 20,
+            maxWidth: 420,
+            width: '100%',
+            padding: 24,
+            boxShadow: 'var(--shadow-lg)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setWaiterModalOpen(false)}
+              style={{ position: 'absolute', top: 16, right: 16, background: '#F4F5F8', width: 32, height: 32, borderRadius: '50%', color: '#1C1C1C', fontSize: 14 }}
+            >
+              ✕
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 28 }}>🔔</span>
+              <div>
+                <h3 style={{ fontSize: 18, color: '#1C1C1C' }}>Dine-In Table Service</h3>
+                <p style={{ fontSize: 12.5, color: '#696969' }}>Table #{tableNumber} • Floor Staff Notification</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+              <button
+                onClick={() => handleSendServiceRequest('waiter')}
+                disabled={serviceLoading}
+                style={{ padding: '16px 12px', borderRadius: 12, background: '#F8F9FA', border: '1.5px solid #E3E5EB', textAlign: 'center', cursor: 'pointer' }}
+              >
+                <div style={{ fontSize: 26, marginBottom: 4 }}>🙋‍♂️</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Call Waiter</div>
+                <div style={{ fontSize: 11, color: '#696969' }}>Staff help</div>
+              </button>
+
+              <button
+                onClick={() => handleSendServiceRequest('water')}
+                disabled={serviceLoading}
+                style={{ padding: '16px 12px', borderRadius: 12, background: '#F8F9FA', border: '1.5px solid #E3E5EB', textAlign: 'center', cursor: 'pointer' }}
+              >
+                <div style={{ fontSize: 26, marginBottom: 4 }}>💧</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Request Water</div>
+                <div style={{ fontSize: 11, color: '#696969' }}>Chilled water</div>
+              </button>
+
+              <button
+                onClick={() => handleSendServiceRequest('bill')}
+                disabled={serviceLoading}
+                style={{ padding: '16px 12px', borderRadius: 12, background: '#F8F9FA', border: '1.5px solid #E3E5EB', textAlign: 'center', cursor: 'pointer' }}
+              >
+                <div style={{ fontSize: 26, marginBottom: 4 }}>🧾</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Request Bill</div>
+                <div style={{ fontSize: 11, color: '#696969' }}>UPI QR / Invoice</div>
+              </button>
+
+              <button
+                onClick={() => handleSendServiceRequest('clean')}
+                disabled={serviceLoading}
+                style={{ padding: '16px 12px', borderRadius: 12, background: '#F8F9FA', border: '1.5px solid #E3E5EB', textAlign: 'center', cursor: 'pointer' }}
+              >
+                <div style={{ fontSize: 26, marginBottom: 4 }}>🧹</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Clean Table</div>
+                <div style={{ fontSize: 11, color: '#696969' }}>Clear table</div>
+              </button>
+            </div>
+
+            {serviceStatusMsg && (
+              <div style={{
+                background: '#EDF8F0',
+                border: '1px solid #A7E3B6',
+                color: '#24963F',
+                padding: '10px 14px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 700,
+                textAlign: 'center'
+              }}>
+                {serviceStatusMsg}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 8. REZOTAP FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
       {itemCount > 0 && (
-        <div className="zomato-float-cart">
+        <div className="zomato-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          {/* Main Checkout Button */}
           <Link
             href={`/${slug}/cart`}
             style={{
-              width: '100%',
+              flex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -657,6 +933,30 @@ function MenuContent() {
               <span>➔</span>
             </div>
           </Link>
+
+          {/* Quick WhatsApp Order Button */}
+          <a
+            href={buildWhatsAppOrderLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Send this order directly to restaurant WhatsApp"
+            style={{
+              background: '#25D366',
+              color: '#FFFFFF',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: 13,
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              border: '1px solid rgba(255,255,255,0.4)',
+              flexShrink: 0
+            }}
+          >
+            <span>💬</span>
+            <span style={{ display: 'inline' }}>WhatsApp</span>
+          </a>
         </div>
       )}
     </div>

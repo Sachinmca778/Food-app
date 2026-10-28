@@ -8,6 +8,17 @@ const router = express.Router();
 const { query } = require('../db/pool');
 const { asyncHandler, ApiError } = require('../middleware/errorHandler');
 
+// GET /api/restaurant — List all active restaurants (RezoTap Explore Directory)
+router.get('/', asyncHandler(async (req, res) => {
+  const { rows: restaurants } = await query(
+    `SELECT id, slug, name, logo_url, cover_url, description, phone,
+            address_line, city, pincode, delivery_fee_paise, free_delivery_above_paise,
+            min_order_paise, avg_prep_minutes, is_open, is_active, upi_id
+     FROM restaurants WHERE is_active = true ORDER BY name ASC`
+  );
+  res.json({ success: true, restaurants });
+}));
+
 // GET /api/restaurant/:slug — Restaurant public info
 router.get('/:slug', asyncHandler(async (req, res) => {
   const { rows: [restaurant] } = await query(

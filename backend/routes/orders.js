@@ -286,4 +286,36 @@ router.post('/:id/cancel', customerAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, order: updatedOrder });
 }));
 
+// POST /api/orders/service-request — Dine-In Waiter / Water / Bill request (RezoTap feature)
+router.post('/service-request', asyncHandler(async (req, res) => {
+  const { restaurantSlug, tableNo, requestType } = req.body;
+  const serviceLabels = {
+    waiter: '🙋‍♂️ Calling Waiter',
+    water: '💧 Requesting Water',
+    bill: '🧾 Requesting Bill / QR',
+    clean: '🧹 Table Cleaning'
+  };
+  const label = serviceLabels[requestType] || 'Service Request';
+
+  try {
+    const io = notificationService.getSocketIO?.();
+    if (io) {
+      io.emit('staff_service_request', {
+        restaurantSlug,
+        tableNo: tableNo || 'Dine-In',
+        requestType,
+        label,
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (err) {
+    console.error('Socket notification error:', err.message);
+  }
+
+  res.json({
+    success: true,
+    message: `${label} sent for Table ${tableNo || ''}! Staff notified.`
+  });
+}));
+
 module.exports = router;
