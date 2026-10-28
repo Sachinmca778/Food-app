@@ -66,6 +66,8 @@ export default function RestaurantDashboardPage() {
   // Table QR Generator & Marketing Kit State
   const [qrTableNumber, setQrTableNumber] = useState('1');
   const [copiedTableLink, setCopiedTableLink] = useState(false);
+  const [kotOrder, setKotOrder] = useState(null);
+  const [batchStandeeMode, setBatchStandeeMode] = useState(false);
 
   // Check login token
   useEffect(() => {
@@ -825,14 +827,49 @@ export default function RestaurantDashboardPage() {
                         </div>
 
                         {/* Customer & Address */}
-                        <div style={{ fontSize: 13, color: '#4F4F4F', marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, color: '#4F4F4F', marginBottom: 10 }}>
                           <div>👤 <strong style={{ color: '#1C1C1C' }}>{order.customer_name || 'Customer'}</strong> • 📱 {order.delivery_phone || order.customer_phone}</div>
                           {order.delivery_address && (
                             <div style={{ marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#696969' }}>
-                              📍 {order.delivery_address.address_line}
+                              📍 {typeof order.delivery_address === 'string' ? order.delivery_address : order.delivery_address.address_line}
                             </div>
                           )}
                         </div>
+
+                        {/* Kitchen Order Ticket (KOT) Items Breakdown */}
+                        {order.items && order.items.length > 0 && (
+                          <div style={{ background: '#F8F9FA', borderRadius: 8, padding: '10px 12px', marginBottom: 12, border: '1px solid #ECEEF2' }}>
+                            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#696969', marginBottom: 6, letterSpacing: '0.4px', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>KOT Items ({order.items.reduce((s, it) => s + (it.quantity || 1), 0)})</span>
+                              <span style={{ color: 'var(--primary)', fontWeight: 800 }}>Chef View</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {order.items.map((it, idx) => (
+                                <div key={it.id || idx} style={{ fontSize: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                  <div>
+                                    <span style={{ fontWeight: 800, color: '#1C1C1C', marginRight: 6 }}>{it.quantity}×</span>
+                                    <span style={{ fontWeight: 700, color: '#2B2B2B' }}>{it.item_name}</span>
+                                    {it.variant_name && <span style={{ fontSize: 11.5, color: '#696969', marginLeft: 4 }}>({it.variant_name})</span>}
+                                    {it.addons && Array.isArray(it.addons) && it.addons.length > 0 && (
+                                      <div style={{ fontSize: 11, color: '#696969', marginLeft: 20 }}>
+                                        + {it.addons.map(a => typeof a === 'object' ? a.name : a).join(', ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: '#696969' }}>
+                                    ₹{(((it.line_total_paise || it.unit_price_paise * it.quantity) || 0) / 100).toFixed(0)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            {order.customer_note && (
+                              <div style={{ marginTop: 8, paddingTop: 6, borderTop: '1px dashed #D1D5DB', fontSize: 11.5, color: '#B45309', fontWeight: 700, display: 'flex', gap: 4 }}>
+                                <span>📝</span>
+                                <span>Chef Note: {order.customer_note}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Total & Payment method */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 800, borderTop: '1px solid #F0F1F4', paddingTop: 8, marginBottom: 14 }}>
@@ -919,13 +956,42 @@ export default function RestaurantDashboardPage() {
                           </button>
                         )}
 
-                        <Link
-                          href={`/track/${order.public_token}`}
-                          target="_blank"
-                          style={{ width: '100%', textAlign: 'center', fontSize: 12, color: '#696969', padding: '3px 0' }}
-                        >
-                          View Customer Live Tracker ↗
-                        </Link>
+                        <div style={{ display: 'flex', gap: 6, width: '100%', marginTop: 2 }}>
+                          <button
+                            onClick={() => setKotOrder(order)}
+                            style={{
+                              flex: 1,
+                              padding: '6px 8px',
+                              fontSize: 12,
+                              fontWeight: 800,
+                              background: '#F8F9FA',
+                              color: '#1C1C1C',
+                              border: '1px solid #E3E5EB',
+                              borderRadius: 6,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🖨️ KOT Slip
+                          </button>
+                          <Link
+                            href={`/track/${order.public_token}`}
+                            target="_blank"
+                            style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              fontSize: 12,
+                              color: '#696969',
+                              padding: '6px 8px',
+                              background: '#F8F9FA',
+                              border: '1px solid #E3E5EB',
+                              borderRadius: 6,
+                              fontWeight: 600,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            Tracker ↗
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1233,7 +1299,37 @@ export default function RestaurantDashboardPage() {
                 <p style={{ color: '#696969', fontSize: 13 }}>Download or print branded contactless QR standees for your dining tables and takeaway counter.</p>
               </div>
 
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  onClick={() => setBatchStandeeMode(false)}
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    borderRadius: 8,
+                    background: !batchStandeeMode ? '#1C1C1C' : '#FFFFFF',
+                    color: !batchStandeeMode ? '#FFFFFF' : '#4F4F4F',
+                    border: '1px solid #E3E5EB',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Single Standee
+                </button>
+                <button
+                  onClick={() => setBatchStandeeMode(true)}
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    borderRadius: 8,
+                    background: batchStandeeMode ? 'var(--primary)' : '#FFFFFF',
+                    color: batchStandeeMode ? '#FFFFFF' : '#4F4F4F',
+                    border: '1px solid #E3E5EB',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📑 Batch All 12 Tables
+                </button>
                 <button
                   onClick={() => {
                     if (typeof window !== 'undefined') window.print();
@@ -1241,201 +1337,297 @@ export default function RestaurantDashboardPage() {
                   className="btn-primary"
                   style={{ padding: '9px 18px', fontSize: 13, borderRadius: 8 }}
                 >
-                  🖨️ Print Standee
+                  🖨️ {batchStandeeMode ? 'Print All Standees (1-12)' : 'Print Standee'}
                 </button>
               </div>
             </div>
 
-            {/* Table Number Selector */}
-            <div style={{ background: '#FFFFFF', padding: 18, borderRadius: 14, border: '1px solid #ECEEF2', marginBottom: 20, boxShadow: 'var(--shadow-sm)' }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#1C1C1C', marginBottom: 10 }}>
-                Select Table to Generate QR Standee:
-              </label>
+            {batchStandeeMode ? (
+              /* ================= BATCH ALL TABLES STANDESS ================= */
+              <div>
+                <div className="no-print" style={{ textAlign: 'center', marginBottom: 20, padding: '12px 16px', background: '#EDF8F0', borderRadius: 12, border: '1px solid #BBF7D0', color: '#166534', fontSize: 13, fontWeight: 700 }}>
+                  📄 Print All Standees Kit Ready: High-resolution QR standees for Tables 1 through 12 + Takeaway counter formatted with automatic page-breaks for tent cards.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+                  {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'counter'].map(num => (
+                    <div
+                      key={num}
+                      className="batch-standee-item"
+                      style={{
+                        background: '#FFFFFF',
+                        borderRadius: 20,
+                        border: '3px solid var(--primary)',
+                        boxShadow: 'var(--shadow-sm)',
+                        padding: '24px 20px',
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 12
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--primary)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                          🍽️
+                        </div>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: '#1C1C1C' }}>
+                          {restaurant?.name || 'Spice Garden'}
+                        </div>
+                      </div>
 
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-                {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(num => (
-                  <button
-                    key={num}
-                    onClick={() => setQrTableNumber(num)}
+                      <div style={{
+                        background: 'var(--primary)',
+                        color: '#FFFFFF',
+                        padding: '5px 18px',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 15,
+                        fontWeight: 900,
+                        letterSpacing: '0.04em'
+                      }}>
+                        {num === 'counter' ? '🥡 TAKEAWAY & PICKUP' : `🍽️ TABLE #${num}`}
+                      </div>
+
+                      <div style={{
+                        padding: 10,
+                        background: '#FFFFFF',
+                        borderRadius: 14,
+                        border: '2px solid #ECEEF2'
+                      }}>
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=6&data=${encodeURIComponent(
+                            typeof window !== 'undefined'
+                              ? (num === 'counter'
+                                ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
+                                : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${num}`)
+                              : `http://localhost:3001/spice-garden?table=${num}`
+                          )}`}
+                          alt={`Table ${num} QR`}
+                          style={{ width: 170, height: 170, display: 'block' }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C', marginBottom: 2 }}>
+                          📱 Scan with Any Camera / UPI App
+                        </div>
+                        <div style={{ fontSize: 11.5, color: '#696969' }}>
+                          Browse Menu • Call Waiter • Instant Direct UPI
+                        </div>
+                      </div>
+
+                      <div style={{
+                        borderTop: '1px solid #F0F1F4',
+                        paddingTop: 8,
+                        width: '100%',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: '#828282',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <span>✓ 0% Commission Direct</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: 800 }}>DirectDine OS</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* ================= SINGLE TABLE VIEW ================= */
+              <div>
+                {/* Table Number Selector */}
+                <div style={{ background: '#FFFFFF', padding: 18, borderRadius: 14, border: '1px solid #ECEEF2', marginBottom: 20, boxShadow: 'var(--shadow-sm)' }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#1C1C1C', marginBottom: 10 }}>
+                    Select Table to Generate QR Standee:
+                  </label>
+
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(num => (
+                      <button
+                        key={num}
+                        onClick={() => setQrTableNumber(num)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 8,
+                          fontSize: 13,
+                          fontWeight: 800,
+                          background: qrTableNumber === num ? 'var(--primary)' : '#F8F9FA',
+                          color: qrTableNumber === num ? '#FFFFFF' : '#1C1C1C',
+                          border: `1.5px solid ${qrTableNumber === num ? 'var(--primary)' : '#E3E5EB'}`,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        Table {num}
+                      </button>
+                    ))}
+
+                    <button
+                      onClick={() => setQrTableNumber('counter')}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        background: qrTableNumber === 'counter' ? 'var(--primary)' : '#F8F9FA',
+                        color: qrTableNumber === 'counter' ? '#FFFFFF' : '#1C1C1C',
+                        border: `1.5px solid ${qrTableNumber === 'counter' ? 'var(--primary)' : '#E3E5EB'}`,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🥡 Counter / Takeaway
+                    </button>
+                  </div>
+
+                  {/* Link Bar */}
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        typeof window !== 'undefined'
+                          ? (qrTableNumber === 'counter'
+                            ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
+                            : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
+                          : `http://localhost:3001/spice-garden?table=${qrTableNumber}`
+                      }
+                      style={{
+                        flex: 1,
+                        background: '#F8F9FA',
+                        border: '1px solid #E3E5EB',
+                        borderRadius: 8,
+                        padding: '9px 12px',
+                        fontSize: 13,
+                        color: '#4F4F4F'
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const url = typeof window !== 'undefined'
+                          ? (qrTableNumber === 'counter'
+                            ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
+                            : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
+                          : '';
+                        navigator.clipboard?.writeText(url);
+                        setCopiedTableLink(true);
+                        setTimeout(() => setCopiedTableLink(false), 2000);
+                      }}
+                      className="btn-secondary"
+                      style={{ padding: '9px 16px', fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap' }}
+                    >
+                      {copiedTableLink ? '✓ Copied!' : '📋 Copy Link'}
+                    </button>
+                    <a
+                      href={
+                        typeof window !== 'undefined'
+                          ? (qrTableNumber === 'counter'
+                            ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
+                            : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
+                          : '#'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                      style={{ padding: '9px 16px', fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap' }}
+                    >
+                      🔗 Open Link
+                    </a>
+                  </div>
+                </div>
+
+                {/* Standee Preview Card (Print Ready) */}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div
+                    id="printable-standee"
                     style={{
-                      padding: '8px 16px',
-                      borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 800,
-                      background: qrTableNumber === num ? 'var(--primary)' : '#F8F9FA',
-                      color: qrTableNumber === num ? '#FFFFFF' : '#1C1C1C',
-                      border: `1.5px solid ${qrTableNumber === num ? 'var(--primary)' : '#E3E5EB'}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
+                      width: 340,
+                      background: '#FFFFFF',
+                      borderRadius: 20,
+                      border: '3px solid var(--primary)',
+                      boxShadow: 'var(--shadow-lg)',
+                      padding: '28px 24px',
+                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 14
                     }}
                   >
-                    Table {num}
-                  </button>
-                ))}
+                    {/* Standee Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                        🍽️
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: '#1C1C1C' }}>
+                        {restaurant?.name || 'Spice Garden'}
+                      </div>
+                    </div>
 
-                <button
-                  onClick={() => setQrTableNumber('counter')}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 8,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    background: qrTableNumber === 'counter' ? 'var(--primary)' : '#F8F9FA',
-                    color: qrTableNumber === 'counter' ? '#FFFFFF' : '#1C1C1C',
-                    border: `1.5px solid ${qrTableNumber === 'counter' ? 'var(--primary)' : '#E3E5EB'}`,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🥡 Counter / Takeaway
-                </button>
-              </div>
+                    {/* Table Badge */}
+                    <div style={{
+                      background: 'var(--primary)',
+                      color: '#FFFFFF',
+                      padding: '6px 20px',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: 16,
+                      fontWeight: 900,
+                      letterSpacing: '0.04em',
+                      boxShadow: '0 4px 12px var(--primary-glow)'
+                    }}>
+                      {qrTableNumber === 'counter' ? '🥡 TAKEAWAY & PICKUP' : `🍽️ TABLE #${qrTableNumber}`}
+                    </div>
 
-              {/* Link Bar */}
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <input
-                  type="text"
-                  readOnly
-                  value={
-                    typeof window !== 'undefined'
-                      ? (qrTableNumber === 'counter'
-                        ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
-                        : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
-                      : `http://localhost:3001/spice-garden?table=${qrTableNumber}`
-                  }
-                  style={{
-                    flex: 1,
-                    background: '#F8F9FA',
-                    border: '1px solid #E3E5EB',
-                    borderRadius: 8,
-                    padding: '9px 12px',
-                    fontSize: 13,
-                    color: '#4F4F4F'
-                  }}
-                />
-                <button
-                  onClick={() => {
-                    const url = typeof window !== 'undefined'
-                      ? (qrTableNumber === 'counter'
-                        ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
-                        : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
-                      : '';
-                    navigator.clipboard?.writeText(url);
-                    setCopiedTableLink(true);
-                    setTimeout(() => setCopiedTableLink(false), 2000);
-                  }}
-                  className="btn-secondary"
-                  style={{ padding: '9px 16px', fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap' }}
-                >
-                  {copiedTableLink ? '✓ Copied!' : '📋 Copy Link'}
-                </button>
-                <a
-                  href={
-                    typeof window !== 'undefined'
-                      ? (qrTableNumber === 'counter'
-                        ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
-                        : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
-                      : '#'
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ padding: '9px 16px', fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap' }}
-                >
-                  🔗 Open Link
-                </a>
-              </div>
-            </div>
+                    {/* QR Code Container */}
+                    <div style={{
+                      padding: 12,
+                      background: '#FFFFFF',
+                      borderRadius: 16,
+                      border: '2px solid #ECEEF2',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+                    }}>
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(
+                          typeof window !== 'undefined'
+                            ? (qrTableNumber === 'counter'
+                              ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
+                              : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
+                            : `http://localhost:3001/spice-garden?table=${qrTableNumber}`
+                        )}`}
+                        alt="Table QR Code"
+                        style={{ width: 200, height: 200, display: 'block' }}
+                      />
+                    </div>
 
-            {/* Standee Preview Card (Print Ready) */}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div
-                id="printable-standee"
-                style={{
-                  width: 340,
-                  background: '#FFFFFF',
-                  borderRadius: 20,
-                  border: '3px solid var(--primary)',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '28px 24px',
-                  textAlign: 'center',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 14
-                }}
-              >
-                {/* Standee Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-                    🍽️
+                    {/* Call to Action */}
+                    <div>
+                      <div style={{ fontSize: 14.5, fontWeight: 800, color: '#1C1C1C', marginBottom: 4 }}>
+                        📱 Scan with Any Camera / UPI App
+                      </div>
+                      <div style={{ fontSize: 12, color: '#696969', lineHeight: 1.4 }}>
+                        Browse Digital Menu • Call Waiter • Instant Direct UPI
+                      </div>
+                    </div>
+
+                    {/* DirectDine Footer */}
+                    <div style={{
+                      borderTop: '1px solid #F0F1F4',
+                      paddingTop: 10,
+                      width: '100%',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: '#828282',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span>✓ 0% Commission Direct</span>
+                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>DirectDine OS</span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#1C1C1C' }}>
-                    {restaurant?.name || 'Spice Garden'}
-                  </div>
-                </div>
-
-                {/* Table Badge */}
-                <div style={{
-                  background: 'var(--primary)',
-                  color: '#FFFFFF',
-                  padding: '6px 20px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  letterSpacing: '0.04em',
-                  boxShadow: '0 4px 12px var(--primary-glow)'
-                }}>
-                  {qrTableNumber === 'counter' ? '🥡 TAKEAWAY & PICKUP' : `🍽️ TABLE #${qrTableNumber}`}
-                </div>
-
-                {/* QR Code Container */}
-                <div style={{
-                  padding: 12,
-                  background: '#FFFFFF',
-                  borderRadius: 16,
-                  border: '2px solid #ECEEF2',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
-                }}>
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(
-                      typeof window !== 'undefined'
-                        ? (qrTableNumber === 'counter'
-                          ? `${window.location.origin}/${restaurant?.slug || 'spice-garden'}`
-                          : `${window.location.origin}/${restaurant?.slug || 'spice-garden'}?table=${qrTableNumber}`)
-                        : `http://localhost:3001/spice-garden?table=${qrTableNumber}`
-                    )}`}
-                    alt="Table QR Code"
-                    style={{ width: 200, height: 200, display: 'block' }}
-                  />
-                </div>
-
-                {/* Call to Action */}
-                <div>
-                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#1C1C1C', marginBottom: 4 }}>
-                    📱 Scan with Any Camera / UPI App
-                  </div>
-                  <div style={{ fontSize: 12, color: '#696969', lineHeight: 1.4 }}>
-                    Browse Digital Menu • Call Waiter • Instant Direct UPI
-                  </div>
-                </div>
-
-                {/* DirectDine Footer */}
-                <div style={{
-                  borderTop: '1px solid #F0F1F4',
-                  paddingTop: 10,
-                  width: '100%',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: '#828282',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <span>✓ 0% Commission Direct</span>
-                  <span style={{ color: 'var(--primary)', fontWeight: 800 }}>DirectDine OS</span>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </main>
@@ -1567,6 +1759,133 @@ export default function RestaurantDashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ===================== KITCHEN ORDER TICKET (KOT) MODAL ===================== */}
+      {kotOrder && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: 420,
+            background: '#FFFFFF',
+            borderRadius: 16,
+            padding: 24,
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            {/* 80mm Thermal Receipt */}
+            <div id="printable-kot" style={{
+              background: '#FFFFFF',
+              fontFamily: 'Courier New, Courier, monospace',
+              fontSize: 13,
+              lineHeight: 1.35,
+              color: '#000000',
+              padding: '8px 4px'
+            }}>
+              <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: 8, marginBottom: 8 }}>
+                <div style={{ fontSize: 16, fontWeight: 900 }}>{restaurant?.name || 'Spice Garden'}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2 }}>*** KITCHEN ORDER TICKET (KOT) ***</div>
+                <div style={{ fontSize: 11, marginTop: 2 }}>
+                  {new Date(kotOrder.placed_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+
+              {/* Order Meta Header */}
+              <div style={{ borderBottom: '1px dashed #000', paddingBottom: 6, marginBottom: 8, display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 900 }}>
+                <span>ORDER #{kotOrder.order_no}</span>
+                <span>
+                  {kotOrder.order_type === 'dine_in'
+                    ? `TABLE #${kotOrder.table_no || (typeof kotOrder.delivery_address === 'string' ? kotOrder.delivery_address.match(/\d+/)?.[0] : '4')}`
+                    : kotOrder.order_type === 'pickup'
+                    ? 'TAKEAWAY'
+                    : 'DELIVERY'}
+                </span>
+              </div>
+
+              {/* Customer Info */}
+              <div style={{ fontSize: 11.5, marginBottom: 8, color: '#333' }}>
+                <div>Guest: <strong>{kotOrder.customer_name || 'Customer'}</strong> • {kotOrder.delivery_phone || kotOrder.customer_phone}</div>
+                {kotOrder.delivery_address && kotOrder.order_type === 'delivery' && (
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#555' }}>
+                    Addr: {typeof kotOrder.delivery_address === 'string' ? kotOrder.delivery_address : kotOrder.delivery_address.address_line}
+                  </div>
+                )}
+              </div>
+
+              {/* Items List */}
+              <div style={{ borderBottom: '1px dashed #000', paddingBottom: 8, marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: 11, borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6 }}>
+                  <span>QTY  ITEM NAME</span>
+                  <span>PORTION</span>
+                </div>
+                {kotOrder.items && kotOrder.items.length > 0 ? (
+                  kotOrder.items.map((it, idx) => (
+                    <div key={idx} style={{ marginBottom: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 13 }}>
+                        <span>{it.quantity} × {it.item_name}</span>
+                        <span style={{ fontSize: 11 }}>{it.variant_name || 'Regular'}</span>
+                      </div>
+                      {it.addons && Array.isArray(it.addons) && it.addons.length > 0 && (
+                        <div style={{ fontSize: 11, paddingLeft: 18, color: '#555' }}>
+                          + {it.addons.map(a => typeof a === 'object' ? a.name : a).join(', ')}
+                        </div>
+                      )}
+                      {it.note && (
+                        <div style={{ fontSize: 11, paddingLeft: 18, fontStyle: 'italic', color: '#B45309' }}>
+                          Note: {it.note}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div>No items listed</div>
+                )}
+              </div>
+
+              {/* Special Cooking Note */}
+              {kotOrder.customer_note && (
+                <div style={{ border: '1px solid #000', padding: 6, marginBottom: 8, fontSize: 11.5, fontWeight: 800 }}>
+                  ⚠️ CHEF NOTE: {kotOrder.customer_note}
+                </div>
+              )}
+
+              {/* Ticket Footer */}
+              <div style={{ textAlign: 'center', fontSize: 11, color: '#666', paddingTop: 4 }}>
+                <div>Total Quantity: {kotOrder.items ? kotOrder.items.reduce((s, it) => s + (it.quantity || 1), 0) : 0} items</div>
+                <div style={{ marginTop: 2 }}>DirectDine KDS • Live Direct Order</div>
+              </div>
+            </div>
+
+            {/* Modal Action Buttons */}
+            <div className="no-print" style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') window.print();
+                }}
+                className="btn-primary"
+                style={{ flex: 1, padding: '11px', fontSize: 13, borderRadius: 10 }}
+              >
+                🖨️ Print KOT to Printer
+              </button>
+              <button
+                onClick={() => setKotOrder(null)}
+                className="btn-secondary"
+                style={{ padding: '11px 18px', fontSize: 13, borderRadius: 10 }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

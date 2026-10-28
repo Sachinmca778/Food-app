@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 
@@ -132,7 +132,19 @@ export default function HomePage() {
   };
 
   // Curated Restaurant List
-  const restaurants = [
+  const [dbRestaurants, setDbRestaurants] = useState([]);
+
+  useEffect(() => {
+    fetchAPI('/restaurant')
+      .then(res => {
+        if (res.success && res.restaurants?.length > 0) {
+          setDbRestaurants(res.restaurants);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const fallbackRestaurants = [
     {
       id: 'spice-garden',
       slug: 'spice-garden',
@@ -168,6 +180,24 @@ export default function HomePage() {
       phone: '919876543211'
     }
   ];
+
+  const restaurants = dbRestaurants.length > 0 ? dbRestaurants.map(r => ({
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    tagline: r.description || 'Authentic Handi Dum Biryani & North Indian Delicacies',
+    cover: r.cover_url || (r.slug === 'spice-garden' ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80' : 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80'),
+    rating: '4.8',
+    ratingCount: '150+',
+    prepTime: `${r.avg_prep_minutes || 25} mins`,
+    avgForTwo: '₹350 for two',
+    locality: `${r.address_line || 'Bandra West'}, ${r.city || 'Mumbai'}`,
+    distance: '1.2 km',
+    savingsText: 'Save ₹80 vs Aggregators',
+    isOpen: r.is_open,
+    tags: ['biryani', 'north_indian', 'healthy'],
+    phone: r.phone || '919876543210'
+  })) : fallbackRestaurants;
 
   // Filter restaurants by craving and search query
   const filteredRestaurants = restaurants.filter(r => {

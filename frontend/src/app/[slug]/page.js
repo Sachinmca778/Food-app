@@ -910,7 +910,7 @@ function MenuContent() {
         <div className="zomato-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Main Checkout Button */}
           <Link
-            href={`/${slug}/cart`}
+            href={`/${slug}/cart${orderMode === 'dine_in' && tableNumber ? `?table=${tableNumber}` : ''}`}
             style={{
               flex: 1,
               display: 'flex',

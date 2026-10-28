@@ -137,6 +137,10 @@ router.get('/orders', staffAuth, asyncHandler(async (req, res) => {
       [order.id]
     );
     order.items = items;
+    if (order.order_type === 'dine_in' && !order.table_no) {
+      const match = typeof order.delivery_address === 'string' ? order.delivery_address.match(/Table\s*#?(\d+)/i) : null;
+      if (match) order.table_no = match[1];
+    }
   }
 
   // Count by status

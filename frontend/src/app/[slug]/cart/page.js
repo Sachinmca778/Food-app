@@ -413,7 +413,7 @@ function CartContent() {
         <div style={{ fontSize: 54, marginBottom: 14 }}>🛒</div>
         <h2 style={{ fontSize: 24, marginBottom: 8, color: '#1C1C1C' }}>Your Cart is Empty</h2>
         <p style={{ color: '#696969', marginBottom: 24, fontSize: 14 }}>Explore delicious dishes crafted with authentic spices.</p>
-        <Link href={`/${slug}`} className="btn-primary" style={{ padding: '12px 26px', fontSize: 14, borderRadius: 10 }}>
+        <Link href={`/${slug}${tableNo ? `?table=${tableNo}` : ''}`} className="btn-primary" style={{ padding: '12px 26px', fontSize: 14, borderRadius: 10 }}>
           Browse Full Menu ➔
         </Link>
       </div>
@@ -424,7 +424,7 @@ function CartContent() {
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '18px 14px 80px' }}>
       {/* HEADER BAR */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-        <Link href={`/${slug}`} style={{ background: '#FFFFFF', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, border: '1px solid #E3E5EB', boxShadow: 'var(--shadow-sm)' }}>
+        <Link href={`/${slug}${tableNo ? `?table=${tableNo}` : ''}`} style={{ background: '#FFFFFF', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, border: '1px solid #E3E5EB', boxShadow: 'var(--shadow-sm)' }}>
           ←
         </Link>
         <div>

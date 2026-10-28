@@ -371,3 +371,59 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
 }
+
+/* Print Media Rules for Table QR Standees, Kitchen Order Tickets (KOT) & Customer Invoices */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide navigation, carts, action buttons, modals backdrop outside print container */
+  header, nav, footer, .zomato-float-cart, .no-print {
+    display: none !important;
+  }
+
+  /* Standee Print Styling */
+  #printable-standee {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin: 30px auto !important;
+    box-shadow: none !important;
+    border: 3px solid #E23744 !important;
+  }
+
+  .batch-standee-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: always;
+    break-after: page;
+    margin: 40px auto !important;
+  }
+
+  /* Thermal KOT (80mm Kitchen Receipt) Print Styling */
+  #printable-kot {
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    box-shadow: none !important;
+    border: 1px solid #1C1C1C !important;
+  }
+
+  /* Customer Bill Receipt Print Styling */
+  #printable-bill {
+    width: 100% !important;
+    max-width: 520px !important;
+    margin: 20px auto !important;
+    box-shadow: none !important;
+    border: 1px solid #E3E5EB !important;
+  }
+}

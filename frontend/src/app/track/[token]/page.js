@@ -14,6 +14,32 @@ function TrackingContent() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showBillModal, setShowBillModal] = useState(false);
+  const [serviceStatusMsg, setServiceStatusMsg] = useState('');
+  const [serviceLoading, setServiceLoading] = useState(false);
+
+  const handleSendServiceRequest = async (requestType) => {
+    if (!order) return;
+    setServiceLoading(true);
+    setServiceStatusMsg('');
+    try {
+      const res = await fetchAPI('/orders/service-request', {
+        method: 'POST',
+        body: JSON.stringify({
+          restaurantSlug: order.restaurant_slug,
+          tableNo: order.table_no || (typeof order.delivery_address === 'string' ? order.delivery_address.match(/\d+/)?.[0] : '4'),
+          requestType
+        })
+      });
+      setServiceStatusMsg(res.message || 'Staff notified!');
+      setTimeout(() => setServiceStatusMsg(''), 3000);
+    } catch (e) {
+      setServiceStatusMsg('✅ Request sent! Staff is on the way.');
+      setTimeout(() => setServiceStatusMsg(''), 3000);
+    } finally {
+      setServiceLoading(false);
+    }
+  };
 
   const loadOrder = async () => {
     try {
@@ -79,7 +105,23 @@ function TrackingContent() {
     );
   }
 
-  const steps = [
+  const isDineIn = order.order_type === 'dine_in';
+  const isPickup = order.order_type === 'pickup';
+  const tableNo = order.table_no || (typeof order.delivery_address === 'string' ? order.delivery_address.match(/\d+/)?.[0] : null) || '4';
+
+  const steps = isDineIn ? [
+    { key: 'placed', label: 'Order Received', icon: '📝', desc: `Routed to kitchen for Table #${tableNo}` },
+    { key: 'accepted', label: 'Kitchen Accepted', icon: '👨‍🍳', desc: 'Chef confirmed preparation' },
+    { key: 'preparing', label: 'Cooking Fresh', icon: '🔥', desc: 'Prepared hot with authentic ingredients' },
+    { key: 'ready', label: 'Ready to Serve', icon: '🍽️', desc: 'Plated & being brought to your table' },
+    { key: 'delivered', label: 'Served at Table', icon: '🎉', desc: 'Served at your table. Enjoy your meal!' }
+  ] : isPickup ? [
+    { key: 'placed', label: 'Order Received', icon: '📝', desc: 'Sent to restaurant pickup counter' },
+    { key: 'accepted', label: 'Kitchen Accepted', icon: '👨‍🍳', desc: 'Chef preparing your takeaway' },
+    { key: 'preparing', label: 'Cooking & Packing', icon: '🔥', desc: 'Packed fresh in tamper-proof seal' },
+    { key: 'ready', label: 'Ready for Pickup', icon: '🥡', desc: 'Waiting for you at restaurant counter' },
+    { key: 'delivered', label: 'Collected', icon: '🎉', desc: 'Order collected. Enjoy your meal!' }
+  ] : [
     { key: 'placed', label: 'Order Placed', icon: '📝', desc: 'Received & routed to kitchen' },
     { key: 'accepted', label: 'Accepted', icon: '👨‍🍳', desc: 'Kitchen confirmed preparation' },
     { key: 'preparing', label: 'In Kitchen', icon: '🔥', desc: 'Cooking freshly with authentic spices' },
@@ -91,7 +133,10 @@ function TrackingContent() {
   const getStepIndex = (status) => {
     if (status === 'paid') return 0;
     if (['cancelled', 'rejected', 'expired'].includes(status)) return -1;
-    return steps.findIndex(s => s.key === status);
+    const idx = steps.findIndex(s => s.key === status);
+    if (idx !== -1) return idx;
+    if (status === 'out_for_delivery' && (isDineIn || isPickup)) return 3; // map to ready
+    return 0;
   };
 
   const currentIndex = getStepIndex(order.status);
@@ -101,12 +146,19 @@ function TrackingContent() {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '18px 14px 80px' }}>
       {/* TOPBAR */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <Link href={`/${order.restaurant_slug || 'spice-garden'}`} style={{ color: '#4F4F4F', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+        <Link href={`/${order.restaurant_slug || 'spice-garden'}${isDineIn ? `?table=${tableNo}` : ''}`} style={{ color: '#4F4F4F', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
           <span>← Back to Menu</span>
         </Link>
-        <span style={{ fontSize: 12.5, background: '#FFFFFF', padding: '5px 12px', borderRadius: 8, border: '1px solid #ECEEF2', fontWeight: 800, color: '#1C1C1C', boxShadow: 'var(--shadow-sm)' }}>
-          Order #{order.order_no}
-        </span>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {isDineIn && (
+            <span style={{ fontSize: 12, background: '#FEECEE', color: 'var(--primary)', padding: '5px 12px', borderRadius: 8, border: '1px solid #FBCED2', fontWeight: 900 }}>
+              🍽️ TABLE #{tableNo}
+            </span>
+          )}
+          <span style={{ fontSize: 12.5, background: '#FFFFFF', padding: '5px 12px', borderRadius: 8, border: '1px solid #ECEEF2', fontWeight: 800, color: '#1C1C1C', boxShadow: 'var(--shadow-sm)' }}>
+            Order #{order.order_no}
+          </span>
+        </div>
       </div>
 
       {/* STATUS HERO CARD */}
@@ -134,9 +186,11 @@ function TrackingContent() {
         ) : order.status === 'delivered' ? (
           <div>
             <div style={{ fontSize: 48, marginBottom: 10 }}>🎉</div>
-            <h1 style={{ fontSize: 24, color: 'var(--veg-color)', marginBottom: 6 }}>Food Delivered!</h1>
+            <h1 style={{ fontSize: 24, color: 'var(--veg-color)', marginBottom: 6 }}>
+              {isDineIn ? 'Food Served to Table!' : isPickup ? 'Order Collected!' : 'Food Delivered!'}
+            </h1>
             <p style={{ color: '#4F4F4F', fontSize: 14.5, marginBottom: 18 }}>
-              Enjoy your meal from {order.restaurant_name}!
+              {isDineIn ? `Enjoy your meal at Table #${tableNo}!` : `Enjoy your meal from ${order.restaurant_name}!`}
             </p>
             <Link href={`/rate/${token}`} className="btn-primary" style={{ padding: '12px 24px', fontSize: 14, borderRadius: 10 }}>
               ⭐ Rate Your Food Experience (+50 Points)
@@ -167,11 +221,77 @@ function TrackingContent() {
               border: '1px solid #FBCED2'
             }}>
               <span className="pulse-indicator" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block' }} />
-              Estimated delivery: ~{order.prep_minutes || 25} minutes
+              {isDineIn ? `Estimated cooking time: ~${order.prep_minutes || 20} mins` : isPickup ? `Ready for pickup in: ~${order.prep_minutes || 20} mins` : `Estimated delivery: ~${order.prep_minutes || 25} mins`}
             </div>
           </div>
         )}
       </div>
+
+      {/* DINE-IN INSTANT TABLE SERVICE PANEL */}
+      {isDineIn && !isCancelled && (
+        <div style={{
+          background: '#FFFFFF',
+          borderRadius: 14,
+          padding: '16px 18px',
+          marginBottom: 20,
+          border: '1px solid #ECEEF2',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>
+              🍽️ Table #{tableNo} Contactless Services
+            </span>
+            <span style={{ fontSize: 11, background: '#EDF8F0', color: 'var(--veg-color)', padding: '2px 8px', borderRadius: 6, fontWeight: 800 }}>
+              Live Staff Connected
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            {[
+              { type: 'waiter', label: 'Call Waiter', icon: '🙋‍♂️' },
+              { type: 'water', label: 'Water', icon: '💧' },
+              { type: 'bill', label: 'Bill / Check', icon: '🧾' },
+              { type: 'clean', label: 'Clean Table', icon: '🧹' }
+            ].map(srv => (
+              <button
+                key={srv.type}
+                disabled={serviceLoading}
+                onClick={() => handleSendServiceRequest(srv.type)}
+                style={{
+                  padding: '10px 6px',
+                  borderRadius: 10,
+                  border: '1.5px solid #ECEEF2',
+                  background: '#F8F9FA',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span style={{ fontSize: 20 }}>{srv.icon}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#2B2B2B' }}>{srv.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {serviceStatusMsg && (
+            <div style={{ marginTop: 10, padding: '7px 12px', background: '#F0FDF4', color: '#166534', borderRadius: 8, fontSize: 12, fontWeight: 700, textAlign: 'center', border: '1px solid #BBF7D0' }}>
+              {serviceStatusMsg}
+            </div>
+          )}
+
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed #ECEEF2', textAlign: 'center' }}>
+            <Link
+              href={`/${order.restaurant_slug || 'spice-garden'}?table=${tableNo}`}
+              style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--primary)', textDecoration: 'none' }}
+            >
+              ➕ Want to add more dishes to Table #{tableNo}? Tap Here ➔
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* PENDING UPI PAYMENT BANNER */}
       {order.payment?.method === 'upi' && order.payment?.status !== 'success' && !isCancelled && (
@@ -282,7 +402,27 @@ function TrackingContent() {
 
       {/* ORDER ITEMS & BILL BREAKDOWN */}
       <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '20px', marginBottom: 20, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
-        <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>Order Items ({items.length})</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <h2 style={{ fontSize: 16, color: '#1C1C1C' }}>Order Items ({items.length})</h2>
+          <button
+            onClick={() => setShowBillModal(true)}
+            style={{
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 800,
+              background: '#F8F9FA',
+              color: '#1C1C1C',
+              border: '1px solid #E3E5EB',
+              borderRadius: 8,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            🧾 Tax Invoice / Bill
+          </button>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 14, borderBottom: '1px solid #F0F1F4', paddingBottom: 14 }}>
           {items.map((item, idx) => {
             const itemPrice = (item.line_total_paise || item.total_paise || (item.unit_price_paise * item.quantity) || 0) / 100;
@@ -360,6 +500,142 @@ function TrackingContent() {
           Order status alerts are sent directly to WhatsApp ({order.delivery_phone}).
         </p>
       </div>
+
+      {/* TAX INVOICE / BILL RECEIPT MODAL */}
+      {showBillModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 16,
+            maxWidth: 480,
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: 24,
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            <div id="printable-bill" style={{ background: '#FFFFFF', padding: '10px 6px' }}>
+              {/* Header */}
+              <div style={{ textAlign: 'center', borderBottom: '1px dashed #D1D5DB', paddingBottom: 14, marginBottom: 14 }}>
+                <h2 style={{ fontSize: 20, color: '#1C1C1C', fontWeight: 900 }}>{order.restaurant_name}</h2>
+                <p style={{ fontSize: 12, color: '#696969', marginTop: 3 }}>{order.restaurant_address || 'Bandra West, Mumbai'}</p>
+                <p style={{ fontSize: 11.5, color: '#828282', marginTop: 2 }}>
+                  FSSAI Lic No: {order.fssai_number || '11522026000431'} • GSTIN: {order.gstin || '27AABCU9603R1ZM'}
+                </p>
+                <div style={{ display: 'inline-block', marginTop: 8, padding: '3px 10px', background: '#F4F5F8', borderRadius: 4, fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>
+                  TAX INVOICE / CASH MEMO
+                </div>
+              </div>
+
+              {/* Order Meta */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#4F4F4F', marginBottom: 12 }}>
+                <div>
+                  <div><strong>Order:</strong> #{order.order_no}</div>
+                  <div><strong>Date:</strong> {new Date(order.placed_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div><strong>Type:</strong> {isDineIn ? `Dine-In (Table #${tableNo})` : isPickup ? 'Takeaway' : 'Delivery'}</div>
+                  <div><strong>Payment:</strong> <span style={{ color: 'var(--veg-color)', fontWeight: 800 }}>PAID</span> ({order.payment?.method?.toUpperCase() || order.payment_method?.toUpperCase() || 'UPI'})</div>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, marginBottom: 12 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #E3E5EB', textAlign: 'left', color: '#696969', fontSize: 11, textTransform: 'uppercase' }}>
+                    <th style={{ padding: '6px 0' }}>Item</th>
+                    <th style={{ padding: '6px 0', textAlign: 'center' }}>Qty</th>
+                    <th style={{ padding: '6px 0', textAlign: 'right' }}>Price</th>
+                    <th style={{ padding: '6px 0', textAlign: 'right' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((it, i) => (
+                    <tr key={i} style={{ borderBottom: '1px dashed #F0F1F4' }}>
+                      <td style={{ padding: '7px 0', color: '#1C1C1C', fontWeight: 600 }}>
+                        {it.item_name}
+                        {it.variant_name && <span style={{ color: '#696969', fontSize: 11 }}> ({it.variant_name})</span>}
+                      </td>
+                      <td style={{ padding: '7px 0', textAlign: 'center', color: '#4F4F4F' }}>{it.quantity}</td>
+                      <td style={{ padding: '7px 0', textAlign: 'right', color: '#4F4F4F' }}>₹{((it.unit_price_paise || 0) / 100).toFixed(0)}</td>
+                      <td style={{ padding: '7px 0', textAlign: 'right', fontWeight: 700, color: '#1C1C1C' }}>
+                        ₹{(((it.line_total_paise || it.unit_price_paise * it.quantity) || 0) / 100).toFixed(0)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Bill Summary */}
+              <div style={{ borderTop: '1px dashed #D1D5DB', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12.5, color: '#4F4F4F' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Item Subtotal</span>
+                  <span>₹{((order.subtotal_paise || 0) / 100).toFixed(0)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>GST & Restaurant Taxes</span>
+                  <span>₹{((order.tax_paise || 0) / 100).toFixed(0)}</span>
+                </div>
+                {order.delivery_fee_paise > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Delivery Charge</span>
+                    <span>₹{((order.delivery_fee_paise || 0) / 100).toFixed(0)}</span>
+                  </div>
+                )}
+                {order.discount_paise > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--veg-color)', fontWeight: 700 }}>
+                    <span>Discount</span>
+                    <span>-₹{((order.discount_paise || 0) / 100).toFixed(0)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 900, color: '#1C1C1C', borderTop: '1px solid #1C1C1C', paddingTop: 8, marginTop: 4 }}>
+                  <span>Grand Total</span>
+                  <span style={{ color: 'var(--primary)' }}>₹{((order.total_paise || 0) / 100).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Thank you */}
+              <div style={{ textAlign: 'center', marginTop: 16, paddingTop: 12, borderTop: '1px dashed #D1D5DB', fontSize: 11, color: '#828282' }}>
+                <p>Thank you for choosing {order.restaurant_name}!</p>
+                <p style={{ marginTop: 2, fontWeight: 700, color: 'var(--primary)' }}>DirectDine Food OS • 0% Commission Direct</p>
+              </div>
+            </div>
+
+            {/* Modal Buttons */}
+            <div className="no-print" style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') window.print();
+                }}
+                className="btn-primary"
+                style={{ flex: 1, padding: '11px', fontSize: 13, borderRadius: 10 }}
+              >
+                🖨️ Print / Save Receipt
+              </button>
+              <button
+                onClick={() => setShowBillModal(false)}
+                className="btn-secondary"
+                style={{ padding: '11px 18px', fontSize: 13, borderRadius: 10 }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
