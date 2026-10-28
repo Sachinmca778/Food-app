@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 
-// Craving Categories for Intent-Based Discovery (RezoTap Signature Feature)
+// Craving Categories for Intent-Based Discovery (DirectDine Signature Feature)
 const CRAVING_CATEGORIES = [
   { id: 'all', name: 'All Cravings', icon: '🍽️', tag: 'all' },
   { id: 'biryani', name: 'Biryani & Rice', icon: '🍲', tag: 'biryani', query: 'biryani' },
@@ -18,7 +18,7 @@ const CRAVING_CATEGORIES = [
 ];
 
 export default function HomePage() {
-  // Service mode: 'delivery', 'dine_in', 'takeaway' (RezoTap Multi-Mode Ordering)
+  // Service mode: 'delivery', 'dine_in', 'takeaway' (DirectDine Multi-Mode Ordering)
   const [orderMode, setOrderMode] = useState('delivery');
   const [selectedCity, setSelectedCity] = useState('Bandra West, Mumbai');
   const [cityModalOpen, setCityModalOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function HomePage() {
   const [selectedCraving, setSelectedCraving] = useState('all');
   const [filterType, setFilterType] = useState('all'); // 'all', 'veg', 'non_veg', 'top_rated'
 
-  // Dine-In Table Call Waiter Modal (RezoTap Hallmark Dine-In Feature)
+  // Dine-In Table Call Waiter Modal (DirectDine Table Service Feature)
   const [waiterModalOpen, setWaiterModalOpen] = useState(false);
   const [tableNumber, setTableNumber] = useState('4');
   const [selectedService, setSelectedService] = useState('waiter');
@@ -49,7 +49,7 @@ export default function HomePage() {
   const [waPhone, setWaPhone] = useState('9123456789');
   const [waInput, setWaInput] = useState('Hi');
   const [waLog, setWaLog] = useState([
-    { sender: 'bot', text: '👋 Welcome to RezoTap Direct Food Network!\n0% commission direct ordering. Send "Hi" or tap a quick chip to test our automated WhatsApp engine.' }
+    { sender: 'bot', text: '👋 Welcome to DirectDine Food Network!\n0% commission direct ordering. Send "Hi" or tap a quick chip to test our automated WhatsApp engine.' }
   ]);
   const [waLoading, setWaLoading] = useState(false);
 
@@ -125,7 +125,7 @@ export default function HomePage() {
     }, 2800);
   };
 
-  // Curated Restaurant List (RezoTap Direct Network)
+  // Curated Restaurant List (DirectDine Direct Network)
   const restaurants = [
     {
       id: 'spice-garden',
@@ -176,7 +176,7 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 16px 80px' }}>
       
-      {/* 1. REZOTAP SIGNATURE TOP NAVIGATION (ZOMATO CLEAN RED & WHITE THEME) */}
+      {/* 1. DIRECTDINE TOP NAVIGATION (ZOMATO CLEAN RED & WHITE THEME) */}
       <nav style={{
         background: '#FFFFFF',
         padding: '12px 20px',
@@ -209,7 +209,7 @@ export default function HomePage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--primary)' }}>
-                RezoTap
+                DirectDine
               </span>
               <span style={{ fontSize: 10, background: '#FEECEE', color: 'var(--primary)', fontWeight: 800, padding: '2px 6px', borderRadius: 4, border: '1px solid #FBCED2' }}>
                 DIRECT OS
@@ -221,7 +221,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* RezoTap Multi-Mode Switcher (Delivery / Dine-in / Takeaway) */}
+        {/* Multi-Mode Switcher (Delivery / Dine-in / Takeaway) */}
         <div style={{
           display: 'flex',
           background: '#F4F5F8',
@@ -281,7 +281,7 @@ export default function HomePage() {
 
         {/* Action Controls */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* RezoTap Call Waiter Button (Active for Dine-In) */}
+          {/* Call Waiter Button (Active for Dine-In) */}
           {orderMode === 'dine_in' && (
             <button
               onClick={() => setWaiterModalOpen(true)}
@@ -350,7 +350,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* 2. REZOTAP HERO & INTENT-BASED DISCOVERY HEADER */}
+      {/* 2. HERO & INTENT-BASED DISCOVERY HEADER */}
       <section style={{
         background: '#FFFFFF',
         borderRadius: 20,
@@ -414,7 +414,7 @@ export default function HomePage() {
           Enjoy authentic food straight from your favorite restaurants. 1-Tap UPI payments directly to the kitchen, contactless dine-in table ordering, and instant automated WhatsApp updates.
         </p>
 
-        {/* RezoTap Intent-Based Search & Location Bar */}
+        {/* Intent-Based Search & Location Bar */}
         <div style={{
           maxWidth: 680,
           margin: '0 auto',
@@ -488,7 +488,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. REZOTAP SIGNATURE "EXPLORE BY CRAVING" CAROUSEL */}
+      {/* 3. SIGNATURE "EXPLORE BY CRAVING" CAROUSEL */}
       <section style={{ marginBottom: 36 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
@@ -560,7 +560,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. REZOTAP DIRECT RESTAURANT SHOWCASE */}
+      {/* 4. DIRECT RESTAURANT SHOWCASE */}
       <section style={{ marginBottom: 54 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
           <div>
@@ -644,7 +644,7 @@ export default function HomePage() {
                 color: '#FFFFFF'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {/* RezoTap 0% Commission Direct Badge */}
+                  {/* DirectDine 0% Commission Direct Badge */}
                   <span style={{
                     background: '#24963F',
                     color: '#FFFFFF',
@@ -737,7 +737,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. REZOTAP BUSINESS VALUE STACK ("WHY FOOD BUSINESSES LOVE REZOTAP") */}
+      {/* 5. BUSINESS VALUE STACK ("WHY FOOD BUSINESSES LOVE DIRECTDINE") */}
       <section style={{ marginBottom: 54 }}>
         <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 30px' }}>
           <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
@@ -784,7 +784,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. REZOTAP INTERACTIVE COMMISSION SAVINGS CALCULATOR */}
+      {/* 6. INTERACTIVE COMMISSION SAVINGS CALCULATOR */}
       <section className="glass-panel" style={{ padding: '36px 28px', marginBottom: 54, border: '1px solid var(--border-medium)', borderRadius: 20 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
@@ -792,7 +792,7 @@ export default function HomePage() {
           </div>
           <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>See How Much You Save With 0% Commission</h2>
           <p style={{ color: '#4F4F4F', fontSize: 14, marginTop: 4 }}>
-            Compare typical 28% aggregator deductions against RezoTap Direct Ordering.
+            Compare typical 28% aggregator deductions against DirectDine 0% Commission Direct Ordering.
           </p>
         </div>
 
@@ -852,7 +852,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. REZOTAP WHATSAPP BOT INTERACTIVE SIMULATOR */}
+      {/* 7. WHATSAPP BOT INTERACTIVE SIMULATOR */}
       <section style={{ marginBottom: 54 }}>
         <div className="glass-panel" style={{ padding: '36px 20px', border: '1px solid var(--border-medium)', borderRadius: 20 }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -992,7 +992,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. REZOTAP DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
+      {/* 8. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
       {waiterModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1145,7 +1145,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 9. REZOTAP MERCHANT ONBOARDING MODAL */}
+      {/* 9. MERCHANT ONBOARDING MODAL */}
       {onboardModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1268,7 +1268,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 10. REZOTAP LOCATION SELECTION MODAL */}
+      {/* 10. LOCATION SELECTION MODAL */}
       {cityModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1340,7 +1340,7 @@ export default function HomePage() {
       }}>
         <div>
           <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 16, marginBottom: 2 }}>
-            RezoTap Direct Food OS
+            DirectDine Direct Food OS
           </div>
           <div>Empowering restaurants, cloud kitchens & cafes with 0% commission direct ordering.</div>
         </div>

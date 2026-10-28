@@ -8,7 +8,7 @@ const router = express.Router();
 const { query } = require('../db/pool');
 const { asyncHandler, ApiError } = require('../middleware/errorHandler');
 
-// GET /api/restaurant — List all active restaurants (RezoTap Explore Directory)
+// GET /api/restaurant — List all active restaurants (DirectDine Directory)
 router.get('/', asyncHandler(async (req, res) => {
   const { rows: restaurants } = await query(
     `SELECT id, slug, name, logo_url, cover_url, description, phone,

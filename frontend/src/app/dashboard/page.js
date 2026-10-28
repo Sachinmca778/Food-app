@@ -61,6 +61,7 @@ export default function RestaurantDashboardPage() {
 
   // New incoming order notification banner
   const [incomingAlert, setIncomingAlert] = useState(null);
+  const [tableServiceAlert, setTableServiceAlert] = useState(null);
 
   // Check login token
   useEffect(() => {
@@ -103,6 +104,16 @@ export default function RestaurantDashboardPage() {
 
     socket.on('order:update', () => {
       loadOrders();
+    });
+
+    socket.on('staff_service_request', (data) => {
+      setTableServiceAlert(data);
+      if (soundEnabled) {
+        try {
+          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+          audio.play().catch(() => {});
+        } catch (e) {}
+      }
     });
 
     return () => {
@@ -587,6 +598,49 @@ export default function RestaurantDashboardPage() {
             style={{ background: '#FFFFFF', color: 'var(--primary)', fontWeight: 900, padding: '8px 18px', borderRadius: 8, fontSize: 13 }}
           >
             Accept Now ➔
+          </button>
+        </div>
+      )}
+
+      {/* TABLE SERVICE REQUEST NOTIFICATION BANNER */}
+      {tableServiceAlert && (
+        <div style={{
+          margin: '0 14px 14px',
+          background: '#FFF3CD',
+          border: '1.5px solid #FFEEBA',
+          color: '#856404',
+          padding: '14px 20px',
+          borderRadius: 12,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: 'var(--shadow-sm)',
+          animation: 'pulse-ring 2.2s infinite'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 28 }}>🛎️</span>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 900 }}>
+                Table #{tableServiceAlert.tableNo}: {tableServiceAlert.label}
+              </div>
+              <div style={{ fontSize: 12 }}>
+                Service request received just now • Staff attention requested
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setTableServiceAlert(null)}
+            style={{
+              background: '#856404',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              padding: '8px 18px',
+              borderRadius: 8,
+              fontSize: 13,
+              cursor: 'pointer'
+            }}
+          >
+            Acknowledge ✓
           </button>
         </div>
       )}

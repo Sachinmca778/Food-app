@@ -20,11 +20,11 @@ function MenuContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // RezoTap Multi-Mode Ordering (Delivery, Dine-In, Takeaway)
+  // Multi-Mode Ordering (Delivery, Dine-In, Takeaway)
   const [orderMode, setOrderMode] = useState(hasTableParam ? 'dine_in' : 'delivery');
   const [tableNumber, setTableNumber] = useState(initialTable);
 
-  // Dine-In Table Call Waiter Modal (RezoTap Feature)
+  // Dine-In Table Call Waiter Modal
   const [waiterModalOpen, setWaiterModalOpen] = useState(false);
   const [serviceStatusMsg, setServiceStatusMsg] = useState('');
   const [serviceLoading, setServiceLoading] = useState(false);
@@ -87,7 +87,7 @@ function MenuContent() {
     }
   };
 
-  // RezoTap Dine-In Table Service Request (Call Waiter / Water / Bill)
+  // Dine-In Table Service Request (Call Waiter / Water / Bill)
   const handleSendServiceRequest = async (requestType) => {
     setServiceLoading(true);
     setServiceStatusMsg('');
@@ -116,7 +116,7 @@ function MenuContent() {
     }
   };
 
-  // RezoTap 1-Tap WhatsApp Direct Ordering Generator
+  // 1-Tap WhatsApp Direct Ordering Generator
   const buildWhatsAppOrderLink = () => {
     if (!restaurant) return '#';
     const restPhone = restaurant.phone || '919876543210';
@@ -170,7 +170,7 @@ function MenuContent() {
   return (
     <div style={{ paddingBottom: itemCount > 0 ? 120 : 40, maxWidth: 860, margin: '0 auto' }}>
       
-      {/* 1. REZOTAP TOP SERVICE MODE & ACTION BAR */}
+      {/* 1. TOP SERVICE MODE & ACTION BAR */}
       <div style={{
         margin: '12px 14px 0',
         display: 'flex',
@@ -235,7 +235,7 @@ function MenuContent() {
           </button>
         </div>
 
-        {/* RezoTap Quick Actions (Call Waiter + WhatsApp) */}
+        {/* Quick Actions (Call Waiter + WhatsApp) */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {orderMode === 'dine_in' && (
             <button
@@ -905,7 +905,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 8. REZOTAP FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
+      {/* 8. FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
       {itemCount > 0 && (
         <div className="zomato-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Main Checkout Button */}

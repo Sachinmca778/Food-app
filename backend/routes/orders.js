@@ -286,7 +286,7 @@ router.post('/:id/cancel', customerAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, order: updatedOrder });
 }));
 
-// POST /api/orders/service-request — Dine-In Waiter / Water / Bill request (RezoTap feature)
+// POST /api/orders/service-request — Dine-In Waiter / Water / Bill service request
 router.post('/service-request', asyncHandler(async (req, res) => {
   const { restaurantSlug, tableNo, requestType } = req.body;
   const serviceLabels = {
