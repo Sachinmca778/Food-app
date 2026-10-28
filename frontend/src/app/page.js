@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 
-// Craving Categories for Intent-Based Discovery (DirectDine Signature Feature)
+// Craving Categories for Intent-Based Discovery
 const CRAVING_CATEGORIES = [
   { id: 'all', name: 'All Cravings', icon: '🍽️', tag: 'all' },
   { id: 'biryani', name: 'Biryani & Rice', icon: '🍲', tag: 'biryani', query: 'biryani' },
-  { id: 'north_indian', name: 'North Indian', icon: '🥘', tag: 'north_indian', query: 'paneer' },
   { id: 'healthy', name: 'Healthy & High Protein', icon: '🥗', tag: 'healthy', query: 'healthy' },
+  { id: 'north_indian', name: 'North Indian', icon: '🥘', tag: 'north_indian', query: 'paneer' },
   { id: 'pizza', name: 'Pizza & Fast Food', icon: '🍕', tag: 'fast_food', query: 'pizza' },
   { id: 'thali', name: 'Daily Thali & Meals', icon: '🍱', tag: 'thali', query: 'thali' },
   { id: 'momos', name: 'Momos & Asian', icon: '🥟', tag: 'asian', query: 'momos' },
@@ -18,7 +18,7 @@ const CRAVING_CATEGORIES = [
 ];
 
 export default function HomePage() {
-  // Service mode: 'delivery', 'dine_in', 'takeaway' (DirectDine Multi-Mode Ordering)
+  // Service mode: 'delivery', 'dine_in', 'takeaway'
   const [orderMode, setOrderMode] = useState('delivery');
   const [selectedCity, setSelectedCity] = useState('Bandra West, Mumbai');
   const [cityModalOpen, setCityModalOpen] = useState(false);
@@ -28,7 +28,13 @@ export default function HomePage() {
   const [selectedCraving, setSelectedCraving] = useState('all');
   const [filterType, setFilterType] = useState('all'); // 'all', 'veg', 'non_veg', 'top_rated'
 
-  // Dine-In Table Call Waiter Modal (DirectDine Table Service Feature)
+  // Pricing Toggle ('monthly' vs 'annual')
+  const [billingCycle, setBillingCycle] = useState('monthly');
+
+  // FAQ Accordion
+  const [openFaq, setOpenFaq] = useState(0);
+
+  // Dine-In Table Call Waiter Modal
   const [waiterModalOpen, setWaiterModalOpen] = useState(false);
   const [tableNumber, setTableNumber] = useState('4');
   const [selectedService, setSelectedService] = useState('waiter');
@@ -125,7 +131,7 @@ export default function HomePage() {
     }, 2800);
   };
 
-  // Curated Restaurant List (DirectDine Direct Network)
+  // Curated Restaurant List
   const restaurants = [
     {
       id: 'spice-garden',
@@ -173,10 +179,34 @@ export default function HomePage() {
     return matchSearch && matchCraving;
   });
 
+  // FAQs List
+  const faqs = [
+    {
+      q: 'Do I need my own delivery riders with DirectDine?',
+      a: 'No. DirectDine is a 0% commission direct ordering platform. You can either use your existing in-house staff or connect with hyperlocal 3rd party logistics (like Shadowfax, Dunzo, Borzo, Porter). You save 25%-30% margin on every order.'
+    },
+    {
+      q: 'How does instant UPI payment work?',
+      a: 'When customers place an order, the payment is made directly to your Google Pay, PhonePe, Paytm, or Bank UPI ID. Money is credited instantly into your account with 0 middleman delay or deduction.'
+    },
+    {
+      q: 'Can customers order both from table (Dine-In) and for Home Delivery?',
+      a: 'Yes! DirectDine supports Multi-Mode Ordering. In your restaurant, customers scan table QR codes to browse the menu, place orders, and call the waiter. At home, they open your direct link or WhatsApp bot to order delivery.'
+    },
+    {
+      q: 'Who owns the customer contact details and data?',
+      a: 'You own 100% of your customer records. Unlike aggregators that mask phone numbers, DirectDine gives you full access to names, phone numbers, and ordering history for repeat WhatsApp marketing.'
+    },
+    {
+      q: 'How fast can I go live?',
+      a: 'You can go live in under 5 minutes! Simply list your restaurant, upload your menu items, download your table QR stickers, and start taking direct orders immediately.'
+    }
+  ];
+
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 16px 80px' }}>
       
-      {/* 1. DIRECTDINE TOP NAVIGATION (ZOMATO CLEAN RED & WHITE THEME) */}
+      {/* 1. TOP NAVIGATION (ZOMATO CLEAN RED & WHITE THEME) */}
       <nav style={{
         background: '#FFFFFF',
         padding: '12px 20px',
@@ -353,22 +383,21 @@ export default function HomePage() {
       {/* 2. HERO & INTENT-BASED DISCOVERY HEADER */}
       <section style={{
         background: '#FFFFFF',
-        borderRadius: 20,
+        borderRadius: 24,
         border: '1px solid var(--border-medium)',
-        padding: '34px 24px',
-        marginBottom: 28,
+        padding: '42px 28px',
+        marginBottom: 32,
         boxShadow: 'var(--shadow-sm)',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Subtle Decorative Background Element */}
         <div style={{
           position: 'absolute',
-          top: -30,
-          right: -30,
-          width: 140,
-          height: 140,
+          top: -40,
+          right: -40,
+          width: 180,
+          height: 180,
           background: 'radial-gradient(circle, rgba(226,55,68,0.08) 0%, transparent 70%)',
           borderRadius: '50%',
           pointerEvents: 'none'
@@ -382,49 +411,49 @@ export default function HomePage() {
           background: '#FEECEE',
           border: '1px solid #FBCED2',
           color: 'var(--primary)',
-          padding: '5px 16px',
+          padding: '6px 18px',
           borderRadius: 'var(--radius-full)',
-          fontSize: 12.5,
+          fontSize: 13,
           fontWeight: 800,
-          marginBottom: 16
+          marginBottom: 18
         }}>
           <span className="pulse-indicator" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block' }} />
-          Zero Commission Direct Food Network • Instant Direct UPI Payments
+          Zero Commission Direct Food Network • Instant UPI Settlements • Branded Table QR
         </div>
 
         <h1 style={{
-          fontSize: 'clamp(28px, 4.2vw, 44px)',
+          fontSize: 'clamp(30px, 4.6vw, 48px)',
           fontWeight: 900,
-          lineHeight: 1.2,
+          lineHeight: 1.18,
           color: '#1C1C1C',
           letterSpacing: '-0.03em',
-          marginBottom: 12
+          marginBottom: 14
         }}>
-          Direct Food Ordering With <br />
-          <span style={{ color: 'var(--primary)' }}>Zero Aggregator Price Markup</span>
+          Stop Paying 30% Commissions. <br />
+          <span style={{ color: 'var(--primary)' }}>Own Your Direct Food Business.</span>
         </h1>
 
         <p style={{
           color: '#4F4F4F',
-          fontSize: 'clamp(14px, 1.6vw, 16.5px)',
-          lineHeight: 1.55,
-          maxWidth: 680,
-          margin: '0 auto 24px'
+          fontSize: 'clamp(14.5px, 1.8vw, 17px)',
+          lineHeight: 1.6,
+          maxWidth: 720,
+          margin: '0 auto 28px'
         }}>
-          Enjoy authentic food straight from your favorite restaurants. 1-Tap UPI payments directly to the kitchen, contactless dine-in table ordering, and instant automated WhatsApp updates.
+          DirectDine gives restaurants, cloud kitchens, cafes, and home chefs a complete digital operating system. Contactless table ordering, WhatsApp commerce, instant UPI payments, and real-time kitchen displays.
         </p>
 
         {/* Intent-Based Search & Location Bar */}
         <div style={{
-          maxWidth: 680,
-          margin: '0 auto',
+          maxWidth: 720,
+          margin: '0 auto 24px',
           background: '#FFFFFF',
-          borderRadius: 14,
+          borderRadius: 16,
           border: '2px solid var(--border-medium)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          boxShadow: '0 6px 24px rgba(0,0,0,0.06)',
           display: 'flex',
           alignItems: 'center',
-          padding: '6px 8px',
+          padding: '6px 10px',
           flexWrap: 'wrap',
           gap: 8
         }}>
@@ -437,9 +466,9 @@ export default function HomePage() {
               gap: 6,
               background: '#F8F9FA',
               border: '1px solid #E3E5EB',
-              borderRadius: 8,
-              padding: '8px 12px',
-              fontSize: 13,
+              borderRadius: 10,
+              padding: '9px 14px',
+              fontSize: 13.5,
               fontWeight: 700,
               color: '#1C1C1C',
               cursor: 'pointer'
@@ -461,17 +490,17 @@ export default function HomePage() {
                 width: '100%',
                 border: 'none',
                 outline: 'none',
-                fontSize: 14,
-                padding: '8px 12px 8px 30px',
+                fontSize: 14.5,
+                padding: '9px 12px 9px 34px',
                 color: '#1C1C1C',
                 fontFamily: 'inherit'
               }}
             />
-            <span style={{ position: 'absolute', left: 8, top: 9, fontSize: 14, opacity: 0.5 }}>🔍</span>
+            <span style={{ position: 'absolute', left: 10, top: 10, fontSize: 15, opacity: 0.5 }}>🔍</span>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: 8, top: 9, background: 'none', color: '#696969', fontSize: 13 }}
+                style={{ position: 'absolute', right: 10, top: 10, background: 'none', color: '#696969', fontSize: 13 }}
               >
                 ✕
               </button>
@@ -481,15 +510,23 @@ export default function HomePage() {
           <button
             onClick={() => {}}
             className="btn-primary"
-            style={{ padding: '10px 20px', borderRadius: 8, fontSize: 13.5 }}
+            style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14 }}
           >
             Explore
           </button>
         </div>
+
+        {/* Trust Points Strip */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 18, flexWrap: 'wrap', fontSize: 12.5, fontWeight: 700, color: '#696969' }}>
+          <span>✨ 0% Commission Forever</span>
+          <span>⚡ Instant Direct UPI</span>
+          <span>👑 100% Customer Data Ownership</span>
+          <span>💬 Meta Cloud WhatsApp Bot</span>
+        </div>
       </section>
 
       {/* 3. SIGNATURE "EXPLORE BY CRAVING" CAROUSEL */}
-      <section style={{ marginBottom: 36 }}>
+      <section style={{ marginBottom: 38 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
             <h2 style={{ fontSize: 20, color: '#1C1C1C', fontWeight: 800 }}>Explore What You're Craving</h2>
@@ -737,54 +774,101 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. BUSINESS VALUE STACK ("WHY FOOD BUSINESSES LOVE DIRECTDINE") */}
+      {/* 5. HOW IT WORKS (3 SIMPLE STEPS) */}
       <section style={{ marginBottom: 54 }}>
-        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 30px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 32px' }}>
           <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-            DIGITAL RESTAURANT OPERATING SYSTEM
+            SEAMLESS EXPERIENCE
           </div>
-          <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Built To Free Kitchens From High Commissions</h2>
+          <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>How DirectDine Works in 3 Simple Steps</h2>
           <p style={{ color: '#696969', fontSize: 14 }}>
-            Everything you need to run dine-in, takeaway, and direct online food delivery without paying 30% cuts.
+            No app download required for customers. Fast, frictionless, and 100% direct.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
-          <div className="glass-panel" style={{ padding: '24px 20px', borderRadius: 14 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
-            <h3 style={{ fontSize: 17, color: '#1C1C1C', marginBottom: 6 }}>Direct Instant UPI Payments</h3>
-            <p style={{ color: '#696969', fontSize: 13, lineHeight: 1.5 }}>
-              100% money goes directly to your Google Pay, PhonePe, or Merchant Bank Account. Zero commission cuts and no payout delays.
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+          <div className="glass-panel" style={{ padding: '28px 22px', borderRadius: 16, textAlign: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: '#FEECEE', color: 'var(--primary)', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontWeight: 900 }}>
+              1
+            </div>
+            <h3 style={{ fontSize: 18, color: '#1C1C1C', marginBottom: 8 }}>Scan QR or Tap Link</h3>
+            <p style={{ color: '#696969', fontSize: 13.5, lineHeight: 1.5 }}>
+              Guests scan your branded Table QR sticker at your cafe or click your direct link on Instagram & WhatsApp.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: '24px 20px', borderRadius: 14 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>📱</div>
-            <h3 style={{ fontSize: 17, color: '#1C1C1C', marginBottom: 6 }}>Table QR & NFC Dine-In</h3>
-            <p style={{ color: '#696969', fontSize: 13, lineHeight: 1.5 }}>
-              Guests scan table QR codes to view the digital menu, order food, and call the waiter directly from their phones without paper menus.
+          <div className="glass-panel" style={{ padding: '28px 22px', borderRadius: 16, textAlign: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: '#EDF8F0', color: '#24963F', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontWeight: 900 }}>
+              2
+            </div>
+            <h3 style={{ fontSize: 18, color: '#1C1C1C', marginBottom: 8 }}>Browse & Customize</h3>
+            <p style={{ color: '#696969', fontSize: 13.5, lineHeight: 1.5 }}>
+              Customers browse real food photos, select portion sizes, add extra toppings, or choose 1-tap WhatsApp chat ordering.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: '24px 20px', borderRadius: 14 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
-            <h3 style={{ fontSize: 17, color: '#1C1C1C', marginBottom: 6 }}>Automated WhatsApp Bot</h3>
-            <p style={{ color: '#696969', fontSize: 13, lineHeight: 1.5 }}>
-              Instant order confirmations, live kitchen progress, and automated review collection sent via Meta Cloud WhatsApp API.
-            </p>
-          </div>
-
-          <div className="glass-panel" style={{ padding: '24px 20px', borderRadius: 14 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>👑</div>
-            <h3 style={{ fontSize: 17, color: '#1C1C1C', marginBottom: 6 }}>100% Customer Data Ownership</h3>
-            <p style={{ color: '#696969', fontSize: 13, lineHeight: 1.5 }}>
-              You own all customer phone numbers and ordering habits to run WhatsApp repeat marketing and loyalty campaigns.
+          <div className="glass-panel" style={{ padding: '28px 22px', borderRadius: 16, textAlign: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: '#FFF3D6', color: '#B45309', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontWeight: 900 }}>
+              3
+            </div>
+            <h3 style={{ fontSize: 18, color: '#1C1C1C', marginBottom: 8 }}>Pay 100% Direct via UPI</h3>
+            <p style={{ color: '#696969', fontSize: 13.5, lineHeight: 1.5 }}>
+              Payments go straight to your Google Pay or PhonePe account with 0% commission. The kitchen KDS immediately chimes!
             </p>
           </div>
         </div>
       </section>
 
-      {/* 6. INTERACTIVE COMMISSION SAVINGS CALCULATOR */}
+      {/* 6. AGGREGATOR VS DIRECTDINE COMPARISON MATRIX */}
+      <section style={{ marginBottom: 54 }}>
+        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 30px' }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            TRANSPARENT COMPARISON
+          </div>
+          <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Why Direct Food Ordering Beats Aggregators</h2>
+        </div>
+
+        <div className="glass-panel" style={{ overflowX: 'auto', borderRadius: 18, border: '1px solid var(--border-medium)', padding: 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 600 }}>
+            <thead>
+              <tr style={{ background: '#F8F9FA', borderBottom: '1px solid #ECEEF2' }}>
+                <th style={{ padding: '16px 20px', fontSize: 14, color: '#4F4F4F', fontWeight: 800 }}>Feature</th>
+                <th style={{ padding: '16px 20px', fontSize: 14, color: '#C9202E', fontWeight: 800 }}>Zomato / Swiggy</th>
+                <th style={{ padding: '16px 20px', fontSize: 14, color: '#24963F', fontWeight: 900, background: '#F0FDF4' }}>DirectDine Platform</th>
+              </tr>
+            </thead>
+            <tbody style={{ fontSize: 13.5 }}>
+              <tr style={{ borderBottom: '1px solid #F0F1F4' }}>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: '#1C1C1C' }}>Commission Per Order</td>
+                <td style={{ padding: '14px 20px', color: '#DC2626' }}>❌ 25% – 32% Cut</td>
+                <td style={{ padding: '14px 20px', color: '#166534', fontWeight: 800, background: '#F0FDF4' }}>✅ 0% Commission (Keep 100%)</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #F0F1F4' }}>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: '#1C1C1C' }}>Payment Settlement</td>
+                <td style={{ padding: '14px 20px', color: '#DC2626' }}>❌ 7 to 14 days delay</td>
+                <td style={{ padding: '14px 20px', color: '#166534', fontWeight: 800, background: '#F0FDF4' }}>✅ Instant to your UPI / Bank</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #F0F1F4' }}>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: '#1C1C1C' }}>Customer Phone Numbers</td>
+                <td style={{ padding: '14px 20px', color: '#DC2626' }}>❌ Hidden / Masked numbers</td>
+                <td style={{ padding: '14px 20px', color: '#166534', fontWeight: 800, background: '#F0FDF4' }}>✅ 100% Owned by you</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid #F0F1F4' }}>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: '#1C1C1C' }}>Dine-In Table QR Ordering</td>
+                <td style={{ padding: '14px 20px', color: '#DC2626' }}>❌ Not available / Extra fees</td>
+                <td style={{ padding: '14px 20px', color: '#166534', fontWeight: 800, background: '#F0FDF4' }}>✅ Built-in QR + Call Waiter</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '14px 20px', fontWeight: 700, color: '#1C1C1C' }}>Automated WhatsApp Bot</td>
+                <td style={{ padding: '14px 20px', color: '#DC2626' }}>❌ No direct restaurant bot</td>
+                <td style={{ padding: '14px 20px', color: '#166534', fontWeight: 800, background: '#F0FDF4' }}>✅ Meta Cloud WhatsApp Engine</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* 7. INTERACTIVE COMMISSION SAVINGS CALCULATOR */}
       <section className="glass-panel" style={{ padding: '36px 28px', marginBottom: 54, border: '1px solid var(--border-medium)', borderRadius: 20 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
@@ -852,7 +936,150 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. WHATSAPP BOT INTERACTIVE SIMULATOR */}
+      {/* 8. TRANSPARENT SAAS SUBSCRIPTION PLANS */}
+      <section style={{ marginBottom: 54 }}>
+        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 28px' }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            TRANSPARENT PRICING
+          </div>
+          <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Simple Plans With No Commission Cut</h2>
+          <p style={{ color: '#696969', fontSize: 14 }}>
+            No setup fees. No hidden cuts. Keep 100% of your earnings.
+          </p>
+
+          {/* Billing Cycle Switcher */}
+          <div style={{
+            display: 'inline-flex',
+            background: '#FFFFFF',
+            padding: 4,
+            borderRadius: 10,
+            border: '1px solid var(--border-medium)',
+            marginTop: 18,
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                background: billingCycle === 'monthly' ? 'var(--primary)' : 'transparent',
+                color: billingCycle === 'monthly' ? '#FFFFFF' : '#4F4F4F',
+                transition: 'all 0.18s'
+              }}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingCycle('annual')}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                background: billingCycle === 'annual' ? 'var(--primary)' : 'transparent',
+                color: billingCycle === 'annual' ? '#FFFFFF' : '#4F4F4F',
+                transition: 'all 0.18s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              Annual <span style={{ background: '#24963F', color: '#FFFFFF', padding: '1px 6px', borderRadius: 4, fontSize: 10 }}>SAVE 20%</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Pricing Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'stretch' }}>
+          {/* Spark Plan */}
+          <div className="glass-panel" style={{ padding: '28px 24px', borderRadius: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#696969', textTransform: 'uppercase', letterSpacing: '0.06em' }}>SPARK PLAN</span>
+              <div style={{ fontSize: 32, fontWeight: 900, color: '#1C1C1C', margin: '8px 0 4px' }}>
+                ₹{billingCycle === 'annual' ? '799' : '999'}<span style={{ fontSize: 14, color: '#696969', fontWeight: 600 }}>/month</span>
+              </div>
+              <p style={{ color: '#696969', fontSize: 13, marginBottom: 20 }}>Best for home chefs, tiffin services, & small bakeries</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13.5, color: '#1C1C1C', marginBottom: 24 }}>
+                <div>✓ 1 Location Storefront</div>
+                <div>✓ Up to 30 Menu Items</div>
+                <div>✓ 0% Commission Direct UPI</div>
+                <div>✓ Printable Table QR Code</div>
+                <div>✓ WhatsApp Order Link</div>
+                <div>✓ 7-Day Free Trial</div>
+              </div>
+            </div>
+
+            <button onClick={() => setOnboardModalOpen(true)} className="btn-secondary" style={{ width: '100%', padding: '12px 0', fontSize: 14, borderRadius: 10 }}>
+              Start 7-Day Free Trial
+            </button>
+          </div>
+
+          {/* Blaze Plan (Featured) */}
+          <div className="glass-panel" style={{
+            padding: '28px 24px',
+            borderRadius: 18,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            border: '2px solid var(--primary)',
+            position: 'relative',
+            boxShadow: '0 8px 30px rgba(226, 55, 68, 0.12)'
+          }}>
+            <div style={{ position: 'absolute', top: -12, right: 24, background: 'var(--primary)', color: '#FFFFFF', padding: '3px 12px', borderRadius: 'var(--radius-full)', fontSize: 11, fontWeight: 900 }}>
+              ★ MOST POPULAR
+            </div>
+
+            <div>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>BLAZE PLAN</span>
+              <div style={{ fontSize: 32, fontWeight: 900, color: '#1C1C1C', margin: '8px 0 4px' }}>
+                ₹{billingCycle === 'annual' ? '1,599' : '1,999'}<span style={{ fontSize: 14, color: '#696969', fontWeight: 600 }}>/month</span>
+              </div>
+              <p style={{ color: '#696969', fontSize: 13, marginBottom: 20 }}>For dine-in restaurants, cafes, & high-volume cloud kitchens</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13.5, color: '#1C1C1C', marginBottom: 24 }}>
+                <div>✓ <strong>Unlimited</strong> Menu Items & Photos</div>
+                <div>✓ <strong>Live Kitchen KDS</strong> (Audio alerts & status)</div>
+                <div>✓ <strong>Table QR & Call Waiter</strong> System</div>
+                <div>✓ <strong>Meta Cloud WhatsApp API</strong> Automation</div>
+                <div>✓ Active Coupons (WELCOME10, FLAT50)</div>
+                <div>✓ Customer Analytics & Repeat CRM</div>
+              </div>
+            </div>
+
+            <button onClick={() => setOnboardModalOpen(true)} className="btn-primary" style={{ width: '100%', padding: '12px 0', fontSize: 14, borderRadius: 10 }}>
+              Get Started Now ➔
+            </button>
+          </div>
+
+          {/* Enterprise Plan */}
+          <div className="glass-panel" style={{ padding: '28px 24px', borderRadius: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#696969', textTransform: 'uppercase', letterSpacing: '0.06em' }}>EMPIRE MULTI-OUTLET</span>
+              <div style={{ fontSize: 32, fontWeight: 900, color: '#1C1C1C', margin: '8px 0 4px' }}>
+                ₹{billingCycle === 'annual' ? '3,199' : '3,999'}<span style={{ fontSize: 14, color: '#696969', fontWeight: 600 }}>/month</span>
+              </div>
+              <p style={{ color: '#696969', fontSize: 13, marginBottom: 20 }}>For food chains, franchises, & cloud kitchen networks</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13.5, color: '#1C1C1C', marginBottom: 24 }}>
+                <div>✓ Multi-Branch Centralized Portal</div>
+                <div>✓ Custom Domain (`orders.yourcafe.com`)</div>
+                <div>✓ Dedicated WhatsApp Number Setup</div>
+                <div>✓ Priority 24/7 Phone & Tech Support</div>
+                <div>✓ Custom POS Integration Support</div>
+              </div>
+            </div>
+
+            <button onClick={() => setOnboardModalOpen(true)} className="btn-secondary" style={{ width: '100%', padding: '12px 0', fontSize: 14, borderRadius: 10 }}>
+              Talk to Sales
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. WHATSAPP BOT INTERACTIVE SIMULATOR */}
       <section style={{ marginBottom: 54 }}>
         <div className="glass-panel" style={{ padding: '36px 20px', border: '1px solid var(--border-medium)', borderRadius: 20 }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -992,7 +1219,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
+      {/* 10. FREQUENTLY ASKED QUESTIONS (ACCORDION) */}
+      <section style={{ marginBottom: 54 }}>
+        <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 28px' }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            GOT QUESTIONS?
+          </div>
+          <h2 style={{ fontSize: 26, color: '#1C1C1C' }}>Frequently Asked Questions</h2>
+        </div>
+
+        <div style={{ maxWidth: 740, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {faqs.map((faq, index) => {
+            const isOpen = openFaq === index;
+            return (
+              <div
+                key={index}
+                className="glass-panel"
+                style={{
+                  borderRadius: 14,
+                  overflow: 'hidden',
+                  border: '1px solid var(--border-medium)'
+                }}
+              >
+                <button
+                  onClick={() => setOpenFaq(isOpen ? null : index)}
+                  style={{
+                    width: '100%',
+                    padding: '16px 20px',
+                    textAlign: 'left',
+                    background: '#FFFFFF',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontWeight: 700,
+                    fontSize: 15,
+                    color: '#1C1C1C',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>{faq.q}</span>
+                  <span style={{ fontSize: 18, color: 'var(--primary)' }}>{isOpen ? '−' : '+'}</span>
+                </button>
+                {isOpen && (
+                  <div style={{ padding: '0 20px 16px', color: '#4F4F4F', fontSize: 14, lineHeight: 1.55 }}>
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 11. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
       {waiterModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1145,7 +1424,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 9. MERCHANT ONBOARDING MODAL */}
+      {/* 12. MERCHANT ONBOARDING MODAL */}
       {onboardModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1268,7 +1547,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 10. LOCATION SELECTION MODAL */}
+      {/* 13. LOCATION SELECTION MODAL */}
       {cityModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1325,7 +1604,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 11. CLEAN ZOMATO STYLE FOOTER */}
+      {/* 14. CLEAN ZOMATO STYLE FOOTER */}
       <footer style={{
         marginTop: 48,
         paddingTop: 32,
@@ -1340,7 +1619,7 @@ export default function HomePage() {
       }}>
         <div>
           <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 16, marginBottom: 2 }}>
-            DirectDine Direct Food OS
+            DirectDine Food OS
           </div>
           <div>Empowering restaurants, cloud kitchens & cafes with 0% commission direct ordering.</div>
         </div>

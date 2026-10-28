@@ -20,6 +20,7 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
   let {
     restaurantId, restaurant_id, restaurantSlug, restaurant_slug,
     items, orderType, order_type = 'delivery',
+    tableNo, table_no,
     deliveryName, delivery_name, customer_name,
     deliveryPhone, delivery_phone, customer_phone,
     deliveryAddress, delivery_address, address,
@@ -81,6 +82,13 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
     } else {
       cleanAddress = String(address);
     }
+  }
+
+  const tNo = tableNo || table_no;
+  if (orderType === 'dine_in' && !cleanAddress) {
+    cleanAddress = `Dine-In • Table #${tNo || '1'}`;
+  } else if (orderType === 'pickup' && !cleanAddress) {
+    cleanAddress = 'Takeaway / Self-Pickup';
   }
 
   // 5. Delivery coordinates & distance

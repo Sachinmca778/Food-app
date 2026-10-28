@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { fetchAPI } from '@/lib/api';
 import { useCart } from '@/lib/cartContext';
@@ -11,17 +11,19 @@ function CartContent() {
   const params = useParams();
   const slug = params?.slug;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTable = searchParams?.get('table') || '';
 
   const { cart, restaurant, updateQuantity, removeItem, clearCart, itemCount, cartSubtotalPaise, setRestaurantInfo } = useCart();
 
-  // Order Details
-  const [orderType, setOrderType] = useState('delivery'); // 'delivery' or 'pickup'
+  // Order Details: 'delivery', 'dine_in', 'pickup'
+  const [orderType, setOrderType] = useState(initialTable ? 'dine_in' : 'delivery');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [addressLine, setAddressLine] = useState('');
   const [landmark, setLandmark] = useState('');
   const [pincode, setPincode] = useState('400050');
-  const [tableNo, setTableNo] = useState('');
+  const [tableNo, setTableNo] = useState(initialTable || '4');
   const [cookingNotes, setCookingNotes] = useState('');
 
   // OTP Auth State
@@ -431,39 +433,103 @@ function CartContent() {
         </div>
       </div>
 
-      {/* DELIVERY OR PICKUP SELECTOR */}
+      {/* DELIVERY / DINE-IN / TAKEAWAY SELECTOR */}
       <div style={{ background: '#FFFFFF', padding: 4, display: 'flex', gap: 6, marginBottom: 18, borderRadius: 12, border: '1px solid #E3E5EB', boxShadow: 'var(--shadow-sm)' }}>
         <button
           onClick={() => setOrderType('delivery')}
           style={{
             flex: 1,
-            padding: '11px 16px',
+            padding: '11px 12px',
             borderRadius: 8,
             fontWeight: 800,
-            fontSize: 13.5,
+            fontSize: 13,
             background: orderType === 'delivery' ? 'var(--primary)' : 'transparent',
             color: orderType === 'delivery' ? '#FFFFFF' : '#4F4F4F',
             transition: 'all 0.18s ease'
           }}
         >
-          🛵 Home Delivery
+          🛵 Delivery
+        </button>
+        <button
+          onClick={() => setOrderType('dine_in')}
+          style={{
+            flex: 1,
+            padding: '11px 12px',
+            borderRadius: 8,
+            fontWeight: 800,
+            fontSize: 13,
+            background: orderType === 'dine_in' ? 'var(--primary)' : 'transparent',
+            color: orderType === 'dine_in' ? '#FFFFFF' : '#4F4F4F',
+            transition: 'all 0.18s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4
+          }}
+        >
+          🍽️ Dine-In {tableNo && <span style={{ background: orderType === 'dine_in' ? '#FFFFFF' : '#F4F5F8', color: orderType === 'dine_in' ? 'var(--primary)' : '#1C1C1C', padding: '1px 5px', borderRadius: 4, fontSize: 10 }}>T{tableNo}</span>}
         </button>
         <button
           onClick={() => setOrderType('pickup')}
           style={{
             flex: 1,
-            padding: '11px 16px',
+            padding: '11px 12px',
             borderRadius: 8,
             fontWeight: 800,
-            fontSize: 13.5,
+            fontSize: 13,
             background: orderType === 'pickup' ? 'var(--primary)' : 'transparent',
             color: orderType === 'pickup' ? '#FFFFFF' : '#4F4F4F',
             transition: 'all 0.18s ease'
           }}
         >
-          🥡 Takeaway / Pickup
+          🥡 Takeaway
         </button>
       </div>
+
+      {/* DINE-IN TABLE SELECTOR */}
+      {orderType === 'dine_in' && (
+        <div style={{
+          background: '#FFFFFF',
+          border: '1.5px solid #FBCED2',
+          borderRadius: 14,
+          padding: '16px 18px',
+          marginBottom: 18,
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div>
+              <span style={{ fontWeight: 800, fontSize: 14, color: '#1C1C1C' }}>🍽️ Dine-In Table Selection</span>
+              <p style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>Food will be served directly to your table</p>
+            </div>
+            <span style={{ background: '#FEECEE', color: 'var(--primary)', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+              Table #{tableNo || '1'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(num => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => setTableNo(num)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  background: tableNo === num ? 'var(--primary)' : '#F8F9FA',
+                  color: tableNo === num ? '#FFFFFF' : '#1C1C1C',
+                  border: `1.5px solid ${tableNo === num ? 'var(--primary)' : '#E3E5EB'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                T{num}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ITEMS IN CART */}
       <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 18, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
@@ -523,7 +589,7 @@ function CartContent() {
       <div id="customer-contact-section" style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 18, border: isLoggedIn ? '1.5px solid #BBF7D0' : '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <h2 style={{ fontSize: 16, color: '#1C1C1C', margin: 0 }}>
-            {orderType === 'delivery' ? '📍 Delivery Address & Contact' : '👤 Customer Contact'}
+            {orderType === 'delivery' ? '📍 Delivery Address & Contact' : orderType === 'dine_in' ? '🍽️ Dine-In Table & Contact' : '👤 Customer Contact'}
           </h2>
           {isLoggedIn ? (
             <span style={{ fontSize: 11, background: '#DCFCE7', color: '#15803D', fontWeight: 800, padding: '3px 9px', borderRadius: 20 }}>
@@ -682,19 +748,15 @@ function CartContent() {
             </>
           )}
 
+          {orderType === 'dine_in' && (
+            <div style={{ padding: '10px 14px', background: '#EDF8F0', border: '1px solid #A7E3B6', borderRadius: 8, fontSize: 13, color: '#1B7A32', fontWeight: 700 }}>
+              🍽️ Food will be prepared fresh and served directly to Table #{tableNo || '1'}.
+            </div>
+          )}
+
           {orderType === 'pickup' && (
-            <div>
-              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-                Table Number (if dining in)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Table 4 (Optional)"
-                value={tableNo}
-                onChange={(e) => setTableNo(e.target.value)}
-                className="input-field"
-                style={{ height: 42 }}
-              />
+            <div style={{ padding: '10px 14px', background: '#F8F9FA', border: '1px solid #E3E5EB', borderRadius: 8, fontSize: 13, color: '#4F4F4F' }}>
+              🥡 Takeaway order: Please collect your parcel from the restaurant counter when ready.
             </div>
           )}
         </div>
@@ -947,6 +1009,36 @@ function CartContent() {
           ? `Proceed to Pay ₹${(grandTotalPaise / 100).toFixed(2)} via Card ➔`
           : `Confirm Order with Cash on Delivery (₹${(grandTotalPaise / 100).toFixed(2)}) ➔`}
       </button>
+
+      {/* 1-TAP DIRECT WHATSAPP ORDER OPTION */}
+      <div style={{ marginTop: 12, textAlign: 'center' }}>
+        <a
+          href={`https://wa.me/${restaurant?.phone || '919876543210'}?text=${encodeURIComponent(
+            `👋 Hi ${restaurant?.name || 'Restaurant'}!\nI'd like to place a direct order:\n\n${cart.map(i => `• ${i.quantity}x ${i.name} ${i.variantName ? `(${i.variantName})` : ''} - ₹${((i.unitPricePaise * i.quantity) / 100).toFixed(0)}`).join('\n')}\n\n💰 Total: ₹${(grandTotalPaise / 100).toFixed(0)}\n📍 Mode: ${orderType === 'dine_in' ? `Dine-In (Table ${tableNo || '1'})` : orderType === 'pickup' ? 'Takeaway Pickup' : `Delivery to: ${addressLine || 'Address'}`}\n📞 Customer: ${customerName || 'Guest'} (${customerPhone || ''})\n\nPlease confirm my order!`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            width: '100%',
+            padding: '13px',
+            borderRadius: 12,
+            background: '#E8F5E9',
+            border: '1.5px solid #A5D6A7',
+            color: '#1B5E20',
+            fontWeight: 800,
+            fontSize: 14.5,
+            textDecoration: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <span>💬</span>
+          <span>Or Place Order Directly on WhatsApp ➔</span>
+        </a>
+      </div>
 
       {/* REAL DIRECT UPI PAYMENT GATEWAY MODAL */}
       {upiPaymentModal && (

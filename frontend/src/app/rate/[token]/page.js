@@ -80,9 +80,48 @@ function RatingContent() {
             <p style={{ color: '#4F4F4F', fontSize: 14, marginBottom: 20, lineHeight: 1.5 }}>
               Your feedback goes directly to {order?.restaurant_name || 'the restaurant'} and helps maintain top quality.
             </p>
-            <div style={{ background: '#EDF8F0', border: '1px solid #A7E3B6', color: '#1B7A32', padding: 12, borderRadius: 10, fontSize: 14, fontWeight: 700, marginBottom: 24 }}>
+            <div style={{ background: '#EDF8F0', border: '1px solid #A7E3B6', color: '#1B7A32', padding: 12, borderRadius: 10, fontSize: 14, fontWeight: 700, marginBottom: 20 }}>
               🎁 50 Bonus Loyalty Points Credited to your Phone!
             </div>
+
+            {stars >= 4 && (
+              <div style={{
+                background: '#FFF8E1',
+                border: '1.5px solid #FFE082',
+                borderRadius: 14,
+                padding: '16px',
+                marginBottom: 20,
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: '#F57F17', marginBottom: 4 }}>
+                  🌟 Loved our food? Post a Google Review!
+                </div>
+                <p style={{ fontSize: 12.5, color: '#5D4037', marginBottom: 12 }}>
+                  Your 5-star review on Google helps fellow foodies discover our local kitchen.
+                </p>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(order?.restaurant_name || 'Spice Garden Restaurant Mumbai reviews')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: '#1A73E8',
+                    color: '#FFFFFF',
+                    padding: '8px 18px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    boxShadow: '0 2px 8px rgba(26,115,232,0.3)'
+                  }}
+                >
+                  <span>⭐</span>
+                  <span>Review on Google Maps ➔</span>
+                </a>
+              </div>
+            )}
             <Link href="/" className="btn-primary" style={{ width: '100%', padding: '13px', borderRadius: 10 }}>
               Back to Home ➔
             </Link>
