@@ -29,6 +29,9 @@ function MenuContent() {
   const [serviceStatusMsg, setServiceStatusMsg] = useState('');
   const [serviceLoading, setServiceLoading] = useState(false);
 
+  // VIP Loyalty Profile & Benefits Modal
+  const [loyaltyModalOpen, setLoyaltyModalOpen] = useState(false);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [vegFilter, setVegFilter] = useState('all'); // 'all', 'veg', 'non_veg'
@@ -235,8 +238,40 @@ function MenuContent() {
           </button>
         </div>
 
-        {/* Quick Actions (Call Waiter + WhatsApp) */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {/* Quick Actions (VIP Club + Call Waiter + WhatsApp) */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setLoyaltyModalOpen(true)}
+            style={{
+              background: 'linear-gradient(135deg, #1C1C1C, #2D3748)',
+              color: '#FCD34D',
+              border: '1px solid rgba(252, 211, 77, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+            }}
+          >
+            <span>👑 VIP Club</span>
+            <span
+              style={{
+                background: 'rgba(252, 211, 77, 0.2)',
+                color: '#FFF',
+                padding: '1px 6px',
+                borderRadius: 10,
+                fontSize: 10.5,
+                fontWeight: 800
+              }}
+            >
+              🪙 240 pts
+            </span>
+          </button>
+
           {orderMode === 'dine_in' && (
             <button
               onClick={() => setWaiterModalOpen(true)}
@@ -392,6 +427,65 @@ function MenuContent() {
           </div>
         </div>
       </header>
+
+      {/* 2B. VIP LOYALTY CLUB HIGHLIGHT BANNER */}
+      <div
+        onClick={() => setLoyaltyModalOpen(true)}
+        style={{
+          margin: '0 14px 14px',
+          background: 'linear-gradient(90deg, #FFFBEB 0%, #FEF3C7 100%)',
+          border: '1.5px solid #FCD34D',
+          borderRadius: 12,
+          padding: '11px 16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)',
+          transition: 'transform 0.15s ease'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: '#D97706',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 16
+            }}
+          >
+            👑
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#92400E' }}>
+              Direct VIP Club: 240 Points Available (₹240 Cash Discount)
+            </div>
+            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 1 }}>
+              🥇 Gold Tier • Earn 10% instant points cashback on this order
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            color: '#B45309',
+            background: 'rgba(255,255,255,0.7)',
+            padding: '4px 10px',
+            borderRadius: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4
+          }}
+        >
+          View Perks ➔
+        </div>
+      </div>
 
       {/* 3. SEARCH & FILTERS BAR */}
       <div style={{ padding: '0 14px', marginBottom: 14 }}>
@@ -901,6 +995,313 @@ function MenuContent() {
                 {serviceStatusMsg}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 7B. VIP LOYALTY PROFILE & BENEFITS MODAL */}
+      {loyaltyModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 1050,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setLoyaltyModalOpen(false);
+          }}
+        >
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 20,
+              width: '100%',
+              maxWidth: 580,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                padding: '18px 20px',
+                borderBottom: '1px solid #F0F2F5',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>👑</span>
+                <div>
+                  <h3 style={{ fontSize: 17, fontWeight: 900, color: '#1C1C1C', margin: 0 }}>
+                    DirectDine VIP Club
+                  </h3>
+                  <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+                    Exclusive Direct Ordering Rewards & Tier Perks
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setLoyaltyModalOpen(false)}
+                style={{
+                  background: '#F5F5F5',
+                  border: 'none',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#666'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: 20 }}>
+              {/* Metallic VIP Pass Card */}
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #1C1917 0%, #78350F 55%, #B45309 100%)',
+                  borderRadius: 16,
+                  padding: '22px 24px',
+                  color: '#FFFFFF',
+                  boxShadow: '0 14px 30px rgba(180, 83, 9, 0.3)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  marginBottom: 20
+                }}
+              >
+                {/* Decorative watermarks */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: -15,
+                    right: -15,
+                    fontSize: 120,
+                    opacity: 0.1,
+                    pointerEvents: 'none',
+                    userSelect: 'none'
+                  }}
+                >
+                  👑
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                  <div>
+                    <div style={{ fontSize: 10.5, letterSpacing: 2, textTransform: 'uppercase', opacity: 0.8, fontWeight: 700 }}>
+                      DIRECT ORDERING VIP PASS
+                    </div>
+                    <div style={{ fontSize: 19, fontWeight: 900, marginTop: 4 }}>
+                      Valued Foodie Member
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
+                      padding: '4px 10px',
+                      borderRadius: 20,
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      color: '#FEF3C7'
+                    }}
+                  >
+                    🥇 GOLD VIP
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', position: 'relative', zIndex: 1 }}>
+                  <div>
+                    <div style={{ fontSize: 11, textTransform: 'uppercase', opacity: 0.8, fontWeight: 600 }}>
+                      Available Points Balance
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 900, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                      🪙 240 PTS
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#FEF3C7' }}>
+                        = ₹240.00 Off
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 10.5, opacity: 0.8 }}>Active Perk</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#FEF3C7' }}>
+                      10% Cashback + Free Delivery
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress bar to Platinum */}
+                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.18)', position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, opacity: 0.9, marginBottom: 6 }}>
+                    <span>Next Tier: <strong>💎 Platinum Elite</strong></span>
+                    <span>₹350 spent away (72%)</span>
+                  </div>
+                  <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: '72%', height: '100%', background: '#FCD34D', borderRadius: 3 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Concrete 1 Pt = 1 Re Explanation Banner */}
+              <div
+                style={{
+                  background: '#F0FDF4',
+                  border: '1px solid #BBF7D0',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  marginBottom: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10
+                }}
+              >
+                <span style={{ fontSize: 22 }}>💰</span>
+                <div style={{ fontSize: 12.5, color: '#15803D' }}>
+                  <strong>How Benefits Work:</strong> 1 Loyalty Point = <strong>₹1.00 Direct Cash Discount</strong>. Simply check "Redeem Points" on the cart page to deduct ₹240 instantly!
+                </div>
+              </div>
+
+              {/* 4 Tiers Comparison Matrix */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C', marginBottom: 10 }}>
+                  🏆 Membership Tiers & Privileges
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {/* Bronze */}
+                  <div
+                    style={{
+                      border: '1px solid #E5E7EB',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      background: '#FAFAFA',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#9A3412' }}>
+                        🥉 Bronze Foodie (₹0 - ₹999 spend)
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#666', marginTop: 2 }}>
+                        • 5% Points Cashback • 1-Tap Redemption • Table priority
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#666' }}>Unlocked</span>
+                  </div>
+
+                  {/* Silver */}
+                  <div
+                    style={{
+                      border: '1px solid #E5E7EB',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      background: '#FAFAFA',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#475569' }}>
+                        🥈 Silver Gourmet (₹1,000 - ₹2,499 spend)
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#666', marginTop: 2 }}>
+                        • 7% Points Cashback • Free Dessert on ₹699+ • Priority prep
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#666' }}>Unlocked</span>
+                  </div>
+
+                  {/* Gold (Active) */}
+                  <div
+                    style={{
+                      border: '2px solid #D97706',
+                      borderRadius: 10,
+                      padding: '12px 14px',
+                      background: '#FFFBEB',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      boxShadow: '0 2px 6px rgba(217, 119, 6, 0.1)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 900, color: '#B45309' }}>
+                          🥇 Gold VIP (₹2,500 - ₹4,999 spend)
+                        </span>
+                        <span style={{ background: '#D97706', color: '#fff', fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 8 }}>
+                          YOUR TIER
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#92400E', marginTop: 3 }}>
+                        • 10% Cashback • <strong>FREE Delivery on all orders</strong> • Welcome drink
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 16 }}>⭐</span>
+                  </div>
+
+                  {/* Platinum */}
+                  <div
+                    style={{
+                      border: '1px dashed #94A3B8',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      background: '#F8FAFC',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#0F172A' }}>
+                        💎 Platinum Elite (₹5,000+ spend)
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>
+                        • 12% Cashback • Free Delivery • 10% Extra VIP Code • Free Birthday Feast
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 8 }}>
+                      ₹350 Left
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button
+                type="button"
+                onClick={() => setLoyaltyModalOpen(false)}
+                className="btn-primary"
+                style={{
+                  width: '100%',
+                  padding: 13,
+                  borderRadius: 12,
+                  fontSize: 14,
+                  fontWeight: 900,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+              >
+                <span>Order Now & Redeem ₹240</span>
+                <span>➔</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

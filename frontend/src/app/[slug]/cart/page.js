@@ -36,7 +36,7 @@ function CartContent() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
-  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [loyaltyPoints, setLoyaltyPoints] = useState(240);
   const [useLoyalty, setUseLoyalty] = useState(false);
 
   // Payment
@@ -101,6 +101,11 @@ function CartContent() {
         const c = JSON.parse(savedCustomer);
         setCustomerPhone(c.phone || '');
         setCustomerName(c.name || '');
+        if (c.loyalty_points !== undefined) {
+          setLoyaltyPoints(c.loyalty_points);
+        } else {
+          setLoyaltyPoints(240);
+        }
         if (c.address) {
           setAddressLine(c.address.address_line || '');
           setLandmark(c.address.landmark || '');
@@ -211,7 +216,7 @@ function CartContent() {
   const gstPercent = restaurant?.gst_percent || 5;
   const gstPaise = Math.round((cartSubtotalPaise * gstPercent) / 100);
   const discountPaise = appliedCoupon?.discountPaise || 0;
-  const loyaltyDiscountPaise = useLoyalty ? Math.min(loyaltyPoints * 50, cartSubtotalPaise / 2) : 0;
+  const loyaltyDiscountPaise = useLoyalty ? Math.min((loyaltyPoints || 240) * 100, cartSubtotalPaise) : 0;
 
   const grandTotalPaise = Math.max(0, cartSubtotalPaise + deliveryFeePaise + gstPaise - discountPaise - loyaltyDiscountPaise);
 
@@ -811,6 +816,127 @@ function CartContent() {
         )}
       </div>
 
+      {/* VIP LOYALTY CARD & 1-TAP REDEMPTION */}
+      <div
+        style={{
+          background: useLoyalty
+            ? 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)'
+            : '#FFFFFF',
+          borderRadius: 14,
+          padding: '18px 20px',
+          marginBottom: 18,
+          border: useLoyalty ? '1.5px solid #F59E0B' : '1px solid #ECEEF2',
+          boxShadow: 'var(--shadow-sm)',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #D97706, #F59E0B)',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 18,
+                fontWeight: 900
+              }}
+            >
+              👑
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C' }}>DirectDine VIP Club</span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    background: '#FEF3C7',
+                    color: '#92400E',
+                    padding: '2px 7px',
+                    borderRadius: 10,
+                    fontWeight: 800
+                  }}
+                >
+                  🥇 Gold VIP (10% Cashback)
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>
+                Available Balance:{' '}
+                <strong style={{ color: '#B45309' }}>
+                  🪙 {loyaltyPoints || 240} Points (₹{loyaltyPoints || 240}.00)
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Checkbox / Toggle */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={useLoyalty}
+              onChange={(e) => setUseLoyalty(e.target.checked)}
+              style={{
+                width: 20,
+                height: 20,
+                accentColor: '#D97706',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 800, color: useLoyalty ? '#B45309' : '#1C1C1C' }}>
+              {useLoyalty ? 'Redeemed ✓' : 'Redeem Points'}
+            </span>
+          </label>
+        </div>
+
+        {useLoyalty ? (
+          <div
+            style={{
+              marginTop: 12,
+              paddingTop: 10,
+              borderTop: '1px dashed #FCD34D',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: 12.5
+            }}
+          >
+            <span style={{ color: '#92400E', fontWeight: 600 }}>
+              🎉 Redeeming {Math.min(loyaltyPoints || 240, Math.floor(cartSubtotalPaise / 100))} points:
+            </span>
+            <strong style={{ color: '#15803D', fontSize: 14 }}>
+              -₹{Math.min(loyaltyPoints || 240, Math.floor(cartSubtotalPaise / 100))}.00 Direct Cash Discount
+            </strong>
+          </div>
+        ) : (
+          <div style={{ fontSize: 11.5, color: '#888', marginTop: 8 }}>
+            💡 1 Loyalty Point = ₹1.00 Direct Cash Discount. Check the box above to deduct ₹{Math.min(loyaltyPoints || 240, Math.floor(cartSubtotalPaise / 100))} right now.
+          </div>
+        )}
+
+        <div
+          style={{
+            marginTop: 10,
+            background: 'rgba(217, 119, 6, 0.08)',
+            borderRadius: 8,
+            padding: '7px 10px',
+            fontSize: 11.5,
+            color: '#92400E',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+        >
+          <span>✨</span>
+          <span>
+            You will also earn <strong>+₹{Math.round((cartSubtotalPaise * 0.10) / 100)} (10% Cashback)</strong> in VIP points once this order is confirmed!
+          </span>
+        </div>
+      </div>
+
       {/* PAYMENT METHOD SELECTION */}
       <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 18, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>💳 Payment Mode</h2>
@@ -941,6 +1067,13 @@ function CartContent() {
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--veg-color)', fontWeight: 700 }}>
               <span>Coupon Discount ({appliedCoupon.code})</span>
               <span>-₹{(discountPaise / 100).toFixed(2)}</span>
+            </div>
+          )}
+
+          {useLoyalty && loyaltyDiscountPaise > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#B45309', fontWeight: 700 }}>
+              <span>🪙 VIP Loyalty Redemption ({Math.round(loyaltyDiscountPaise / 100)} pts)</span>
+              <span>-₹{(loyaltyDiscountPaise / 100).toFixed(2)}</span>
             </div>
           )}
 

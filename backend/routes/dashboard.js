@@ -456,15 +456,16 @@ router.post('/menu/item/:id/photo', staffAuth, handleItemPhoto);
 
 // ========== CUSTOMERS CRM ==========
 
-// GET /api/dashboard/customers — Customer list
+// GET /api/dashboard/customers — Customer list with loyalty tiers
 router.get('/customers', staffAuth, asyncHandler(async (req, res) => {
-  const { limit = 50, offset = 0, search } = req.query;
+  const { limit = 100, offset = 0, search } = req.query;
+  const restaurantId = await getEffectiveRestaurantId(req);
 
   let sql = `SELECT rc.*, c.phone, c.name
              FROM restaurant_customers rc
              JOIN customers c ON c.id = rc.customer_id
              WHERE rc.restaurant_id = $1`;
-  const params = [req.staff.restaurantId];
+  const params = [restaurantId];
 
   if (search) {
     sql += ` AND (c.name ILIKE $${params.length + 1} OR c.phone ILIKE $${params.length + 1})`;
@@ -476,12 +477,136 @@ router.get('/customers', staffAuth, asyncHandler(async (req, res) => {
 
   const { rows: customers } = await query(sql, params);
 
+  // Compute tier and VIP benefits for each customer
+  const enrichedCustomers = customers.map(c => {
+    const totalSpentRupees = Math.round((c.total_spent_paise || 0) / 100);
+    const orderCount = c.total_orders || 0;
+
+    let tier = 'bronze';
+    let tierName = 'Bronze Foodie';
+    let tierIcon = '🥉';
+    let tierColor = '#B45309';
+    let tierBg = '#FEF3C7';
+    let pointsRate = '5% Earn Rate';
+    let unlockedPerks = ['5% points cashback on every order', 'Welcome 50 bonus points'];
+    let nextTierName = 'Silver Gourmet';
+    let nextTierThreshold = 1000;
+    let nextTierProgress = Math.min(100, Math.round((totalSpentRupees / 1000) * 100));
+
+    if (totalSpentRupees >= 7000 || orderCount >= 10) {
+      tier = 'platinum';
+      tierName = 'Platinum Elite';
+      tierIcon = '💎';
+      tierColor = '#7C3AED';
+      tierBg = '#F5F3FF';
+      pointsRate = '12% Earn Rate';
+      unlockedPerks = ['12% points cashback on all orders', 'Always FREE Delivery', '10% Flat Extra Off', 'Complimentary Birthday Platter', 'Direct Chef Line'];
+      nextTierName = 'Max Tier Achieved';
+      nextTierThreshold = 7000;
+      nextTierProgress = 100;
+    } else if (totalSpentRupees >= 3000 || orderCount >= 5) {
+      tier = 'gold';
+      tierName = 'Gold VIP';
+      tierIcon = '🥇';
+      tierColor = '#D97706';
+      tierBg = '#FEF3C7';
+      pointsRate = '10% Earn Rate';
+      unlockedPerks = ['10% points cashback on all orders', 'Always FREE Delivery', 'Priority Kitchen Queue (15 min prep)', 'Double Points Weekends'];
+      nextTierName = 'Platinum Elite';
+      nextTierThreshold = 7000;
+      nextTierProgress = Math.min(100, Math.round(((totalSpentRupees - 3000) / 4000) * 100));
+    } else if (totalSpentRupees >= 1000 || orderCount >= 2) {
+      tier = 'silver';
+      tierName = 'Silver Gourmet';
+      tierIcon = '🥈';
+      tierColor = '#4B5563';
+      tierBg = '#F3F4F6';
+      pointsRate = '7% Earn Rate';
+      unlockedPerks = ['7% points cashback on all orders', 'Free Dessert / Beverage over ₹400', 'Secret Direct Menu Access'];
+      nextTierName = 'Gold VIP';
+      nextTierThreshold = 3000;
+      nextTierProgress = Math.min(100, Math.round(((totalSpentRupees - 1000) / 2000) * 100));
+    }
+
+    return {
+      ...c,
+      tier,
+      tierName,
+      tierIcon,
+      tierColor,
+      tierBg,
+      pointsRate,
+      unlockedPerks,
+      nextTierName,
+      nextTierThreshold,
+      nextTierProgress
+    };
+  });
+
   const { rows: [{ count }] } = await query(
     'SELECT count(*)::int FROM restaurant_customers WHERE restaurant_id = $1',
-    [req.staff.restaurantId]
+    [restaurantId]
   );
 
-  res.json({ success: true, customers, total: count });
+  res.json({ success: true, customers: enrichedCustomers, total: count });
+}));
+
+// POST /api/dashboard/customers/:customerId/loyalty-adjust — Credit/debit loyalty points
+router.post('/customers/:customerId/loyalty-adjust', staffAuth, asyncHandler(async (req, res) => {
+  const { points, reason = 'VIP Courtesy Bonus' } = req.body;
+  const restaurantId = await getEffectiveRestaurantId(req);
+  const customerId = req.params.customerId;
+
+  const pointsNum = parseInt(points, 10);
+  if (isNaN(pointsNum) || pointsNum === 0) {
+    throw new ApiError(400, 'Invalid points amount');
+  }
+
+  const { rows: [rc] } = await query(
+    `UPDATE restaurant_customers
+     SET loyalty_points = GREATEST(0, loyalty_points + $1)
+     WHERE restaurant_id = $2 AND customer_id = $3
+     RETURNING *`,
+    [pointsNum, restaurantId, customerId]
+  );
+  if (!rc) throw new ApiError(404, 'Customer record not found');
+
+  await query(
+    `INSERT INTO loyalty_ledger (restaurant_id, customer_id, points, reason)
+     VALUES ($1, $2, $3, 'manual_adjust')`,
+    [restaurantId, customerId, pointsNum]
+  );
+
+  res.json({
+    success: true,
+    message: `${pointsNum > 0 ? '+' : ''}${pointsNum} Loyalty Points adjusted! New Balance: ${rc.loyalty_points} pts`,
+    newBalance: rc.loyalty_points
+  });
+}));
+
+// GET /api/dashboard/customers/:customerId/ledger — Customer order history & points ledger
+router.get('/customers/:customerId/ledger', staffAuth, asyncHandler(async (req, res) => {
+  const restaurantId = await getEffectiveRestaurantId(req);
+  const customerId = req.params.customerId;
+
+  const { rows: ledger } = await query(
+    `SELECT ll.*, o.order_no
+     FROM loyalty_ledger ll
+     LEFT JOIN orders o ON o.id = ll.order_id
+     WHERE ll.restaurant_id = $1 AND ll.customer_id = $2
+     ORDER BY ll.created_at DESC LIMIT 50`,
+    [restaurantId, customerId]
+  );
+
+  const { rows: orders } = await query(
+    `SELECT id, order_no, total_paise, status, order_type, placed_at
+     FROM orders
+     WHERE restaurant_id = $1 AND customer_id = $2
+     ORDER BY placed_at DESC LIMIT 20`,
+    [restaurantId, customerId]
+  );
+
+  res.json({ success: true, ledger, orders });
 }));
 
 // ========== COUPONS ==========
