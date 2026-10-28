@@ -606,16 +606,35 @@ router.put('/toggle-open', staffAuth, asyncHandler(async (req, res) => {
 
 // ========== ANALYTICS ==========
 
-// GET /api/dashboard/analytics — Dashboard stats
+// GET /api/dashboard/analytics — Dashboard stats & deep revenue intelligence
 router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
   const restaurantId = await getEffectiveRestaurantId(req);
 
-  // Today's stats
+  // Today's stats (all non-cancelled orders placed today)
   const { rows: [todayStats] } = await query(
     `SELECT count(*)::int AS orders, COALESCE(sum(total_paise), 0)::bigint AS revenue
      FROM orders
-     WHERE restaurant_id = $1 AND status = 'delivered'
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
        AND placed_at >= date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata')`,
+    [restaurantId]
+  );
+
+  // Yesterday's stats (for comparison)
+  const { rows: [yesterdayStats] } = await query(
+    `SELECT count(*)::int AS orders, COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+       AND placed_at >= date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata' - interval '1 day')
+       AND placed_at < date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata')`,
+    [restaurantId]
+  );
+
+  // Last 7 days stats
+  const { rows: [weekStats] } = await query(
+    `SELECT count(*)::int AS orders, COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+       AND placed_at >= now() - interval '7 days'`,
     [restaurantId]
   );
 
@@ -623,8 +642,76 @@ router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
   const { rows: [monthStats] } = await query(
     `SELECT count(*)::int AS orders, COALESCE(sum(total_paise), 0)::bigint AS revenue
      FROM orders
-     WHERE restaurant_id = $1 AND status = 'delivered'
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
        AND placed_at >= date_trunc('month', now() AT TIME ZONE 'Asia/Kolkata')`,
+    [restaurantId]
+  );
+
+  // All-time stats
+  const { rows: [allTimeStats] } = await query(
+    `SELECT count(*)::int AS orders, COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')`,
+    [restaurantId]
+  );
+
+  // 7-Day Daily Timeline for charts
+  const { rows: timelineRows } = await query(
+    `SELECT to_char(placed_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') AS day_key,
+            to_char(placed_at AT TIME ZONE 'Asia/Kolkata', 'Dy') AS day_name,
+            to_char(placed_at AT TIME ZONE 'Asia/Kolkata', 'DD Mon') AS label,
+            count(*)::int AS orders,
+            COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+       AND placed_at >= now() - interval '7 days'
+     GROUP BY day_key, day_name, label
+     ORDER BY day_key ASC`,
+    [restaurantId]
+  );
+
+  // Ordering Channel Breakdown (Dine-in, Takeaway, Delivery)
+  const { rows: channelRows } = await query(
+    `SELECT order_type,
+            count(*)::int AS orders,
+            COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+     GROUP BY order_type ORDER BY revenue DESC`,
+    [restaurantId]
+  );
+
+  // Payment Method Breakdown (UPI, Card, COD)
+  const { rows: paymentRows } = await query(
+    `SELECT COALESCE(payment_method, 'upi') AS method,
+            count(*)::int AS orders,
+            COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+     GROUP BY payment_method ORDER BY revenue DESC`,
+    [restaurantId]
+  );
+
+  // Hourly Daypart Distribution (for peak sales heatmap)
+  const { rows: hourlyRows } = await query(
+    `SELECT extract(hour from placed_at AT TIME ZONE 'Asia/Kolkata')::int AS hour_slot,
+            count(*)::int AS orders,
+            COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND status NOT IN ('cancelled', 'rejected', 'expired')
+     GROUP BY hour_slot
+     ORDER BY hour_slot ASC`,
+    [restaurantId]
+  );
+
+  // Dine-In Table Performance
+  const { rows: tableRows } = await query(
+    `SELECT delivery_address,
+            count(*)::int AS orders,
+            COALESCE(sum(total_paise), 0)::bigint AS revenue
+     FROM orders
+     WHERE restaurant_id = $1 AND order_type = 'dine_in' AND status NOT IN ('cancelled', 'rejected', 'expired')
+     GROUP BY delivery_address ORDER BY orders DESC LIMIT 6`,
     [restaurantId]
   );
 
@@ -632,8 +719,7 @@ router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
   const { rows: topDishes } = await query(
     `SELECT oi.item_name, sum(oi.quantity)::int AS qty, sum(oi.line_total_paise)::bigint AS revenue
      FROM order_items oi JOIN orders o ON o.id = oi.order_id
-     WHERE o.restaurant_id = $1 AND o.status = 'delivered'
-       AND o.placed_at > now() - interval '30 days'
+     WHERE o.restaurant_id = $1 AND o.status NOT IN ('cancelled', 'rejected', 'expired')
      GROUP BY oi.item_name ORDER BY qty DESC LIMIT 10`,
     [restaurantId]
   );
@@ -656,7 +742,7 @@ router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
     [restaurantId]
   );
 
-  // Recent orders (for the live feed)
+  // Recent orders
   const { rows: recentOrders } = await query(
     `SELECT o.id, o.order_no, o.status, o.total_paise, o.order_type, o.placed_at,
             c.name as customer_name
@@ -666,20 +752,42 @@ router.get('/analytics', staffAuth, asyncHandler(async (req, res) => {
     [restaurantId]
   );
 
-  res.json({
-    success: true,
+  const payload = {
     today: {
-      orders: todayStats.orders,
-      revenue: todayStats.revenue
+      orders: todayStats?.orders || 0,
+      revenue: todayStats?.revenue || 0
+    },
+    yesterday: {
+      orders: yesterdayStats?.orders || 0,
+      revenue: yesterdayStats?.revenue || 0
+    },
+    week: {
+      orders: weekStats?.orders || 0,
+      revenue: weekStats?.revenue || 0
     },
     month: {
-      orders: monthStats.orders,
-      revenue: monthStats.revenue
+      orders: monthStats?.orders || 0,
+      revenue: monthStats?.revenue || 0
     },
-    topDishes,
-    customers: customerStats,
-    ratings: ratingStats,
-    recentOrders
+    allTime: {
+      orders: allTimeStats?.orders || 0,
+      revenue: allTimeStats?.revenue || 0
+    },
+    timeline: timelineRows || [],
+    channels: channelRows || [],
+    paymentMethods: paymentRows || [],
+    hourlySlots: hourlyRows || [],
+    tablePerformance: tableRows || [],
+    topDishes: topDishes || [],
+    customers: customerStats || { total_customers: 0, repeat_customers: 0, avg_orders: 1 },
+    ratings: ratingStats || { total_ratings: 0, avg_food_rating: 4.8, avg_delivery_rating: 4.9 },
+    recentOrders: recentOrders || []
+  };
+
+  res.json({
+    success: true,
+    analytics: payload,
+    ...payload
   });
 }));
 
