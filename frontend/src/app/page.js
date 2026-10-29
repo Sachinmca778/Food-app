@@ -236,6 +236,130 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 16px 80px' }}>
       
+      {/* 0. CLIENT PRESENTATION & ROLE DEMO HUB */}
+      <div style={{
+        background: 'linear-gradient(90deg, #0F172A 0%, #1E293B 100%)',
+        color: '#FFFFFF',
+        borderRadius: 14,
+        padding: '11px 18px',
+        marginBottom: 16,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 10,
+        boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 18 }}>🏢</span>
+          <div>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#FCD34D' }}>
+              Client Demo &amp; Role Switcher:
+            </span>
+            <span style={{ fontSize: 12, color: '#94A3B8', marginLeft: 6 }}>
+              Show your client the 3 distinct platform layers:
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link
+            href="/spice-garden"
+            style={{
+              background: 'rgba(226, 55, 68, 0.2)',
+              color: '#FECDD3',
+              border: '1px solid rgba(226, 55, 68, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>🍛</span>
+            <span>Spice Garden Store</span>
+          </Link>
+
+          <Link
+            href="/chai-and-bites"
+            style={{
+              background: 'rgba(217, 119, 6, 0.2)',
+              color: '#FDE68A',
+              border: '1px solid rgba(217, 119, 6, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>🥐</span>
+            <span>Chai &amp; Bites Bakery</span>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            style={{
+              background: 'rgba(59, 130, 246, 0.2)',
+              color: '#BFDBFE',
+              border: '1px solid rgba(59, 130, 246, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>👨‍🍳</span>
+            <span>Kitchen Partner Portal</span>
+          </Link>
+
+          <Link
+            href="/admin"
+            style={{
+              background: 'rgba(147, 51, 234, 0.2)',
+              color: '#E9D5FF',
+              border: '1px solid rgba(147, 51, 234, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>👑</span>
+            <span>Super Admin</span>
+          </Link>
+
+          <Link
+            href="/login"
+            style={{
+              background: '#FFFFFF',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>🚪</span>
+            <span>All Portals</span>
+          </Link>
+        </div>
+      </div>
+
       {/* 1. TOP NAVIGATION (ZOMATO CLEAN RED & WHITE THEME) */}
       <nav style={{
         background: '#FFFFFF',
@@ -555,6 +679,212 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2B. 3 DISTINCT PLATFORM LAYERS (CLIENT PITCH SHOWCASE) */}
+      <section style={{ marginBottom: 38 }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            COMPLETE FOOD OPERATING SYSTEM
+          </div>
+          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', color: '#1C1C1C', fontWeight: 900 }}>
+            3 Dedicated Experiences for Every Stakeholder
+          </h2>
+          <p style={{ color: '#696969', fontSize: 14, maxWidth: 640, margin: '6px auto 0' }}>
+            Built specifically so customers, restaurant staff, and platform administrators have their own tailored interface.
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
+          gap: 16
+        }}>
+          {/* Layer 1: Customer Storefront */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #E2E8F0',
+            borderRadius: 18,
+            padding: '24px 22px',
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: '#FFF1F2',
+                color: 'var(--primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                marginBottom: 12,
+                border: '1px solid #FECDD3'
+              }}>
+                🍽️
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                LAYER 1 • END-CONSUMERS
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+                Restaurant Brand Storefront
+              </h3>
+              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
+                Each restaurant has its own dedicated website (<code>/[slug]</code>) where foodies browse the menu, customize cake messages, redeem VIP cash points, and pay via instant UPI.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Link
+                href="/spice-garden"
+                style={{
+                  flex: 1,
+                  background: '#FFF1F2',
+                  color: 'var(--primary)',
+                  border: '1px solid #FECDD3',
+                  padding: '9px 12px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  textAlign: 'center'
+                }}
+              >
+                🍛 Spice Garden ➔
+              </Link>
+              <Link
+                href="/chai-and-bites"
+                style={{
+                  flex: 1,
+                  background: '#FFFBEB',
+                  color: '#B45309',
+                  border: '1px solid #FDE68A',
+                  padding: '9px 12px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  textAlign: 'center'
+                }}
+              >
+                🥐 Chai &amp; Bites ➔
+              </Link>
+            </div>
+          </div>
+
+          {/* Layer 2: Kitchen KDS & Partner Portal */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #BFDBFE',
+            borderRadius: 18,
+            padding: '24px 22px',
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: '#EFF6FF',
+                color: '#2563EB',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                marginBottom: 12,
+                border: '1px solid #BFDBFE'
+              }}>
+                👨‍🍳
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                LAYER 2 • RESTAURANT OWNER &amp; STAFF
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+                Kitchen Order Display (KDS)
+              </h3>
+              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
+                For chefs and floor managers to accept/dispatch live orders with audio chimes, update dish pricing, print table QR standees, and manage repeat customer CRM.
+              </p>
+            </div>
+            <Link
+              href="/dashboard"
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                fontSize: 12.5,
+                fontWeight: 800,
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #1E40AF 0%, #2563EB 100%)',
+                color: '#FFFFFF',
+                textAlign: 'center',
+                display: 'inline-block',
+                textDecoration: 'none'
+              }}
+            >
+              Open Kitchen Dashboard ➔
+            </Link>
+          </div>
+
+          {/* Layer 3: Super Admin Console */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #DDD6FE',
+            borderRadius: 18,
+            padding: '24px 22px',
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: '#FAF5FF',
+                color: '#7C3AED',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                marginBottom: 12,
+                border: '1px solid #DDD6FE'
+              }}>
+                👑
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                LAYER 3 • PLATFORM OWNER
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+                Master Super Admin Console
+              </h3>
+              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
+                For the SaaS platform owner to onboard new restaurant brands in 2 minutes, monitor global GMV, and track platform-wide commission savings.
+              </p>
+            </div>
+            <Link
+              href="/admin"
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                fontSize: 12.5,
+                fontWeight: 800,
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+                color: '#FFFFFF',
+                textAlign: 'center',
+                display: 'inline-block',
+                textDecoration: 'none'
+              }}
+            >
+              Enter Super Admin Console ➔
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 3. SIGNATURE "EXPLORE BY CRAVING" CAROUSEL */}
       <section style={{ marginBottom: 38 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -769,34 +1099,57 @@ export default function HomePage() {
                 </p>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Link
-                    href={`/${rest.slug}${orderMode === 'dine_in' ? '?table=4' : ''}`}
-                    className="btn-primary"
-                    style={{ flex: 1, padding: '10px 14px', fontSize: 13, borderRadius: 8 }}
-                  >
-                    Browse Menu ➔
-                  </Link>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Link
+                      href={`/${rest.slug}${orderMode === 'dine_in' ? '?table=4' : ''}`}
+                      className="btn-primary"
+                      style={{ flex: 1, padding: '10px 14px', fontSize: 13, borderRadius: 8, textAlign: 'center' }}
+                    >
+                      🍽️ Customer Storefront ➔
+                    </Link>
 
-                  <a
-                    href={`https://wa.me/${rest.phone}?text=${encodeURIComponent(`Hi ${rest.name}! I would like to explore today's direct menu and place an order.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    <a
+                      href={`https://wa.me/${rest.phone}?text=${encodeURIComponent(`Hi ${rest.name}! I would like to explore today's direct menu and place an order.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        background: '#E8F5E9',
+                        color: '#1B5E20',
+                        border: '1px solid #C8E6C9',
+                        padding: '10px 14px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}
+                    >
+                      💬 WhatsApp
+                    </a>
+                  </div>
+
+                  <Link
+                    href="/dashboard"
                     style={{
-                      background: '#E8F5E9',
-                      color: '#1B5E20',
-                      border: '1px solid #C8E6C9',
-                      padding: '10px 14px',
+                      background: '#F8F9FA',
+                      color: '#475569',
+                      border: '1px solid #E2E8F0',
+                      padding: '7px 12px',
                       borderRadius: 8,
-                      fontSize: 13,
-                      fontWeight: 800,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      textAlign: 'center',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 4
                     }}
                   >
-                    💬 WhatsApp
-                  </a>
+                    <span>🔐</span>
+                    <span>Staff / Owner Kitchen Login</span>
+                  </Link>
                 </div>
               </div>
             </div>

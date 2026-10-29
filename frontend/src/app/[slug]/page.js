@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
@@ -65,6 +65,13 @@ function MenuContent() {
   const [occasionSuccessMsg, setOccasionSuccessMsg] = useState('');
   const [occasionCouponCode, setOccasionCouponCode] = useState('');
   const [occasionSubmitting, setOccasionSubmitting] = useState(false);
+
+  // Restaurant Staff / Owner Login Modal State
+  const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [staffPhone, setStaffPhone] = useState(slug === 'chai-and-bites' ? '9988776655' : '9876543210');
+  const [staffPassword, setStaffPassword] = useState(slug === 'chai-and-bites' ? 'chai123' : 'spice123');
+  const [staffLoginLoading, setStaffLoginLoading] = useState(false);
+  const [staffLoginError, setStaffLoginError] = useState('');
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -238,6 +245,31 @@ function MenuContent() {
     }
   };
 
+  // Staff & Owner Kitchen Login Handler
+  const handleStaffLogin = async (e) => {
+    if (e) e.preventDefault();
+    setStaffLoginLoading(true);
+    setStaffLoginError('');
+    try {
+      const res = await fetchAPI('/dashboard/login', {
+        method: 'POST',
+        body: JSON.stringify({ phone: staffPhone, password: staffPassword })
+      });
+      if (res.token) {
+        localStorage.setItem('staff_token', res.token);
+        const restObj = res.restaurant || restaurant || { name: 'Spice Garden', slug: 'spice-garden' };
+        localStorage.setItem('staff_restaurant', JSON.stringify(restObj));
+        window.location.href = '/dashboard';
+      } else {
+        setStaffLoginError(res.error || 'Invalid staff credentials');
+      }
+    } catch (err) {
+      setStaffLoginError(err.message || 'Login failed');
+    } finally {
+      setStaffLoginLoading(false);
+    }
+  };
+
   // Dine-In Table Service Request (Call Waiter / Water / Bill)
   const handleSendServiceRequest = async (requestType) => {
     setServiceLoading(true);
@@ -270,9 +302,9 @@ function MenuContent() {
   // 1-Tap WhatsApp Direct Ordering Generator
   const buildWhatsAppOrderLink = () => {
     if (!restaurant) return '#';
-    const restPhone = restaurant.phone || '919876543210';
+    const restPhone = (restaurant.phone || '919876543210').replace(/\D/g, '');
     if (cart.length === 0) {
-      return `https://wa.me/${restPhone}?text=${encodeURIComponent(`Hi ${restaurant.name}! I am browsing your menu and would like to place a direct order.`)}`;
+      return `https://wa.me/${restPhone}?text=${encodeURIComponent(`Hi ${restaurant.name}! 👋 I am browsing your menu and would like to place a direct order.`)}`;
     }
     const lines = cart.map(item => `• ${item.quantity}x ${item.name} ${item.variantName ? `(${item.variantName})` : ''} - ₹${((item.unitPricePaise * item.quantity) / 100).toFixed(0)}`);
     const total = (cartSubtotalPaise / 100).toFixed(0);
@@ -287,21 +319,30 @@ function MenuContent() {
   const modalTotalPaise = modalBasePrice + modalAddonsPrice;
 
   // Filtered menu
-  const filteredMenu = menu.map(cat => {
-    const items = cat.items.filter(item => {
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchVeg = vegFilter === 'all' || item.veg_type === vegFilter;
-      return matchSearch && matchVeg;
-    });
-    return { ...cat, items };
-  }).filter(cat => cat.items.length > 0);
+  const filteredMenu = useMemo(() => {
+    return menu.map(cat => {
+      const items = (cat.items || []).filter(item => {
+        const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchVeg = vegFilter === 'all' || item.veg_type === vegFilter;
+        return matchSearch && matchVeg;
+      });
+      return { ...cat, items };
+    }).filter(cat => cat.items.length > 0);
+  }, [menu, searchQuery, vegFilter]);
+
+  // Chef's Signature Bestsellers Spotlight
+  const spotlightItems = useMemo(() => {
+    const allItems = menu.flatMap(cat => cat.items || []);
+    const bestsellers = allItems.filter(item => item.is_bestseller);
+    return bestsellers.length >= 2 ? bestsellers.slice(0, 4) : allItems.slice(0, 4);
+  }, [menu]);
 
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', gap: 16 }}>
         <div style={{ width: 44, height: 44, border: '3px solid #F0F1F4', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <p style={{ color: '#4F4F4F', fontSize: 14, fontWeight: 600 }}>Loading menu...</p>
+        <p style={{ color: '#4F4F4F', fontSize: 14, fontWeight: 600 }}>Loading culinary experience...</p>
         <style jsx>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -318,148 +359,676 @@ function MenuContent() {
     );
   }
 
-  return (
-    <div style={{ paddingBottom: itemCount > 0 ? 120 : 40, maxWidth: 860, margin: '0 auto' }}>
-      
-      {/* 1. TOP SERVICE MODE & ACTION BAR */}
-      <div style={{
-        margin: '12px 14px 0',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 10
-      }}>
-        {/* Mode Switcher */}
-        <div style={{
-          display: 'flex',
-          background: '#FFFFFF',
-          padding: 3,
-          borderRadius: 10,
-          border: '1px solid var(--border-medium)',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          <button
-            onClick={() => setOrderMode('delivery')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              background: orderMode === 'delivery' ? 'var(--primary)' : 'transparent',
-              color: orderMode === 'delivery' ? '#FFFFFF' : '#4F4F4F',
-              transition: 'all 0.18s'
-            }}
-          >
-            🛵 Delivery
-          </button>
-          <button
-            onClick={() => setOrderMode('dine_in')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              background: orderMode === 'dine_in' ? 'var(--primary)' : 'transparent',
-              color: orderMode === 'dine_in' ? '#FFFFFF' : '#4F4F4F',
-              transition: 'all 0.18s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
-            }}
-          >
-            🍽️ Table {tableNumber}
-          </button>
-          <button
-            onClick={() => setOrderMode('takeaway')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              background: orderMode === 'takeaway' ? 'var(--primary)' : 'transparent',
-              color: orderMode === 'takeaway' ? '#FFFFFF' : '#4F4F4F',
-              transition: 'all 0.18s'
-            }}
-          >
-            🥡 Takeaway
-          </button>
-        </div>
+  const coverImage = restaurant.cover_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&auto=format&fit=crop&q=85';
+  const logoImage = restaurant.logo_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&auto=format&fit=crop&q=80';
 
-        {/* Quick Actions (VIP Club + Call Waiter + WhatsApp) */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setLoyaltyModalOpen(true)}
-            style={{
-              background: 'linear-gradient(135deg, #1C1C1C, #2D3748)',
-              color: '#FCD34D',
-              border: '1px solid rgba(252, 211, 77, 0.4)',
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-            }}
-          >
-            <span>👑 VIP Club</span>
-            <span
+  return (
+    <div style={{ paddingBottom: itemCount > 0 ? 120 : 60, maxWidth: 1040, margin: '0 auto' }}>
+      
+      {/* 1. TOP LUXURY ANNOUNCEMENT TICKER */}
+      <div style={{
+        background: 'linear-gradient(90deg, #1C1917 0%, #3B0D11 50%, #1C1917 100%)',
+        color: '#FCD34D',
+        padding: '9px 16px',
+        fontSize: 'clamp(11.5px, 2.5vw, 13px)',
+        fontWeight: 700,
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        letterSpacing: '0.02em',
+        borderBottom: '1px solid rgba(226, 55, 68, 0.3)',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.15)'
+      }}>
+        <span>✨</span>
+        <span>
+          <strong>Direct Order Exclusive:</strong> 0% Platform Markup • Flat ₹50 OFF with code <strong style={{ color: '#FFFFFF', textDecoration: 'underline' }}>FLAT50</strong> • Earn 10% Cash Points • Free Candles & Cutlery
+        </span>
+        <span>✨</span>
+      </div>
+
+      {/* 2. GRAND PANORAMIC RESTAURANT HERO SECTION (340px) */}
+      <section style={{
+        position: 'relative',
+        margin: '14px 14px 20px',
+        borderRadius: 22,
+        overflow: 'hidden',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.12)',
+        background: '#1C1917'
+      }}>
+        {/* Background Cover Photo with Smooth Dark Vignette */}
+        <div style={{
+          position: 'relative',
+          height: 340,
+          backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.72) 55%, rgba(15, 23, 42, 0.96) 100%), url(${coverImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '18px 22px'
+        }}>
+          {/* Top Bar inside Hero: Back link + DirectDine Pill + Open Status */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <Link
+              href="/"
               style={{
-                background: 'rgba(252, 211, 77, 0.2)',
-                color: '#FFF',
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 10.5,
-                fontWeight: 800
+                background: 'rgba(255, 255, 255, 0.92)',
+                backdropFilter: 'blur(8px)',
+                color: '#1C1C1C',
+                padding: '7px 14px',
+                borderRadius: 24,
+                fontSize: 12.5,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
               }}
             >
-              🪙 240 pts
+              <span>←</span>
+              <span>All Kitchens</span>
+            </Link>
+
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{
+                background: '#24963F',
+                color: '#FFFFFF',
+                padding: '6px 12px',
+                borderRadius: 20,
+                fontSize: 11.5,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                boxShadow: '0 2px 8px rgba(36, 150, 63, 0.35)'
+              }}>
+                ✓ 0% Commission Direct
+              </span>
+
+              <span style={{
+                background: restaurant.isOpen ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                backdropFilter: 'blur(8px)',
+                color: restaurant.isOpen ? '#86EFAC' : '#FCA5A5',
+                border: `1px solid ${restaurant.isOpen ? 'rgba(134, 239, 172, 0.4)' : 'rgba(252, 165, 165, 0.4)'}`,
+                padding: '5px 12px',
+                borderRadius: 20,
+                fontSize: 11.5,
+                fontWeight: 800
+              }}>
+                {restaurant.isOpen ? `🟢 Open Now (~${restaurant.avg_prep_minutes || 25} mins)` : '🔴 Closed'}
+              </span>
+            </div>
+          </div>
+
+          {/* Restaurant Identity: Circular Logo Avatar + Name + Tagline + Meta */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
+            {/* Golden Rimmed Logo Avatar */}
+            <div style={{
+              width: 82,
+              height: 82,
+              borderRadius: '50%',
+              border: '3.5px solid #FCD34D',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              overflow: 'hidden',
+              background: '#FFFFFF',
+              flexShrink: 0
+            }}>
+              <img
+                src={logoImage}
+                alt={restaurant.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+
+            {/* Title & Cuisine */}
+            <div style={{ flex: '1 1 300px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <h1 style={{
+                  fontSize: 'clamp(24px, 4vw, 34px)',
+                  fontWeight: 900,
+                  color: '#FFFFFF',
+                  lineHeight: 1.15,
+                  margin: 0,
+                  textShadow: '0 2px 10px rgba(0,0,0,0.7)'
+                }}>
+                  {restaurant.name}
+                </h1>
+                <span className="zomato-rating-pill" style={{ fontSize: 13, padding: '4px 9px' }}>
+                  4.8 ★
+                </span>
+                <span style={{ color: '#E2E8F0', fontSize: 12, fontWeight: 600, opacity: 0.9 }}>
+                  (1,240+ verified foodie reviews)
+                </span>
+              </div>
+
+              <p style={{
+                color: '#CBD5E1',
+                fontSize: 13.5,
+                margin: '6px 0 0',
+                lineHeight: 1.4,
+                textShadow: '0 1px 4px rgba(0,0,0,0.6)'
+              }}>
+                {restaurant.description || 'Authentic flavors, freshest spices, and zero aggregator price markup.'}
+              </p>
+
+              {/* Meta Chips */}
+              <div style={{
+                display: 'flex',
+                gap: 12,
+                marginTop: 8,
+                flexWrap: 'wrap',
+                fontSize: 12,
+                color: '#E2E8F0',
+                fontWeight: 600
+              }}>
+                <span>📍 {restaurant.address_line || restaurant.city || 'Mumbai'}</span>
+                <span>•</span>
+                <span>⏱️ {restaurant.avg_prep_minutes || 25} mins prep</span>
+                <span>•</span>
+                <span>🛵 Free Delivery above ₹{((restaurant.free_delivery_above_paise || 49900) / 100).toFixed(0)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Action Navigation Buttons inside Hero Bar */}
+        <div style={{
+          background: '#0F172A',
+          borderTop: '1px solid rgba(255,255,255,0.12)',
+          padding: '12px 20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 10
+        }}>
+          {/* Primary CTA */}
+          <a
+            href="#menu-section"
+            className="btn-primary"
+            style={{
+              padding: '9px 18px',
+              fontSize: 13,
+              fontWeight: 800,
+              borderRadius: 10
+            }}
+          >
+            🍽️ Explore Menu & Order
+          </a>
+
+          {/* Interactive Feature Shortcuts */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setBulkModalOpen(true)}
+              style={{
+                background: 'rgba(37, 99, 235, 0.2)',
+                color: '#93C5FD',
+                border: '1px solid rgba(147, 197, 253, 0.3)',
+                padding: '7px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <span>🎈</span>
+              <span>Bulk Party Orders</span>
+            </button>
+
+            <button
+              onClick={() => setOccasionModalOpen(true)}
+              style={{
+                background: 'rgba(226, 55, 68, 0.2)',
+                color: '#FECDD3',
+                border: '1px solid rgba(254, 205, 211, 0.3)',
+                padding: '7px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <span>🎂</span>
+              <span>Birthday Club (15% OFF)</span>
+            </button>
+
+            <button
+              onClick={() => setLoyaltyModalOpen(true)}
+              style={{
+                background: 'linear-gradient(135deg, #78350F, #B45309)',
+                color: '#FEF3C7',
+                border: '1px solid #FCD34D',
+                padding: '7px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                boxShadow: '0 2px 8px rgba(180, 83, 9, 0.3)'
+              }}
+            >
+              <span>👑 VIP Pass</span>
+              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: 6, fontSize: 11 }}>
+                🪙 240 pts
+              </span>
+            </button>
+
+            <a
+              href={buildWhatsAppOrderLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: '#25D366',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '7px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <span>💬</span>
+              <span>WhatsApp Chef</span>
+            </a>
+
+            <button
+              onClick={() => setStaffModalOpen(true)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.12)',
+                color: '#F8FAFC',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                padding: '7px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <span>🔐</span>
+              <span>Kitchen Login</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. "WHY ORDER DIRECT FROM US?" – 4-CARD DIRECTDINE VALUE GRID */}
+      <section style={{ margin: '0 14px 22px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 12
+        }}>
+          {/* Benefit 1 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 14,
+            padding: '14px 16px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>💰</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Zero Aggregator Markup</div>
+            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
+              Direct kitchen prices are 10–20% cheaper than Swiggy/Zomato. Every rupee goes to quality food.
+            </div>
+          </div>
+
+          {/* Benefit 2 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 14,
+            padding: '14px 16px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>🪙</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>10% Instant Cash Cashback</div>
+            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
+              1 Loyalty Point = <strong>₹1.00 Direct Discount</strong> on your next order. No hidden conditions.
+            </div>
+          </div>
+
+          {/* Benefit 3 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 14,
+            padding: '14px 16px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>👨‍🍳</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Direct Chef Attention</div>
+            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
+              Customized spice level, ribbon wording on cakes, and complimentary cutlery packs.
+            </div>
+          </div>
+
+          {/* Benefit 4 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 14,
+            padding: '14px 16px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>⚡</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Express Kitchen Dispatch</div>
+            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
+              Hot and fresh dispatch directly from the pan to your doorstep without multi-order detour delays.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. VISUAL "CATEGORY CRAVINGS" STORY CAROUSEL */}
+      {menu.length > 0 && (
+        <section style={{ margin: '0 14px 22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 800, color: '#1C1C1C', margin: 0 }}>
+              Craving by Category 😋
+            </h3>
+            <span style={{ fontSize: 12, color: '#696969', fontWeight: 600 }}>
+              Tap to jump
             </span>
-          </button>
+          </div>
 
-          <button
-            onClick={() => setBulkModalOpen(true)}
-            style={{
-              background: '#EFF6FF',
-              color: '#1E40AF',
-              border: '1px solid #BFDBFE',
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
+          <div style={{
+            display: 'flex',
+            gap: 14,
+            overflowX: 'auto',
+            paddingBottom: 6,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}>
+            {menu.map((category) => {
+              const sampleItem = category.items?.[0];
+              const sampleImg = sampleItem ? getFoodImageUrl(sampleItem) : 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80';
+              const isSelected = activeCategory === category.id;
+
+              return (
+                <a
+                  key={category.id}
+                  href={`#category-${category.id}`}
+                  onClick={() => setActiveCategory(category.id)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexShrink: 0,
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{
+                    width: 74,
+                    height: 74,
+                    borderRadius: '50%',
+                    padding: 3,
+                    border: `2.5px solid ${isSelected ? 'var(--primary)' : '#E2E8F0'}`,
+                    background: '#FFFFFF',
+                    boxShadow: isSelected ? '0 4px 14px var(--primary-glow)' : 'var(--shadow-sm)',
+                    transition: 'all 0.2s ease',
+                    overflow: 'hidden'
+                  }}>
+                    <img
+                      src={sampleImg}
+                      alt={category.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </div>
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: isSelected ? 800 : 700,
+                    color: isSelected ? 'var(--primary)' : '#1C1C1C',
+                    textAlign: 'center',
+                    maxWidth: 82,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {category.name}
+                  </span>
+                  <span style={{
+                    fontSize: 10.5,
+                    color: '#828282',
+                    marginTop: -4
+                  }}>
+                    {category.items?.length || 0} items
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 5. "CHEF'S SIGNATURE SPECIALS & BESTSELLERS" SPOTLIGHT SHELF */}
+      {spotlightItems.length > 0 && (
+        <section style={{
+          margin: '0 14px 24px',
+          background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
+          border: '1.5px solid #FED7AA',
+          borderRadius: 18,
+          padding: '16px 18px',
+          boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 18 }}>⭐</span>
+                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#9A3412', margin: 0 }}>
+                  Chef's Signature Specials & Bestsellers
+                </h3>
+              </div>
+              <p style={{ fontSize: 12, color: '#C2410C', margin: '3px 0 0' }}>
+                Handpicked most loved recipes straight from our master kitchen
+              </p>
+            </div>
+            <span style={{
+              background: '#EA580C',
+              color: '#FFFFFF',
+              fontSize: 11,
               fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
-            }}
-          >
-            <span>🎈</span>
-            <span>Bulk Orders</span>
-          </button>
+              padding: '3px 8px',
+              borderRadius: 20
+            }}>
+              Must Try
+            </span>
+          </div>
 
-          <button
-            onClick={() => setOccasionModalOpen(true)}
-            style={{
-              background: '#FFF1F2',
-              color: '#BE123C',
-              border: '1px solid #FECDD3',
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
-            }}
-          >
-            <span>🎂</span>
-            <span>Birthday Club</span>
-          </button>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 12
+          }}>
+            {spotlightItems.map((item) => {
+              const cartItem = cart.find(ci => ci.itemId === item.id);
+              const hasCustomizations = (item.variants && item.variants.length > 0) || (item.addon_groups && item.addon_groups.length > 0);
 
+              return (
+                <div
+                  key={`spotlight-${item.id}`}
+                  style={{
+                    background: '#FFFFFF',
+                    borderRadius: 14,
+                    padding: '12px 14px',
+                    border: '1px solid #FFEDD5',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <span className={item.veg_type === 'veg' ? 'badge-veg' : 'badge-nonveg'} />
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 900,
+                        background: '#FEF3C7',
+                        color: '#B45309',
+                        padding: '1px 6px',
+                        borderRadius: 4
+                      }}>
+                        ★ Chef Special
+                      </span>
+                    </div>
+
+                    <h4 style={{ fontSize: 14.5, fontWeight: 800, color: '#1C1C1C', margin: '0 0 3px' }}>
+                      {item.name}
+                    </h4>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: '#1C1C1C', marginBottom: 4 }}>
+                      ₹{(item.base_price_paise / 100).toFixed(0)}
+                    </div>
+                    {item.description && (
+                      <p style={{
+                        fontSize: 11.5,
+                        color: '#696969',
+                        lineHeight: 1.35,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        margin: 0
+                      }}>
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 90 }}>
+                    <div style={{
+                      width: 86,
+                      height: 72,
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                      border: '1px solid #ECEEF2',
+                      background: '#F8F9FA'
+                    }}>
+                      <img
+                        src={getFoodImageUrl(item)}
+                        alt={item.name}
+                        loading="lazy"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div style={{ marginTop: -12, position: 'relative', zIndex: 2 }}>
+                      {cartItem ? (
+                        <div className="zomato-qty-pill" style={{ height: 28 }}>
+                          <button onClick={() => updateQuantity(cartItem.cartKey, -1)} style={{ padding: '0 8px', fontSize: 14 }}>-</button>
+                          <span style={{ fontSize: 12, minWidth: 18 }}>{cartItem.quantity}</span>
+                          <button onClick={() => updateQuantity(cartItem.cartKey, 1)} style={{ padding: '0 8px', fontSize: 14 }}>+</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleQuickAdd(item)}
+                          className="zomato-add-btn"
+                          style={{ padding: '4px 14px', fontSize: 11.5 }}
+                        >
+                          ADD {hasCustomizations ? '+' : ''}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 6. ORDER MODE SWITCHER & PINCODE SERVICEABILITY BAR */}
+      <section style={{ margin: '0 14px 16px' }}>
+        <div style={{
+          background: '#FFFFFF',
+          borderRadius: 14,
+          padding: '12px 14px',
+          border: '1px solid var(--border-medium)',
+          boxShadow: 'var(--shadow-sm)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 10
+        }}>
+          {/* Mode Switcher Tabs */}
+          <div style={{
+            display: 'flex',
+            background: '#F4F5F8',
+            padding: 3,
+            borderRadius: 10,
+            border: '1px solid #E3E5EB'
+          }}>
+            <button
+              onClick={() => setOrderMode('delivery')}
+              style={{
+                padding: '7px 14px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 800,
+                background: orderMode === 'delivery' ? 'var(--primary)' : 'transparent',
+                color: orderMode === 'delivery' ? '#FFFFFF' : '#4F4F4F',
+                transition: 'all 0.18s'
+              }}
+            >
+              🛵 Delivery
+            </button>
+            <button
+              onClick={() => setOrderMode('dine_in')}
+              style={{
+                padding: '7px 14px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 800,
+                background: orderMode === 'dine_in' ? 'var(--primary)' : 'transparent',
+                color: orderMode === 'dine_in' ? '#FFFFFF' : '#4F4F4F',
+                transition: 'all 0.18s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              🍽️ Table {tableNumber}
+            </button>
+            <button
+              onClick={() => setOrderMode('takeaway')}
+              style={{
+                padding: '7px 14px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 800,
+                background: orderMode === 'takeaway' ? 'var(--primary)' : 'transparent',
+                color: orderMode === 'takeaway' ? '#FFFFFF' : '#4F4F4F',
+                transition: 'all 0.18s'
+              }}
+            >
+              🥡 Takeaway
+            </button>
+          </div>
+
+          {/* Dine-In Call Waiter action button */}
           {orderMode === 'dine_in' && (
             <button
               onClick={() => setWaiterModalOpen(true)}
@@ -467,432 +1036,138 @@ function MenuContent() {
                 background: '#FFF3CD',
                 color: '#856404',
                 border: '1px solid #FFEEBA',
-                padding: '6px 12px',
+                padding: '7px 14px',
                 borderRadius: 8,
-                fontSize: 12,
+                fontSize: 12.5,
                 fontWeight: 800,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 4
+                gap: 5
               }}
             >
-              🔔 Call Waiter
+              🔔 Call Waiter / Service
             </button>
           )}
 
-          <a
-            href={buildWhatsAppOrderLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: '#E8F5E9',
-              color: '#1B5E20',
-              border: '1px solid #C8E6C9',
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
-            }}
-          >
-            💬 WhatsApp
-          </a>
+          {/* Delivery Pincode input */}
+          {orderMode === 'delivery' && (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Pincode e.g. 400050"
+                  maxLength={6}
+                  value={pincodeInput}
+                  onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleCheckPincode(); }}
+                  style={{
+                    width: 140,
+                    height: 36,
+                    padding: '0 10px',
+                    borderRadius: 8,
+                    border: '1px solid #D1D5DB',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    textAlign: 'center'
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCheckPincode}
+                disabled={pincodeChecking || pincodeInput.length !== 6}
+                style={{
+                  background: 'var(--primary)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '0 14px',
+                  height: 36,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: pincodeInput.length === 6 ? 'pointer' : 'not-allowed',
+                  opacity: pincodeInput.length === 6 ? 1 : 0.6
+                }}
+              >
+                {pincodeChecking ? '...' : 'Check Pin'}
+              </button>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* 1B. DELIVERY PINCODE SERVICEABILITY CHECKER (CRUSTO BAKERS FEATURE) */}
-      {orderMode === 'delivery' && (
-        <div
-          style={{
-            margin: '10px 14px 0',
-            background: '#FFFFFF',
-            borderRadius: 12,
+        {/* Pincode Result Banner */}
+        {orderMode === 'delivery' && pincodeVerified && (
+          <div style={{
+            marginTop: 8,
+            padding: '8px 14px',
+            borderRadius: 10,
+            background: pincodeServiceable ? '#EDF8F0' : '#FEECEE',
+            border: `1px solid ${pincodeServiceable ? '#A7E3B6' : '#FBCED2'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>{pincodeServiceable ? '✅' : '⚠️'}</span>
+              <span style={{ fontWeight: 800, color: pincodeServiceable ? '#15803D' : '#DC2626' }}>
+                {pincodeMsg || (pincodeServiceable ? `Delivering to ${savedPincode}` : `Pincode outside delivery radius`)}
+              </span>
+            </div>
+            <span style={{ color: '#4F4F4F', fontWeight: 600 }}>
+              Est. 30–45 mins • Free delivery above ₹{((restaurant?.free_delivery_above_paise || 49900) / 100).toFixed(0)}
+            </span>
+          </div>
+        )}
+
+        {/* Takeaway Info Banner */}
+        {orderMode === 'takeaway' && (
+          <div style={{
+            marginTop: 8,
             padding: '10px 14px',
-            border: '1px solid #ECEEF2',
-            boxShadow: 'var(--shadow-sm)',
+            borderRadius: 10,
+            background: '#EFF6FF',
+            border: '1.5px solid #BFDBFE',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 8
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 17 }}>📍</span>
-            {pincodeVerified ? (
-              <div>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    fontWeight: 800,
-                    color: pincodeServiceable ? '#15803D' : '#DC2626'
-                  }}
-                >
-                  {pincodeServiceable ? `Delivering to ${savedPincode}` : `Pincode ${savedPincode} outside direct radius`}
-                </div>
-                <div style={{ fontSize: 11, color: '#696969' }}>
-                  {pincodeServiceable
-                    ? `Est. 35-45 mins • Free delivery above ₹${((restaurant?.free_delivery_above_paise || 49900) / 100).toFixed(0)}`
-                    : `Order available for Store Pickup or Dine-In!`}
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1C1C1C' }}>
-                  Check Delivery to your Area
-                </div>
-                <div style={{ fontSize: 11, color: '#696969' }}>
-                  Enter your 6-digit postal pincode to verify speed & charges
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="e.g. 400050"
-              maxLength={6}
-              value={pincodeInput}
-              onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleCheckPincode(); }}
+          }}>
+            <div style={{ fontSize: 12.5, color: '#1E40AF', fontWeight: 700 }}>
+              🥡 Kitchen Self-Pickup: <strong>{restaurant.address_line || 'Bandra West, Mumbai'}</strong> • Ready in ~20 mins
+            </div>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                `${restaurant.name} ${restaurant.address_line || ''} ${restaurant.city || ''}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
-                width: 100,
-                height: 32,
-                padding: '0 8px',
-                borderRadius: 8,
-                border: '1px solid #D1D5DB',
-                fontSize: 12.5,
-                fontWeight: 700,
-                textAlign: 'center'
-              }}
-            />
-            <button
-              type="button"
-              onClick={handleCheckPincode}
-              disabled={pincodeChecking || pincodeInput.length !== 6}
-              style={{
-                background: 'var(--primary)',
+                background: '#2563EB',
                 color: '#FFFFFF',
-                border: 'none',
-                borderRadius: 8,
-                padding: '0 12px',
-                height: 32,
-                fontSize: 12,
+                padding: '5px 12px',
+                borderRadius: 6,
+                fontSize: 11.5,
                 fontWeight: 800,
-                cursor: pincodeInput.length === 6 ? 'pointer' : 'not-allowed',
-                opacity: pincodeInput.length === 6 ? 1 : 0.6
+                textDecoration: 'none'
               }}
             >
-              {pincodeChecking ? '...' : 'Check'}
-            </button>
+              Get Directions 🗺️
+            </a>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {/* 1C. TAKEAWAY PICKUP STORE LOCATION & DIRECTIONS (CRUSTO BAKERS FEATURE) */}
-      {orderMode === 'takeaway' && (
-        <div
-          style={{
-            margin: '10px 14px 0',
-            background: '#EFF6FF',
-            border: '1.5px solid #BFDBFE',
-            borderRadius: 12,
-            padding: '12px 16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 10
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🥡</span>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#1E40AF' }}>
-                Self-Pickup from {restaurant.name} Kitchen
-              </div>
-              <div style={{ fontSize: 12, color: '#1D4ED8', marginTop: 2 }}>
-                📍 {restaurant.address_line || 'Bandra West, Mumbai'} • ⏱️ Ready in ~25 mins
-              </div>
-            </div>
-          </div>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${restaurant.name} ${restaurant.address_line || ''} ${restaurant.city || ''}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: '#2563EB',
-              color: '#FFFFFF',
-              padding: '7px 14px',
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5
-            }}
-          >
-            <span>🗺️</span>
-            <span>Get Directions</span>
-          </a>
-        </div>
-      )}
-
-      {/* 2. CRISP WHITE RESTAURANT HEADER CARD (ZOMATO THEME) */}
-      <header style={{
-        margin: '12px 14px 16px',
-        background: '#FFFFFF',
-        borderRadius: 16,
-        border: '1px solid var(--border-medium)',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        {/* Restaurant Cover Banner */}
-        <div style={{
-          height: 140,
-          background: restaurant.cover_url
-            ? `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%), url(${restaurant.cover_url}) center/cover no-repeat`
-            : 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FEE2E2 100%)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          padding: 16
-        }}>
-          <Link href="/" style={{
-            background: '#FFFFFF',
-            border: '1px solid #E3E5EB',
-            borderRadius: '50%',
-            width: 36,
-            height: 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 16,
-            color: '#1C1C1C',
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            ←
-          </Link>
-
-          <div style={{ display: 'flex', gap: 6 }}>
-            <span style={{
-              background: '#24963F',
-              color: '#FFFFFF',
-              padding: '4px 10px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 11,
-              fontWeight: 800
-            }}>
-              ✓ 0% Commission Direct
-            </span>
-            <span style={{
-              background: restaurant.isOpen ? '#EDF8F0' : '#FEECEE',
-              color: restaurant.isOpen ? '#24963F' : '#E23744',
-              border: `1px solid ${restaurant.isOpen ? '#A7E3B6' : '#FBCED2'}`,
-              padding: '4px 10px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 11,
-              fontWeight: 800
-            }}>
-              {restaurant.isOpen ? '🟢 Open Now' : '🔴 Closed'}
-            </span>
-          </div>
-        </div>
-
-        {/* Restaurant Identity & Details */}
-        <div style={{ padding: '16px 20px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-            <div>
-              <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', color: '#1C1C1C', lineHeight: 1.2 }}>{restaurant.name}</h1>
-              <p style={{ color: '#696969', fontSize: 13, marginTop: 4 }}>
-                {restaurant.address_line || 'Bandra West, Mumbai'} • North Indian, Mughlai, Dum Biryani
-              </p>
-            </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <span className="zomato-rating-pill" style={{ fontSize: 14, padding: '4px 10px' }}>
-                4.8 ★
-              </span>
-              <div style={{ fontSize: 11, color: '#828282', marginTop: 3 }}>180+ ratings</div>
-            </div>
-          </div>
-
-          <p style={{ color: '#4F4F4F', fontSize: 13.5, lineHeight: 1.5, marginBottom: 14 }}>
-            {restaurant.description || 'Authentic flavors, freshest spices, and zero aggregator price markup.'}
-          </p>
-
-          {/* Quick Metrics Bar */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-            gap: 10,
-            borderTop: '1px solid var(--border-subtle)',
-            paddingTop: 14
-          }}>
-            <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Prep Time</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>⏱️ {restaurant.avg_prep_minutes || 25} mins</div>
-            </div>
-
-            <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Min Order</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', marginTop: 2 }}>₹{(restaurant.min_order_paise / 100).toFixed(0)}</div>
-            </div>
-
-            <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Delivery Fee</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#24963F', marginTop: 2 }}>₹{(restaurant.delivery_fee_paise / 100).toFixed(0)}</div>
-            </div>
-
-            <div style={{ background: '#F8F9FA', padding: '8px 12px', borderRadius: 8, border: '1px solid #ECEEF2' }}>
-              <div style={{ fontSize: 11, color: '#696969', fontWeight: 600 }}>Offers Active</div>
-              <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--primary)', marginTop: 2 }}>WELCOME10 / FLAT50</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* 2B. VIP LOYALTY CLUB HIGHLIGHT BANNER */}
-      <div
-        onClick={() => setLoyaltyModalOpen(true)}
-        style={{
-          margin: '0 14px 14px',
-          background: 'linear-gradient(90deg, #FFFBEB 0%, #FEF3C7 100%)',
-          border: '1.5px solid #FCD34D',
-          borderRadius: 12,
-          padding: '11px 16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)',
-          transition: 'transform 0.15s ease'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              background: '#D97706',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16
-            }}
-          >
-            👑
-          </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#92400E' }}>
-              Direct VIP Club: 240 Points Available (₹240 Cash Discount)
-            </div>
-            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 1 }}>
-              🥇 Gold Tier • Earn 10% instant points cashback on this order
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: '#B45309',
-            background: 'rgba(255,255,255,0.7)',
-            padding: '4px 10px',
-            borderRadius: 20,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4
-          }}
-        >
-          View Perks ➔
-        </div>
-      </div>
-
-      {/* 2C. CRUSTO BAKERS DUAL FEATURE STRIP: BULK CATERING & BIRTHDAY CLUB */}
-      <div
-        style={{
-          margin: '0 14px 14px',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 10
-        }}
-      >
-        {/* Bulk Catering Card */}
-        <div
-          onClick={() => setBulkModalOpen(true)}
-          style={{
-            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-            border: '1.5px solid #93C5FD',
-            borderRadius: 12,
-            padding: '11px 14px',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(37,99,235,0.08)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 16 }}>🎈</span>
-              <strong style={{ fontSize: 13, color: '#1E40AF' }}>Bulk & Party Catering</strong>
-            </div>
-            <div style={{ fontSize: 11, color: '#2563EB', marginTop: 3, lineHeight: 1.35 }}>
-              Party boxes & office lunches for 15+ guests
-            </div>
-          </div>
-          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#1D4ED8', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-            Get Quote ➔
-          </div>
-        </div>
-
-        {/* Birthday Club Card */}
-        <div
-          onClick={() => setOccasionModalOpen(true)}
-          style={{
-            background: 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%)',
-            border: '1.5px solid #FECDD3',
-            borderRadius: 12,
-            padding: '11px 14px',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(226,55,68,0.08)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 16 }}>🎂</span>
-              <strong style={{ fontSize: 13, color: '#9F1239' }}>Birthday & Occasion Club</strong>
-            </div>
-            <div style={{ fontSize: 11, color: '#BE123C', marginTop: 3, lineHeight: 1.35 }}>
-              Save special dates • Get Flat 15% VIP code
-            </div>
-          </div>
-          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#E23744', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-            Join Free ➔
-          </div>
-        </div>
-      </div>
-
-      {/* 3. SEARCH & FILTERS BAR */}
-      <div style={{ padding: '0 14px', marginBottom: 14 }}>
+      {/* 7. SEARCH & VEG / NON-VEG FILTER BAR */}
+      <section id="menu-section" style={{ margin: '0 14px 14px', scrollMarginTop: 70 }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          {/* Search Box */}
-          <div style={{ flex: '1 1 240px', position: 'relative' }}>
+          {/* Search Field */}
+          <div style={{ flex: '1 1 260px', position: 'relative' }}>
             <input
               type="text"
-              placeholder="Search dishes (Biryani, Paneer, Tandoori)..."
+              placeholder={`Search ${restaurant.name} menu (Biryani, Paneer, Cakes)...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input-field"
@@ -968,9 +1243,9 @@ function MenuContent() {
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 4. STICKY CATEGORY TABS (AUTHENTIC ZOMATO BAR) */}
+      {/* 8. STICKY CATEGORY TABS (AUTHENTIC BRAND SCROLLER) */}
       <div style={{
         position: 'sticky',
         top: 0,
@@ -1007,17 +1282,17 @@ function MenuContent() {
         ))}
       </div>
 
-      {/* 5. MENU CATEGORIES & AUTHENTIC ZOMATO FOOD CARDS */}
+      {/* 9. MAIN MENU CATEGORIES & FOOD DISH CARDS */}
       <div style={{ padding: '16px 14px' }}>
         {filteredMenu.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#696969' }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔍</div>
             <p style={{ fontSize: 16, marginBottom: 4, color: '#1C1C1C', fontWeight: 700 }}>No dishes found</p>
-            <p style={{ fontSize: 13 }}>Try clearing search keywords or changing filters.</p>
+            <p style={{ fontSize: 13 }}>Try clearing your search terms or toggling the dietary filter.</p>
           </div>
         ) : (
           filteredMenu.map(category => (
-            <section key={category.id} id={`category-${category.id}`} style={{ marginBottom: 36, scrollMarginTop: 60 }}>
+            <section key={category.id} id={`category-${category.id}`} style={{ marginBottom: 36, scrollMarginTop: 65 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                 <h2 style={{ fontSize: 20, color: '#1C1C1C' }}>{category.name}</h2>
                 <span style={{ fontSize: 11.5, color: '#696969', background: '#F0F1F4', padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 700 }}>
@@ -1134,7 +1409,294 @@ function MenuContent() {
         )}
       </div>
 
-      {/* 6. CUSTOMIZATION MODAL (CLEAN WHITE BOTTOM SHEET) */}
+      {/* 10. "FOODIE LOVE & VERIFIED CUSTOMER REVIEWS" (SOCIAL PROOF WALL) */}
+      <section style={{ margin: '20px 14px 28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Direct Diners Say
+          </span>
+          <h3 style={{ fontSize: 22, fontWeight: 900, color: '#1C1C1C', marginTop: 4 }}>
+            Foodie Love & Verified Experiences ⭐
+          </h3>
+          <p style={{ fontSize: 13, color: '#696969' }}>
+            Real reviews from customers who ordered direct to their door
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 14
+        }}>
+          {/* Review 1 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 16,
+            padding: '18px 20px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ display: 'flex', color: '#F59E0B', fontSize: 14, marginBottom: 8 }}>
+              ★★★★★
+            </div>
+            <p style={{ fontSize: 13, color: '#1F2937', lineHeight: 1.5, marginBottom: 14, fontStyle: 'italic' }}>
+              &ldquo;The Dum Biryani arrived piping hot with tender, aromatic meat pieces. Ordering direct gave me 10% points cashback and no aggregator surge fee. Best experience!&rdquo;
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#FEE2E2', color: '#E23744', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                R
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>Rahul Sharma</div>
+                <div style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>✓ Verified Direct Diner • Bandra</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Review 2 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 16,
+            padding: '18px 20px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ display: 'flex', color: '#F59E0B', fontSize: 14, marginBottom: 8 }}>
+              ★★★★★
+            </div>
+            <p style={{ fontSize: 13, color: '#1F2937', lineHeight: 1.5, marginBottom: 14, fontStyle: 'italic' }}>
+              &ldquo;Ordered a celebration Belgian Chocolate Cake for my sister&apos;s birthday. Custom message ribbon was perfect, complimentary knife & candles included, safely packed!&rdquo;
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                P
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>Priya Mehta</div>
+                <div style={{ fontSize: 11, color: '#D97706', fontWeight: 600 }}>✓ Gold VIP Member • Pune</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Review 3 */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '1px solid #ECEEF2',
+            borderRadius: 16,
+            padding: '18px 20px',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{ display: 'flex', color: '#F59E0B', fontSize: 14, marginBottom: 8 }}>
+              ★★★★★
+            </div>
+            <p style={{ fontSize: 13, color: '#1F2937', lineHeight: 1.5, marginBottom: 14, fontStyle: 'italic' }}>
+              &ldquo;Placed an office bulk snack order for 35 people. Chef called to verify spice preferences and delivered right on time in tamper-proof boxes. 5 stars all day!&rdquo;
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#DBEAFE', color: '#1D4ED8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                A
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#111827' }}>Aman Kapur</div>
+                <div style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>✓ Corporate Catering Client</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 11. CHEF'S KITCHEN PHILOSOPHY & HYGIENE PROMISE */}
+      <section style={{
+        margin: '0 14px 28px',
+        background: '#FFFFFF',
+        borderRadius: 18,
+        padding: '22px 24px',
+        border: '1px solid #ECEEF2',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <span style={{ fontSize: 24 }}>🛡️</span>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 900, color: '#1C1C1C', margin: 0 }}>
+              Our Kitchen & Quality Promise
+            </h3>
+            <p style={{ fontSize: 12, color: '#696969', margin: '2px 0 0' }}>
+              Crafted fresh daily with restaurant-grade hygiene protocols
+            </p>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 14
+        }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>🧼</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Sanitized Station</div>
+              <div style={{ fontSize: 11.5, color: '#696969', marginTop: 2 }}>Hourly surface sanitization & daily temperature logs.</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>🌿</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Farm-Fresh Spices</div>
+              <div style={{ fontSize: 11.5, color: '#696969', marginTop: 2 }}>Zero artificial food colors, 100% cold-pressed oils.</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>📦</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Spill-Proof Packaging</div>
+              <div style={{ fontSize: 11.5, color: '#696969', marginTop: 2 }}>Tamper-evident food-grade containers that keep food hot.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 12. STORE LOCATION, TIMINGS & NAVIGATION CARD */}
+      <section style={{
+        margin: '0 14px 24px',
+        background: '#F8FAFC',
+        borderRadius: 18,
+        padding: '20px 22px',
+        border: '1.5px solid #E2E8F0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 14
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontSize: 20 }}>📍</span>
+            <h4 style={{ fontSize: 16, fontWeight: 800, color: '#0F172A', margin: 0 }}>
+              {restaurant.name} Kitchen Location
+            </h4>
+          </div>
+          <p style={{ fontSize: 13, color: '#475569', margin: '4px 0 2px' }}>
+            {restaurant.address_line || '42, MG Road'}, {restaurant.city || 'Mumbai'} - {restaurant.pincode || '400001'}
+          </p>
+          <div style={{ fontSize: 12, color: '#64748B', display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
+            <span>🕒 Open Daily: 11:00 AM – 11:30 PM</span>
+            <span>•</span>
+            <span>📞 Direct Kitchen: {restaurant.phone || '+91 98765 43210'}</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${restaurant.name} ${restaurant.address_line || ''} ${restaurant.city || ''}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: '#0F172A',
+              color: '#FFFFFF',
+              padding: '9px 16px',
+              borderRadius: 10,
+              fontSize: 12.5,
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+          >
+            <span>🗺️ Google Maps</span>
+          </a>
+
+          <a
+            href={`tel:${restaurant.phone || '+919876543210'}`}
+            style={{
+              background: '#FFFFFF',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
+              padding: '9px 16px',
+              borderRadius: 10,
+              fontSize: 12.5,
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+          >
+            <span>📞 Call Kitchen</span>
+          </a>
+        </div>
+      </section>
+
+      {/* 12B. RESTAURANT PARTNER & KITCHEN OPERATIONS ACCESS CARD */}
+      <section style={{
+        margin: '0 14px 28px',
+        background: '#FFFFFF',
+        borderRadius: 18,
+        padding: '20px 24px',
+        border: '1.5px solid #FBCED2',
+        boxShadow: 'var(--shadow-sm)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 14
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: '#FFF1F2',
+            color: 'var(--primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 22,
+            flexShrink: 0
+          }}>
+            👨‍🍳
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              RESTAURANT MANAGEMENT
+            </div>
+            <h4 style={{ fontSize: 16, fontWeight: 800, color: '#1C1C1C', margin: '2px 0 0' }}>
+              {restaurant.name} Kitchen Staff &amp; Owner Portal
+            </h4>
+            <p style={{ fontSize: 12.5, color: '#696969', margin: '2px 0 0' }}>
+              Manage live KDS orders, dish pricing, table QR codes, and customer loyalty profiles.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setStaffModalOpen(true)}
+          style={{
+            background: 'var(--primary)',
+            color: '#FFFFFF',
+            border: 'none',
+            padding: '10px 18px',
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            boxShadow: '0 4px 12px var(--primary-glow)'
+          }}
+        >
+          <span>🔐</span>
+          <span>Sign In to Kitchen Dashboard</span>
+        </button>
+      </section>
+
+      {/* 13. CUSTOMIZATION MODAL (CLEAN WHITE BOTTOM SHEET) */}
       {customizingItem && (
         <div style={{
           position: 'fixed',
@@ -1372,7 +1934,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 7. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
+      {/* 14. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
       {waiterModalOpen && (
         <div style={{
           position: 'fixed',
@@ -1469,7 +2031,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 7B. VIP LOYALTY PROFILE & BENEFITS MODAL */}
+      {/* 15. VIP LOYALTY PROFILE & BENEFITS MODAL */}
       {loyaltyModalOpen && (
         <div
           style={{
@@ -1552,7 +2114,7 @@ function MenuContent() {
                   marginBottom: 20
                 }}
               >
-                {/* Decorative watermarks */}
+                {/* Decorative watermark */}
                 <div
                   style={{
                     position: 'absolute',
@@ -1639,7 +2201,7 @@ function MenuContent() {
               >
                 <span style={{ fontSize: 22 }}>💰</span>
                 <div style={{ fontSize: 12.5, color: '#15803D' }}>
-                  <strong>How Benefits Work:</strong> 1 Loyalty Point = <strong>₹1.00 Direct Cash Discount</strong>. Simply check "Redeem Points" on the cart page to deduct ₹240 instantly!
+                  <strong>How Benefits Work:</strong> 1 Loyalty Point = <strong>₹1.00 Direct Cash Discount</strong>. Simply check &ldquo;Redeem Points&rdquo; on the cart page to deduct ₹240 instantly!
                 </div>
               </div>
 
@@ -1776,7 +2338,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 7C. BULK & PARTY CATERING ENQUIRY MODAL (CRUSTO BAKERS FEATURE #4) */}
+      {/* 16. BULK & PARTY CATERING ENQUIRY MODAL (CRUSTO BAKERS FEATURE #4) */}
       {bulkModalOpen && (
         <div
           style={{
@@ -2007,7 +2569,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 7D. BIRTHDAY & OCCASION REMINDER CLUB MODAL (CRUSTO BAKERS FEATURE #5) */}
+      {/* 17. BIRTHDAY & OCCASION REMINDER CLUB MODAL (CRUSTO BAKERS FEATURE #5) */}
       {occasionModalOpen && (
         <div
           style={{
@@ -2220,7 +2782,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 8. FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
+      {/* 18. FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
       {itemCount > 0 && (
         <div className="zomato-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Main Checkout Button */}
@@ -2275,7 +2837,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* 9. FLOATING WHATSAPP CHEF / BAKER LIVE HELP (CRUSTO BAKERS FEATURE) */}
+      {/* 19. FLOATING WHATSAPP CHEF / BAKER LIVE HELP (CRUSTO BAKERS FEATURE) */}
       <a
         href={`https://wa.me/${(restaurant.phone || '919876543210').replace(/\D/g, '')}?text=${encodeURIComponent(
           `Hi ${restaurant.name}! 👋 I am browsing your menu on DirectDine. I have a query regarding a custom cake or party order.`
@@ -2306,6 +2868,164 @@ function MenuContent() {
         <span style={{ fontSize: 17 }}>💬</span>
         <span>Chat with Chef</span>
       </a>
+
+      {/* 20. RESTAURANT STAFF & KITCHEN LOGIN MODAL */}
+      {staffModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 1050,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !staffLoginLoading) setStaffModalOpen(false);
+          }}
+        >
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 22,
+              width: '100%',
+              maxWidth: 460,
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              position: 'relative',
+              padding: '28px 26px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>👨‍🍳</span>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1C1C1C', margin: 0 }}>
+                    {restaurant.name} Staff Login
+                  </h3>
+                  <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+                    Access KDS orders, menu management &amp; table QRs
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setStaffModalOpen(false)}
+                style={{
+                  background: '#F5F5F5',
+                  border: 'none',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#666'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Quick Demo Fill Helper */}
+            <div style={{
+              background: '#FFF1F2',
+              borderRadius: 10,
+              padding: '10px 12px',
+              border: '1px solid #FECDD3',
+              marginBottom: 16,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ fontSize: 12, color: '#9F1239' }}>
+                Demo Credentials: <strong>{slug === 'chai-and-bites' ? '9988776655 (chai123)' : '9876543210 (spice123)'}</strong>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (slug === 'chai-and-bites') {
+                    setStaffPhone('9988776655');
+                    setStaffPassword('chai123');
+                  } else {
+                    setStaffPhone('9876543210');
+                    setStaffPassword('spice123');
+                  }
+                }}
+                style={{
+                  background: '#E23744',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                Auto-Fill
+              </button>
+            </div>
+
+            <form onSubmit={handleStaffLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12.5, color: '#374151', fontWeight: 700, marginBottom: 4 }}>
+                  Registered Staff Phone
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="10-digit number"
+                  value={staffPhone}
+                  onChange={(e) => setStaffPhone(e.target.value)}
+                  className="input-field"
+                  style={{ height: 42 }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 12.5, color: '#374151', fontWeight: 700, marginBottom: 4 }}>
+                  Staff Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter password"
+                  value={staffPassword}
+                  onChange={(e) => setStaffPassword(e.target.value)}
+                  className="input-field"
+                  style={{ height: 42 }}
+                />
+              </div>
+
+              {staffLoginError && (
+                <div style={{ color: '#DC2626', background: '#FEE2E2', border: '1px solid #FCA5A5', padding: '8px 12px', borderRadius: 8, fontSize: 12.5 }}>
+                  ⚠️ {staffLoginError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={staffLoginLoading}
+                className="btn-primary"
+                style={{ width: '100%', padding: '13px', fontSize: 14, fontWeight: 800, borderRadius: 10, marginTop: 4 }}
+              >
+                {staffLoginLoading ? 'Signing In...' : `Sign In to ${restaurant.name} KDS ➔`}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginTop: 14 }}>
+              <Link
+                href="/dashboard"
+                style={{ fontSize: 12, color: '#6B7280', textDecoration: 'underline' }}
+              >
+                Go to Partner Portal (/dashboard)
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

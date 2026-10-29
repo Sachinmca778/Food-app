@@ -142,56 +142,98 @@ export default function SuperAdminPage() {
 
   if (!isSuperAdmin) {
     return (
-      <div style={{ maxWidth: 420, margin: '60px auto', padding: '0 16px' }}>
-        <div style={{ background: '#FFFFFF', padding: '36px 28px', border: '1px solid #E3E5EB', borderRadius: 20, boxShadow: 'var(--shadow-md)' }}>
+      <div style={{ maxWidth: 440, margin: '60px auto', padding: '0 16px' }}>
+        <div style={{
+          background: '#FFFFFF',
+          padding: '36px 30px',
+          border: '1.5px solid #E2E8F0',
+          borderRadius: 24,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+        }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: 12,
-              background: 'var(--primary)',
+              width: 58,
+              height: 58,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
               color: '#FFFFFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 26,
-              margin: '0 auto 12px',
-              boxShadow: '0 4px 14px var(--primary-glow)'
+              fontSize: 28,
+              margin: '0 auto 14px',
+              boxShadow: '0 8px 24px rgba(67, 56, 202, 0.3)'
             }}>
               👑
             </div>
-            <h1 style={{ fontSize: 22, color: '#1C1C1C' }}>Super Admin Portal</h1>
-            <p style={{ color: '#696969', fontSize: 13, marginTop: 4 }}>
-              Zero-commission restaurant onboarding & SaaS management
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#4338CA', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              MASTER PLATFORM CONSOLE
+            </div>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0F172A', margin: '4px 0 6px' }}>
+              Super Admin Portal
+            </h1>
+            <p style={{ color: '#64748B', fontSize: 13, margin: 0, lineHeight: 1.45 }}>
+              Platform-wide governance, global restaurant onboarding &amp; multi-tenant SaaS metrics
             </p>
+          </div>
+
+          {/* Quick Demo Fill Button */}
+          <div style={{ marginBottom: 18 }}>
+            <button
+              type="button"
+              onClick={() => {
+                setAdminPhone('9999999999');
+                setAdminPassword('admin123');
+              }}
+              style={{
+                width: '100%',
+                background: '#EEF2FF',
+                color: '#3730A3',
+                border: '1px dashed #A5B4FC',
+                padding: '8px 12px',
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6
+              }}
+            >
+              <span>⚡</span>
+              <span>1-Click Auto-Fill Demo Credentials (9999999999)</span>
+            </button>
           </div>
 
           <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-                Admin Phone Number
+              <label style={{ display: 'block', fontSize: 12.5, color: '#334155', fontWeight: 700, marginBottom: 5 }}>
+                Master Admin Phone
               </label>
               <input
                 type="text"
+                placeholder="10-digit number e.g. 9999999999"
                 value={adminPhone}
                 onChange={(e) => setAdminPhone(e.target.value)}
                 className="input-field"
                 required
-                style={{ height: 42 }}
+                style={{ height: 42, borderColor: '#CBD5E1' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-                Admin Password
+              <label style={{ display: 'block', fontSize: 12.5, color: '#334155', fontWeight: 700, marginBottom: 5 }}>
+                Master Admin Password
               </label>
               <input
                 type="password"
+                placeholder="Enter password (admin123)"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 className="input-field"
                 required
-                style={{ height: 42 }}
+                style={{ height: 42, borderColor: '#CBD5E1' }}
               />
             </div>
 
@@ -204,12 +246,49 @@ export default function SuperAdminPage() {
             <button
               type="submit"
               disabled={loginLoading}
-              className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: 14, marginTop: 4, borderRadius: 10 }}
+              style={{
+                width: '100%',
+                padding: '13px',
+                fontSize: 14,
+                fontWeight: 800,
+                marginTop: 4,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+                color: '#FFFFFF',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(67, 56, 202, 0.25)'
+              }}
             >
-              {loginLoading ? 'Authenticating...' : 'Enter Admin Console'}
+              {loginLoading ? 'Authenticating...' : 'Enter Super Admin Console ➔'}
             </button>
           </form>
+
+          {/* Role Navigation Clarity Links */}
+          <div style={{
+            marginTop: 22,
+            paddingTop: 16,
+            borderTop: '1px solid #F1F5F9',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            fontSize: 12,
+            textAlign: 'center',
+            color: '#64748B'
+          }}>
+            <div>
+              Looking for a Restaurant Kitchen?{' '}
+              <Link href="/dashboard" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'underline' }}>
+                Go to Partner Portal (/dashboard)
+              </Link>
+            </div>
+            <div>
+              Looking for Customer Storefronts?{' '}
+              <Link href="/" style={{ color: '#0F172A', fontWeight: 800, textDecoration: 'underline' }}>
+                View Direct Stores (/)
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );

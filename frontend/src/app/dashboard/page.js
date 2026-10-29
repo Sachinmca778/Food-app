@@ -525,38 +525,107 @@ export default function RestaurantDashboardPage() {
   // LOGIN SCREEN (CLEAN WHITE)
   if (!isLoggedIn) {
     return (
-      <div style={{ maxWidth: 420, margin: '60px auto', padding: '0 16px' }}>
-        <div style={{ background: '#FFFFFF', padding: '36px 28px', border: '1px solid #E3E5EB', borderRadius: 20, boxShadow: 'var(--shadow-md)' }}>
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+      <div style={{ maxWidth: 460, margin: '60px auto', padding: '0 16px' }}>
+        <div style={{
+          background: '#FFFFFF',
+          padding: '36px 30px',
+          border: '1.5px solid #E2E8F0',
+          borderRadius: 24,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: 22 }}>
             <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: 12,
+              width: 58,
+              height: 58,
+              borderRadius: 16,
               background: 'var(--primary)',
               color: '#FFFFFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 26,
+              fontSize: 28,
               margin: '0 auto 12px',
-              boxShadow: '0 4px 14px var(--primary-glow)'
+              boxShadow: '0 6px 20px var(--primary-glow)'
             }}>
               👨‍🍳
             </div>
-            <h1 style={{ fontSize: 22, color: '#1C1C1C' }}>Restaurant Partner Portal</h1>
-            <p style={{ color: '#696969', fontSize: 13, marginTop: 4 }}>
-              Kitchen dashboard & direct store operations
+            <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              RESTAURANT KITCHEN OPERATIONS
+            </div>
+            <h1 style={{ fontSize: 23, fontWeight: 900, color: '#1C1C1C', margin: '4px 0 6px' }}>
+              Restaurant Partner Portal
+            </h1>
+            <p style={{ color: '#696969', fontSize: 13, margin: 0, lineHeight: 1.45 }}>
+              Kitchen Order Display (KDS), dish availability, table QRs, and customer loyalty CRM
             </p>
+          </div>
+
+          {/* Quick Demo Fill Selector */}
+          <div style={{
+            background: '#F8F9FA',
+            borderRadius: 14,
+            padding: '12px 14px',
+            marginBottom: 20,
+            border: '1px solid #ECEEF2'
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#4F4F4F', marginBottom: 8, textTransform: 'uppercase' }}>
+              ⚡ 1-Click Fill Demo Credentials:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginPhone('9876543210');
+                  setLoginPassword('spice123');
+                }}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid #FBCED2',
+                  borderRadius: 8,
+                  padding: '7px 8px',
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                🍛 Spice Garden
+                <div style={{ fontSize: 10, color: '#696969', fontWeight: 600 }}>9876543210</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginPhone('9988776655');
+                  setLoginPassword('chai123');
+                }}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid #FBCED2',
+                  borderRadius: 8,
+                  padding: '7px 8px',
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                🥐 Chai &amp; Bites
+                <div style={{ fontSize: 10, color: '#696969', fontWeight: 600 }}>9988776655</div>
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-                Registered Mobile Number
+              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 700, marginBottom: 5 }}>
+                Restaurant Registered Mobile
               </label>
               <input
                 type="text"
-                placeholder="10-digit phone number"
+                placeholder="10-digit number e.g. 9876543210"
                 value={loginPhone}
                 onChange={(e) => setLoginPhone(e.target.value)}
                 className="input-field"
@@ -566,12 +635,12 @@ export default function RestaurantDashboardPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 600, marginBottom: 5 }}>
-                Staff Password
+              <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 700, marginBottom: 5 }}>
+                Staff / Owner Password
               </label>
               <input
                 type="password"
-                placeholder="Enter password"
+                placeholder="Enter password (spice123 / chai123)"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className="input-field"
@@ -581,7 +650,7 @@ export default function RestaurantDashboardPage() {
             </div>
 
             {loginError && (
-              <div style={{ color: 'var(--status-cancel)', fontSize: 13, background: '#FEECEE', padding: '8px 12px', borderRadius: 8 }}>
+              <div style={{ color: 'var(--status-cancel)', fontSize: 13, background: '#FEECEE', border: '1px solid #FBCED2', padding: '8px 12px', borderRadius: 8 }}>
                 ⚠️ {loginError}
               </div>
             )}
@@ -590,11 +659,37 @@ export default function RestaurantDashboardPage() {
               type="submit"
               disabled={loginLoading}
               className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: 14, marginTop: 4, borderRadius: 10 }}
+              style={{ width: '100%', padding: '13px', fontSize: 14, fontWeight: 800, marginTop: 4, borderRadius: 10 }}
             >
-              {loginLoading ? 'Authenticating...' : 'Sign In to Kitchen Dashboard'}
+              {loginLoading ? 'Authenticating...' : 'Sign In to Kitchen Dashboard ➔'}
             </button>
           </form>
+
+          {/* Role Navigation Clarity Links */}
+          <div style={{
+            marginTop: 22,
+            paddingTop: 16,
+            borderTop: '1px solid #F1F5F9',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            fontSize: 12,
+            textAlign: 'center',
+            color: '#64748B'
+          }}>
+            <div>
+              Looking for Platform Super Admin?{' '}
+              <Link href="/admin" style={{ color: '#4338CA', fontWeight: 800, textDecoration: 'underline' }}>
+                Go to Super Admin Console (/admin)
+              </Link>
+            </div>
+            <div>
+              Looking for Customer Storefronts?{' '}
+              <Link href="/" style={{ color: '#0F172A', fontWeight: 800, textDecoration: 'underline' }}>
+                View Direct Stores (/)
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
