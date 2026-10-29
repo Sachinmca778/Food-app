@@ -592,21 +592,22 @@ function CartContent() {
                 Select Delivery Date:
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                {['Today', 'Tomorrow', 'Day After Tomorrow'].map((day) => (
+                {['Today', 'Tomorrow', 'Day After'].map((day) => (
                   <button
                     key={day}
                     type="button"
                     onClick={() => setScheduledDay(day)}
                     style={{
                       flex: 1,
-                      padding: '7px 10px',
+                      padding: '7px 8px',
                       borderRadius: 8,
                       fontSize: 12,
                       fontWeight: 700,
                       border: scheduledDay === day ? '2px solid #E23744' : '1px solid #D1D5DB',
                       background: scheduledDay === day ? '#FFFFFF' : 'transparent',
                       color: scheduledDay === day ? '#E23744' : '#4B5563',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      textAlign: 'center'
                     }}
                   >
                     {day}
@@ -1610,29 +1611,10 @@ function CartContent() {
 
       {/* REAL DIRECT UPI PAYMENT GATEWAY MODAL */}
       {upiPaymentModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.72)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 99999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 440,
-            width: '100%',
             padding: '24px 22px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-            maxHeight: '92vh',
-            overflowY: 'auto',
             textAlign: 'center',
             position: 'relative'
           }}>
@@ -1837,29 +1819,10 @@ function CartContent() {
 
       {/* SECURE CARD PAYMENT GATEWAY MODAL */}
       {cardPaymentModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.72)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 99999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 440,
-            width: '100%',
             padding: '24px 22px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-            maxHeight: '92vh',
-            overflowY: 'auto',
             textAlign: 'left',
             position: 'relative'
           }}>

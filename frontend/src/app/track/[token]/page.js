@@ -503,29 +503,11 @@ function TrackingContent() {
 
       {/* TAX INVOICE / BILL RECEIPT MODAL */}
       {showBillModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 16,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 480,
-            width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
             padding: 24,
-            boxShadow: 'var(--shadow-lg)'
+            position: 'relative'
           }}>
             <div id="printable-bill" style={{ background: '#FFFFFF', padding: '10px 6px' }}>
               {/* Header */}

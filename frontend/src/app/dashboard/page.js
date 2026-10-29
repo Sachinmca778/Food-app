@@ -864,7 +864,19 @@ export default function RestaurantDashboardPage() {
       )}
 
       {/* NAVIGATION TABS (CLEAN WHITE) */}
-      <div style={{ padding: '0 14px', display: 'flex', gap: 6, borderBottom: '1px solid #ECEEF2', marginBottom: 18, overflowX: 'auto', background: '#FFFFFF' }}>
+      <div
+        className="no-scrollbar touch-scroll"
+        style={{
+          padding: '0 14px',
+          display: 'flex',
+          gap: 6,
+          borderBottom: '1px solid #ECEEF2',
+          marginBottom: 18,
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          background: '#FFFFFF'
+        }}
+      >
         <button
           onClick={() => setActiveTab('orders')}
           style={{
@@ -876,7 +888,8 @@ export default function RestaurantDashboardPage() {
             background: 'none',
             display: 'flex',
             alignItems: 'center',
-            gap: 6
+            gap: 6,
+            flexShrink: 0
           }}
         >
           <span>🛎️ Live Orders</span>
@@ -895,7 +908,8 @@ export default function RestaurantDashboardPage() {
             color: activeTab === 'menu' ? 'var(--primary)' : '#696969',
             fontWeight: 800,
             fontSize: 14,
-            background: 'none'
+            background: 'none',
+            flexShrink: 0
           }}
         >
           📋 Menu & Stock (86)
@@ -909,7 +923,8 @@ export default function RestaurantDashboardPage() {
             color: activeTab === 'customers' ? 'var(--primary)' : '#696969',
             fontWeight: 800,
             fontSize: 14,
-            background: 'none'
+            background: 'none',
+            flexShrink: 0
           }}
         >
           👥 Customer CRM
@@ -923,7 +938,8 @@ export default function RestaurantDashboardPage() {
             color: activeTab === 'analytics' ? 'var(--primary)' : '#696969',
             fontWeight: 800,
             fontSize: 14,
-            background: 'none'
+            background: 'none',
+            flexShrink: 0
           }}
         >
           📊 Revenue & Analytics
@@ -937,7 +953,8 @@ export default function RestaurantDashboardPage() {
             color: activeTab === 'qr_kit' ? 'var(--primary)' : '#696969',
             fontWeight: 800,
             fontSize: 14,
-            background: 'none'
+            background: 'none',
+            flexShrink: 0
           }}
         >
           🖨️ Table QR & Marketing Kit
@@ -2691,18 +2708,8 @@ export default function RestaurantDashboardPage() {
 
       {/* ACTION MODAL (ACCEPT / REJECT / DISPATCH) */}
       {selectedOrder && actionType && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: 16
-        }}>
-          <div style={{ width: '100%', maxWidth: 440, padding: 24, borderRadius: 18, background: '#FFFFFF', boxShadow: 'var(--shadow-lg)' }}>
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{ maxWidth: 440, padding: 24, position: 'relative' }}>
             <h3 style={{ fontSize: 18, marginBottom: 8, color: '#1C1C1C' }}>
               {actionType === 'accept' && `Accept Order #${selectedOrder.order_no}`}
               {actionType === 'reject' && `Reject Order #${selectedOrder.order_no}`}
@@ -2822,24 +2829,11 @@ export default function RestaurantDashboardPage() {
 
       {/* ===================== KITCHEN ORDER TICKET (KOT) MODAL ===================== */}
       {kotOrder && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            width: '100%',
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 420,
-            background: '#FFFFFF',
-            borderRadius: 16,
             padding: 24,
-            boxShadow: 'var(--shadow-lg)'
+            position: 'relative'
           }}>
             {/* 80mm Thermal Receipt */}
             <div id="printable-kot" style={{
@@ -2949,28 +2943,10 @@ export default function RestaurantDashboardPage() {
 
       {/* ===================== FOOD PHOTO UPLOAD MODAL ===================== */}
       {photoModalItem && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.65)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 580,
-            width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
             padding: '24px 26px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
             position: 'relative'
           }}>
             {/* Close Button */}
@@ -3233,28 +3209,10 @@ export default function RestaurantDashboardPage() {
 
       {/* ===================== ADD NEW DISH MODAL ===================== */}
       {showAddDishModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.65)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 520,
-            width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
             padding: '24px 26px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
             position: 'relative'
           }}>
             <button
@@ -3430,30 +3388,15 @@ export default function RestaurantDashboardPage() {
       {/* ----------------- CUSTOMER VIP PROFILE & POINTS LEDGER MODAL ----------------- */}
       {selectedCustomerModal && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedCustomerModal(null);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#fff',
-              borderRadius: 20,
-              width: '100%',
               maxWidth: 720,
-              maxHeight: '92vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative'
             }}
           >
@@ -3884,29 +3827,16 @@ export default function RestaurantDashboardPage() {
       {/* ----------------- POINTS ADJUSTMENT MODAL ----------------- */}
       {pointsAdjustmentModal && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget && !adjustLoading) setPointsAdjustmentModal(null);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#fff',
-              borderRadius: 20,
-              width: '100%',
               maxWidth: 480,
               padding: 24,
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative'
             }}
           >

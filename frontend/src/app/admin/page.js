@@ -431,18 +431,8 @@ export default function SuperAdminPage() {
 
       {/* QR CODE GENERATOR MODAL */}
       {selectedRestQr && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: 16
-        }}>
-          <div style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 18, background: '#FFFFFF', boxShadow: 'var(--shadow-lg)', textAlign: 'center' }}>
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{ maxWidth: 420, padding: 28, textAlign: 'center', position: 'relative' }}>
             <h3 style={{ fontSize: 20, color: '#1C1C1C', marginBottom: 2 }}>{selectedRestQr.name}</h3>
             <p style={{ color: '#696969', fontSize: 13, marginBottom: 20 }}>
               Automated high-resolution QR code for tables & flyers
@@ -496,18 +486,8 @@ export default function SuperAdminPage() {
 
       {/* RESTAURANT ONBOARDING WIZARD MODAL */}
       {showAddModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: 16
-        }}>
-          <div style={{ width: '100%', maxWidth: 500, maxHeight: '88vh', overflowY: 'auto', padding: 26, borderRadius: 18, background: '#FFFFFF', boxShadow: 'var(--shadow-lg)' }}>
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{ maxWidth: 500, padding: 26, position: 'relative' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <h3 style={{ fontSize: 20, color: '#1C1C1C' }}>Onboard New Restaurant</h3>
               <button onClick={() => setShowAddModal(false)} style={{ background: 'none', color: '#696969', fontSize: 18 }}>✕</button>

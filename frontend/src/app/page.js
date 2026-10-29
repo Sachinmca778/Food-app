@@ -262,7 +262,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div
+          className="no-scrollbar touch-scroll"
+          style={{
+            display: 'flex',
+            gap: 8,
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            maxWidth: '100%',
+            paddingBottom: 2
+          }}
+        >
           <Link
             href="/spice-garden"
             style={{
@@ -275,7 +285,8 @@ export default function HomePage() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              gap: 4,
+              flexShrink: 0
             }}
           >
             <span>🍛</span>
@@ -294,7 +305,8 @@ export default function HomePage() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              gap: 4,
+              flexShrink: 0
             }}
           >
             <span>🥐</span>
@@ -313,7 +325,8 @@ export default function HomePage() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              gap: 4,
+              flexShrink: 0
             }}
           >
             <span>👨‍🍳</span>
@@ -332,7 +345,8 @@ export default function HomePage() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              gap: 4,
+              flexShrink: 0
             }}
           >
             <span>👑</span>
@@ -351,7 +365,8 @@ export default function HomePage() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              gap: 4,
+              flexShrink: 0
             }}
           >
             <span>🚪</span>
@@ -903,13 +918,16 @@ export default function HomePage() {
         </div>
 
         {/* Circular Category Carousel */}
-        <div style={{
-          display: 'flex',
-          gap: 14,
-          overflowX: 'auto',
-          paddingBottom: 10,
-          scrollbarWidth: 'none'
-        }}>
+        <div
+          className="no-scrollbar touch-scroll"
+          style={{
+            display: 'flex',
+            gap: 14,
+            overflowX: 'auto',
+            paddingBottom: 10,
+            scrollbarWidth: 'none'
+          }}
+        >
           {CRAVING_CATEGORIES.map(cat => {
             const isSelected = selectedCraving === cat.tag;
             return (
@@ -1656,24 +1674,10 @@ export default function HomePage() {
 
       {/* 11. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
       {waiterModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 440,
-            width: '100%',
             padding: 24,
-            boxShadow: 'var(--shadow-lg)',
             position: 'relative'
           }}>
             <button
@@ -1809,24 +1813,10 @@ export default function HomePage() {
 
       {/* 12. MERCHANT ONBOARDING MODAL */}
       {onboardModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 480,
-            width: '100%',
             padding: 26,
-            boxShadow: 'var(--shadow-lg)',
             position: 'relative'
           }}>
             <button
@@ -1932,24 +1922,10 @@ export default function HomePage() {
 
       {/* 13. LOCATION SELECTION MODAL */}
       {cityModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 16,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 400,
-            width: '100%',
             padding: 22,
-            boxShadow: 'var(--shadow-lg)',
             position: 'relative'
           }}>
             <button

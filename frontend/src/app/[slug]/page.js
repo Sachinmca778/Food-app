@@ -388,42 +388,42 @@ function MenuContent() {
         <span>✨</span>
       </div>
 
-      {/* 2. GRAND PANORAMIC RESTAURANT HERO SECTION (340px) */}
+      {/* 2. GRAND PANORAMIC RESTAURANT HERO SECTION */}
       <section style={{
         position: 'relative',
-        margin: '14px 14px 20px',
-        borderRadius: 22,
+        margin: '10px 10px 18px',
+        borderRadius: 20,
         overflow: 'hidden',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.12)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
         background: '#1C1917'
       }}>
         {/* Background Cover Photo with Smooth Dark Vignette */}
         <div style={{
           position: 'relative',
-          height: 340,
+          minHeight: 280,
           backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.72) 55%, rgba(15, 23, 42, 0.96) 100%), url(${coverImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '18px 22px'
+          padding: '16px 16px'
         }}>
           {/* Top Bar inside Hero: Back link + DirectDine Pill + Open Status */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
             <Link
               href="/"
               style={{
                 background: 'rgba(255, 255, 255, 0.92)',
                 backdropFilter: 'blur(8px)',
                 color: '#1C1C1C',
-                padding: '7px 14px',
+                padding: '6px 12px',
                 borderRadius: 24,
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: 800,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 5,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
               }}
             >
@@ -431,20 +431,20 @@ function MenuContent() {
               <span>All Kitchens</span>
             </Link>
 
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
               <span style={{
                 background: '#24963F',
                 color: '#FFFFFF',
-                padding: '6px 12px',
+                padding: '5px 10px',
                 borderRadius: 20,
-                fontSize: 11.5,
+                fontSize: 11,
                 fontWeight: 800,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 4,
                 boxShadow: '0 2px 8px rgba(36, 150, 63, 0.35)'
               }}>
-                ✓ 0% Commission Direct
+                ✓ 0% Commission
               </span>
 
               <span style={{
@@ -452,25 +452,25 @@ function MenuContent() {
                 backdropFilter: 'blur(8px)',
                 color: restaurant.isOpen ? '#86EFAC' : '#FCA5A5',
                 border: `1px solid ${restaurant.isOpen ? 'rgba(134, 239, 172, 0.4)' : 'rgba(252, 165, 165, 0.4)'}`,
-                padding: '5px 12px',
+                padding: '4px 10px',
                 borderRadius: 20,
-                fontSize: 11.5,
+                fontSize: 11,
                 fontWeight: 800
               }}>
-                {restaurant.isOpen ? `🟢 Open Now (~${restaurant.avg_prep_minutes || 25} mins)` : '🔴 Closed'}
+                {restaurant.isOpen ? `🟢 Open (~${restaurant.avg_prep_minutes || 25}m)` : '🔴 Closed'}
               </span>
             </div>
           </div>
 
           {/* Restaurant Identity: Circular Logo Avatar + Name + Tagline + Meta */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexWrap: 'wrap', marginTop: 24 }}>
             {/* Golden Rimmed Logo Avatar */}
             <div style={{
-              width: 82,
-              height: 82,
+              width: 68,
+              height: 68,
               borderRadius: '50%',
-              border: '3.5px solid #FCD34D',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+              border: '3px solid #FCD34D',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
               overflow: 'hidden',
               background: '#FFFFFF',
               flexShrink: 0
@@ -483,10 +483,10 @@ function MenuContent() {
             </div>
 
             {/* Title & Cuisine */}
-            <div style={{ flex: '1 1 300px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 260px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <h1 style={{
-                  fontSize: 'clamp(24px, 4vw, 34px)',
+                  fontSize: 'clamp(22px, 5vw, 32px)',
                   fontWeight: 900,
                   color: '#FFFFFF',
                   lineHeight: 1.15,
@@ -495,19 +495,19 @@ function MenuContent() {
                 }}>
                   {restaurant.name}
                 </h1>
-                <span className="zomato-rating-pill" style={{ fontSize: 13, padding: '4px 9px' }}>
+                <span className="zomato-rating-pill" style={{ fontSize: 12, padding: '3px 8px' }}>
                   4.8 ★
                 </span>
-                <span style={{ color: '#E2E8F0', fontSize: 12, fontWeight: 600, opacity: 0.9 }}>
-                  (1,240+ verified foodie reviews)
+                <span style={{ color: '#E2E8F0', fontSize: 11.5, fontWeight: 600, opacity: 0.9 }}>
+                  (1,240+ reviews)
                 </span>
               </div>
 
               <p style={{
                 color: '#CBD5E1',
-                fontSize: 13.5,
-                margin: '6px 0 0',
-                lineHeight: 1.4,
+                fontSize: 12.5,
+                margin: '4px 0 0',
+                lineHeight: 1.35,
                 textShadow: '0 1px 4px rgba(0,0,0,0.6)'
               }}>
                 {restaurant.description || 'Authentic flavors, freshest spices, and zero aggregator price markup.'}
@@ -516,10 +516,10 @@ function MenuContent() {
               {/* Meta Chips */}
               <div style={{
                 display: 'flex',
-                gap: 12,
-                marginTop: 8,
+                gap: 8,
+                marginTop: 6,
                 flexWrap: 'wrap',
-                fontSize: 12,
+                fontSize: 11.5,
                 color: '#E2E8F0',
                 fontWeight: 600
               }}>
@@ -534,136 +534,143 @@ function MenuContent() {
         </div>
 
         {/* Quick Action Navigation Buttons inside Hero Bar */}
-        <div style={{
-          background: '#0F172A',
-          borderTop: '1px solid rgba(255,255,255,0.12)',
-          padding: '12px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 10
-        }}>
+        <div
+          className="no-scrollbar touch-scroll"
+          style={{
+            background: '#0F172A',
+            borderTop: '1px solid rgba(255,255,255,0.12)',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            overflowX: 'auto',
+            whiteSpace: 'nowrap'
+          }}
+        >
           {/* Primary CTA */}
           <a
             href="#menu-section"
             className="btn-primary"
             style={{
-              padding: '9px 18px',
-              fontSize: 13,
+              padding: '7px 14px',
+              fontSize: 12,
               fontWeight: 800,
-              borderRadius: 10
+              borderRadius: 8,
+              flexShrink: 0
             }}
           >
-            🍽️ Explore Menu & Order
+            🍽️ Order Now
           </a>
 
           {/* Interactive Feature Shortcuts */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              onClick={() => setBulkModalOpen(true)}
-              style={{
-                background: 'rgba(37, 99, 235, 0.2)',
-                color: '#93C5FD',
-                border: '1px solid rgba(147, 197, 253, 0.3)',
-                padding: '7px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span>🎈</span>
-              <span>Bulk Party Orders</span>
-            </button>
+          <button
+            onClick={() => setBulkModalOpen(true)}
+            style={{
+              background: 'rgba(37, 99, 235, 0.2)',
+              color: '#93C5FD',
+              border: '1px solid rgba(147, 197, 253, 0.3)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 11.5,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0
+            }}
+          >
+            <span>🎈</span>
+            <span>Bulk Orders</span>
+          </button>
 
-            <button
-              onClick={() => setOccasionModalOpen(true)}
-              style={{
-                background: 'rgba(226, 55, 68, 0.2)',
-                color: '#FECDD3',
-                border: '1px solid rgba(254, 205, 211, 0.3)',
-                padding: '7px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span>🎂</span>
-              <span>Birthday Club (15% OFF)</span>
-            </button>
+          <button
+            onClick={() => setOccasionModalOpen(true)}
+            style={{
+              background: 'rgba(226, 55, 68, 0.2)',
+              color: '#FECDD3',
+              border: '1px solid rgba(254, 205, 211, 0.3)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 11.5,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0
+            }}
+          >
+            <span>🎂</span>
+            <span>Birthday Club</span>
+          </button>
 
-            <button
-              onClick={() => setLoyaltyModalOpen(true)}
-              style={{
-                background: 'linear-gradient(135deg, #78350F, #B45309)',
-                color: '#FEF3C7',
-                border: '1px solid #FCD34D',
-                padding: '7px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                boxShadow: '0 2px 8px rgba(180, 83, 9, 0.3)'
-              }}
-            >
-              <span>👑 VIP Pass</span>
-              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: 6, fontSize: 11 }}>
-                🪙 240 pts
-              </span>
-            </button>
+          <button
+            onClick={() => setLoyaltyModalOpen(true)}
+            style={{
+              background: 'linear-gradient(135deg, #78350F, #B45309)',
+              color: '#FEF3C7',
+              border: '1px solid #FCD34D',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 11.5,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(180, 83, 9, 0.3)'
+            }}
+          >
+            <span>👑 VIP Pass</span>
+            <span style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: 6, fontSize: 10.5 }}>
+              🪙 240 pts
+            </span>
+          </button>
 
-            <a
-              href={buildWhatsAppOrderLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: '#25D366',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '7px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 800,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span>💬</span>
-              <span>WhatsApp Chef</span>
-            </a>
+          <a
+            href={buildWhatsAppOrderLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: '#25D366',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 11.5,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0
+            }}
+          >
+            <span>💬</span>
+            <span>WhatsApp Chef</span>
+          </a>
 
-            <button
-              onClick={() => setStaffModalOpen(true)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                color: '#F8FAFC',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                padding: '7px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span>🔐</span>
-              <span>Kitchen Login</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setStaffModalOpen(true)}
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 11.5,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              flexShrink: 0
+            }}
+          >
+            <span>🔐</span>
+            <span>Kitchen Login</span>
+          </button>
         </div>
       </section>
 
@@ -671,21 +678,21 @@ function MenuContent() {
       <section style={{ margin: '0 14px 22px' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 12
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 10
         }}>
           {/* Benefit 1 */}
           <div style={{
             background: '#FFFFFF',
             border: '1px solid #ECEEF2',
             borderRadius: 14,
-            padding: '14px 16px',
+            padding: '12px 14px',
             boxShadow: 'var(--shadow-sm)'
           }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>💰</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Zero Aggregator Markup</div>
-            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
-              Direct kitchen prices are 10–20% cheaper than Swiggy/Zomato. Every rupee goes to quality food.
+            <div style={{ fontSize: 22, marginBottom: 4 }}>💰</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Zero Aggregator Markup</div>
+            <div style={{ fontSize: 11.5, color: '#696969', marginTop: 3, lineHeight: 1.35 }}>
+              Kitchen direct prices are 10–20% cheaper than Zomato/Swiggy.
             </div>
           </div>
 
@@ -694,13 +701,13 @@ function MenuContent() {
             background: '#FFFFFF',
             border: '1px solid #ECEEF2',
             borderRadius: 14,
-            padding: '14px 16px',
+            padding: '12px 14px',
             boxShadow: 'var(--shadow-sm)'
           }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>🪙</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>10% Instant Cash Cashback</div>
-            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
-              1 Loyalty Point = <strong>₹1.00 Direct Discount</strong> on your next order. No hidden conditions.
+            <div style={{ fontSize: 22, marginBottom: 4 }}>🪙</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>10% Points Cashback</div>
+            <div style={{ fontSize: 11.5, color: '#696969', marginTop: 3, lineHeight: 1.35 }}>
+              1 Loyalty Point = <strong>₹1.00 Discount</strong> on your next order.
             </div>
           </div>
 
@@ -709,13 +716,13 @@ function MenuContent() {
             background: '#FFFFFF',
             border: '1px solid #ECEEF2',
             borderRadius: 14,
-            padding: '14px 16px',
+            padding: '12px 14px',
             boxShadow: 'var(--shadow-sm)'
           }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>👨‍🍳</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Direct Chef Attention</div>
-            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
-              Customized spice level, ribbon wording on cakes, and complimentary cutlery packs.
+            <div style={{ fontSize: 22, marginBottom: 4 }}>👨‍🍳</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Direct Chef Attention</div>
+            <div style={{ fontSize: 11.5, color: '#696969', marginTop: 3, lineHeight: 1.35 }}>
+              Custom spice levels, ribbon text on cakes &amp; fresh pack.
             </div>
           </div>
 
@@ -724,13 +731,13 @@ function MenuContent() {
             background: '#FFFFFF',
             border: '1px solid #ECEEF2',
             borderRadius: 14,
-            padding: '14px 16px',
+            padding: '12px 14px',
             boxShadow: 'var(--shadow-sm)'
           }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>⚡</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1C1C1C' }}>Express Kitchen Dispatch</div>
-            <div style={{ fontSize: 12, color: '#696969', marginTop: 3, lineHeight: 1.4 }}>
-              Hot and fresh dispatch directly from the pan to your doorstep without multi-order detour delays.
+            <div style={{ fontSize: 22, marginBottom: 4 }}>⚡</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Express Hot Dispatch</div>
+            <div style={{ fontSize: 11.5, color: '#696969', marginTop: 3, lineHeight: 1.35 }}>
+              Direct from the pan to doorstep with zero detour delays.
             </div>
           </div>
         </div>
@@ -748,14 +755,17 @@ function MenuContent() {
             </span>
           </div>
 
-          <div style={{
-            display: 'flex',
-            gap: 14,
-            overflowX: 'auto',
-            paddingBottom: 6,
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none'
-          }}>
+          <div
+            className="no-scrollbar touch-scroll"
+            style={{
+              display: 'flex',
+              gap: 14,
+              overflowX: 'auto',
+              paddingBottom: 6,
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
+          >
             {menu.map((category) => {
               const sampleItem = category.items?.[0];
               const sampleImg = sampleItem ? getFoodImageUrl(sampleItem) : 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80';
@@ -860,7 +870,7 @@ function MenuContent() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: 12
           }}>
             {spotlightItems.map((item) => {
@@ -1246,19 +1256,22 @@ function MenuContent() {
       </section>
 
       {/* 8. STICKY CATEGORY TABS (AUTHENTIC BRAND SCROLLER) */}
-      <div style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 25,
-        background: 'rgba(255, 255, 255, 0.96)',
-        backdropFilter: 'blur(10px)',
-        padding: '10px 14px',
-        borderBottom: '1px solid var(--border-subtle)',
-        display: 'flex',
-        gap: 8,
-        overflowX: 'auto',
-        whiteSpace: 'nowrap'
-      }}>
+      <div
+        className="no-scrollbar touch-scroll"
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 25,
+          background: 'rgba(255, 255, 255, 0.96)',
+          backdropFilter: 'blur(10px)',
+          padding: '10px 14px',
+          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex',
+          gap: 8,
+          overflowX: 'auto',
+          whiteSpace: 'nowrap'
+        }}
+      >
         {filteredMenu.map(category => (
           <a
             key={category.id}
@@ -1301,7 +1314,7 @@ function MenuContent() {
               </div>
 
               {/* Items List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {category.items.map(item => {
                   const cartItem = cart.find(ci => ci.itemId === item.id);
                   const hasCustomizations = (item.variants && item.variants.length > 0) || (item.addon_groups && item.addon_groups.length > 0);
@@ -1313,10 +1326,10 @@ function MenuContent() {
                         background: '#FFFFFF',
                         border: '1px solid #ECEEF2',
                         borderRadius: 14,
-                        padding: '16px 18px',
+                        padding: '14px 14px',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        gap: 16,
+                        gap: 12,
                         boxShadow: 'var(--shadow-sm)',
                         transition: 'box-shadow 0.2s ease, border-color 0.2s ease'
                       }}
@@ -1332,13 +1345,13 @@ function MenuContent() {
                           )}
                         </div>
 
-                        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1C', marginBottom: 4 }}>{item.name}</h3>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: '#1C1C1C', marginBottom: 6 }}>
+                        <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#1C1C1C', marginBottom: 4 }}>{item.name}</h3>
+                        <div style={{ fontSize: 14.5, fontWeight: 800, color: '#1C1C1C', marginBottom: 6 }}>
                           ₹{(item.base_price_paise / 100).toFixed(0)}
                         </div>
 
                         {item.description && (
-                          <p style={{ fontSize: 12.5, color: '#696969', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <p style={{ fontSize: 12, color: '#696969', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {item.description}
                           </p>
                         )}
@@ -1351,10 +1364,10 @@ function MenuContent() {
                       </div>
 
                       {/* Right: Dish Photo + Overlapping ADD Button */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 110, position: 'relative' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 96, flexShrink: 0, position: 'relative' }}>
                         <div style={{
-                          width: 105,
-                          height: 85,
+                          width: 92,
+                          height: 78,
                           borderRadius: 12,
                           background: '#F8F9FA',
                           display: 'flex',
@@ -1381,7 +1394,7 @@ function MenuContent() {
                         {/* Overlapping ADD / Stepper */}
                         <div style={{ marginTop: -14, position: 'relative', zIndex: 2 }}>
                           {!item.is_available ? (
-                            <button disabled style={{ padding: '6px 12px', borderRadius: 8, fontSize: 11, background: '#F4F5F8', color: '#9C9C9C', fontWeight: 600, border: '1px solid #E3E5EB' }}>
+                            <button disabled style={{ padding: '5px 10px', borderRadius: 8, fontSize: 10.5, background: '#F4F5F8', color: '#9C9C9C', fontWeight: 600, border: '1px solid #E3E5EB' }}>
                               Sold Out
                             </button>
                           ) : cartItem ? (
@@ -1698,27 +1711,11 @@ function MenuContent() {
 
       {/* 13. CUSTOMIZATION MODAL (CLEAN WHITE BOTTOM SHEET) */}
       {customizingItem && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.55)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          zIndex: 100
-        }}>
-          <div style={{
-            width: '100%',
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 500,
-            maxHeight: '85vh',
-            overflowY: 'auto',
-            background: '#FFFFFF',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
             padding: '24px 22px 28px',
-            position: 'relative',
-            boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.16)'
+            position: 'relative'
           }}>
             {/* Close Button */}
             <button
@@ -1936,24 +1933,10 @@ function MenuContent() {
 
       {/* 14. DINE-IN SERVICE MODAL ("CALL WAITER / WATER / BILL") */}
       {waiterModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 20,
+        <div className="modal-overlay-responsive">
+          <div className="mobile-modal-sheet touch-scroll" style={{
             maxWidth: 420,
-            width: '100%',
             padding: 24,
-            boxShadow: 'var(--shadow-lg)',
             position: 'relative'
           }}>
             <button
@@ -2034,30 +2017,15 @@ function MenuContent() {
       {/* 15. VIP LOYALTY PROFILE & BENEFITS MODAL */}
       {loyaltyModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget) setLoyaltyModalOpen(false);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#FFFFFF',
-              borderRadius: 20,
-              width: '100%',
               maxWidth: 580,
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative'
             }}
           >
@@ -2341,30 +2309,15 @@ function MenuContent() {
       {/* 16. BULK & PARTY CATERING ENQUIRY MODAL (CRUSTO BAKERS FEATURE #4) */}
       {bulkModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget && !bulkSubmitting) setBulkModalOpen(false);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#FFFFFF',
-              borderRadius: 20,
-              width: '100%',
               maxWidth: 540,
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative',
               padding: 24
             }}
@@ -2572,30 +2525,15 @@ function MenuContent() {
       {/* 17. BIRTHDAY & OCCASION REMINDER CLUB MODAL (CRUSTO BAKERS FEATURE #5) */}
       {occasionModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget && !occasionSubmitting) setOccasionModalOpen(false);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#FFFFFF',
-              borderRadius: 20,
-              width: '100%',
               maxWidth: 520,
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative',
               padding: 24
             }}
@@ -2847,55 +2785,42 @@ function MenuContent() {
         title="Chat with Chef / Order Custom Cake"
         style={{
           position: 'fixed',
-          bottom: itemCount > 0 ? 84 : 22,
-          right: 18,
+          bottom: itemCount > 0 ? 76 : 18,
+          right: 14,
           zIndex: 990,
           background: '#25D366',
           color: '#FFFFFF',
           borderRadius: 30,
-          padding: '10px 16px',
-          boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
+          padding: '8px 14px',
+          boxShadow: '0 6px 20px rgba(37, 211, 102, 0.4)',
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 6,
           textDecoration: 'none',
           fontWeight: 800,
-          fontSize: 12.5,
+          fontSize: 12,
           border: '2px solid #FFFFFF',
           transition: 'all 0.2s ease'
         }}
       >
-        <span style={{ fontSize: 17 }}>💬</span>
+        <span style={{ fontSize: 16 }}>💬</span>
         <span>Chat with Chef</span>
       </a>
 
       {/* 20. RESTAURANT STAFF & KITCHEN LOGIN MODAL */}
       {staffModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
+          className="modal-overlay-responsive"
           onClick={(e) => {
             if (e.target === e.currentTarget && !staffLoginLoading) setStaffModalOpen(false);
           }}
         >
           <div
+            className="mobile-modal-sheet touch-scroll"
             style={{
-              background: '#FFFFFF',
-              borderRadius: 22,
-              width: '100%',
               maxWidth: 460,
-              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
               position: 'relative',
-              padding: '28px 26px'
+              padding: '24px 22px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
