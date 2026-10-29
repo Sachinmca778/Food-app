@@ -32,6 +32,18 @@ function MenuContent() {
   // VIP Loyalty Profile & Benefits Modal
   const [loyaltyModalOpen, setLoyaltyModalOpen] = useState(false);
 
+  // Delivery Pincode Verification State (Crusto Bakers Feature)
+  const [pincodeInput, setPincodeInput] = useState('');
+  const [savedPincode, setSavedPincode] = useState('');
+  const [pincodeVerified, setPincodeVerified] = useState(false);
+  const [pincodeServiceable, setPincodeServiceable] = useState(true);
+  const [pincodeMsg, setPincodeMsg] = useState('');
+  const [pincodeChecking, setPincodeChecking] = useState(false);
+
+  // Cake / Bakery Customization State
+  const [cakeMessage, setCakeMessage] = useState('');
+  const [includeCutlery, setIncludeCutlery] = useState(true);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [vegFilter, setVegFilter] = useState('all'); // 'all', 'veg', 'non_veg'
@@ -67,19 +79,63 @@ function MenuContent() {
       }
     }
     loadData();
+
+    // Check saved pincode
+    const storedPin = typeof window !== 'undefined' ? localStorage.getItem('user_pincode') : null;
+    if (storedPin && storedPin.length === 6) {
+      setPincodeInput(storedPin);
+      setSavedPincode(storedPin);
+      setPincodeVerified(true);
+      setPincodeServiceable(true);
+      setPincodeMsg(`Delivering to ${storedPin}`);
+    }
   }, [slug]);
+
+  const handleCheckPincode = async () => {
+    if (!pincodeInput || pincodeInput.length !== 6) return;
+    setPincodeChecking(true);
+    setPincodeMsg('');
+    try {
+      const res = await fetchAPI(`/restaurant/${slug}/check-pincode?pincode=${pincodeInput}`);
+      setPincodeVerified(true);
+      setSavedPincode(pincodeInput);
+      setPincodeServiceable(res.serviceable);
+      setPincodeMsg(res.message);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user_pincode', pincodeInput);
+      }
+    } catch (e) {
+      setPincodeVerified(true);
+      setSavedPincode(pincodeInput);
+      setPincodeServiceable(true);
+      setPincodeMsg(`Delivering to ${pincodeInput}`);
+    } finally {
+      setPincodeChecking(false);
+    }
+  };
 
   const handleOpenCustomize = (item) => {
     setCustomizingItem(item);
     setSelectedVariant(item.variants?.[0] || null);
     setSelectedAddons([]);
     setSpecialNotes('');
+    setCakeMessage('');
+    setIncludeCutlery(true);
   };
 
   const handleAddCustomized = () => {
     if (!customizingItem) return;
-    addItem(customizingItem, selectedVariant, selectedAddons, specialNotes);
+    let fullNotes = specialNotes ? [specialNotes] : [];
+    if (cakeMessage && cakeMessage.trim()) {
+      fullNotes.unshift(`🎂 Cake: "${cakeMessage.trim()}"`);
+    }
+    if (includeCutlery) {
+      fullNotes.push(`🍴 Candles & Knife`);
+    }
+    addItem(customizingItem, selectedVariant, selectedAddons, fullNotes.join(' • '));
     setCustomizingItem(null);
+    setCakeMessage('');
+    setIncludeCutlery(true);
   };
 
   const handleQuickAdd = (item) => {
@@ -314,6 +370,148 @@ function MenuContent() {
           </a>
         </div>
       </div>
+
+      {/* 1B. DELIVERY PINCODE SERVICEABILITY CHECKER (CRUSTO BAKERS FEATURE) */}
+      {orderMode === 'delivery' && (
+        <div
+          style={{
+            margin: '10px 14px 0',
+            background: '#FFFFFF',
+            borderRadius: 12,
+            padding: '10px 14px',
+            border: '1px solid #ECEEF2',
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 8
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 17 }}>📍</span>
+            {pincodeVerified ? (
+              <div>
+                <div
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    color: pincodeServiceable ? '#15803D' : '#DC2626'
+                  }}
+                >
+                  {pincodeServiceable ? `Delivering to ${savedPincode}` : `Pincode ${savedPincode} outside direct radius`}
+                </div>
+                <div style={{ fontSize: 11, color: '#696969' }}>
+                  {pincodeServiceable
+                    ? `Est. 35-45 mins • Free delivery above ₹${((restaurant?.free_delivery_above_paise || 49900) / 100).toFixed(0)}`
+                    : `Order available for Store Pickup or Dine-In!`}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1C1C1C' }}>
+                  Check Delivery to your Area
+                </div>
+                <div style={{ fontSize: 11, color: '#696969' }}>
+                  Enter your 6-digit postal pincode to verify speed & charges
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              type="text"
+              placeholder="e.g. 400050"
+              maxLength={6}
+              value={pincodeInput}
+              onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCheckPincode(); }}
+              style={{
+                width: 100,
+                height: 32,
+                padding: '0 8px',
+                borderRadius: 8,
+                border: '1px solid #D1D5DB',
+                fontSize: 12.5,
+                fontWeight: 700,
+                textAlign: 'center'
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleCheckPincode}
+              disabled={pincodeChecking || pincodeInput.length !== 6}
+              style={{
+                background: 'var(--primary)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: 8,
+                padding: '0 12px',
+                height: 32,
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: pincodeInput.length === 6 ? 'pointer' : 'not-allowed',
+                opacity: pincodeInput.length === 6 ? 1 : 0.6
+              }}
+            >
+              {pincodeChecking ? '...' : 'Check'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 1C. TAKEAWAY PICKUP STORE LOCATION & DIRECTIONS (CRUSTO BAKERS FEATURE) */}
+      {orderMode === 'takeaway' && (
+        <div
+          style={{
+            margin: '10px 14px 0',
+            background: '#EFF6FF',
+            border: '1.5px solid #BFDBFE',
+            borderRadius: 12,
+            padding: '12px 16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 10
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 24 }}>🥡</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1E40AF' }}>
+                Self-Pickup from {restaurant.name} Kitchen
+              </div>
+              <div style={{ fontSize: 12, color: '#1D4ED8', marginTop: 2 }}>
+                📍 {restaurant.address_line || 'Bandra West, Mumbai'} • ⏱️ Ready in ~25 mins
+              </div>
+            </div>
+          </div>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${restaurant.name} ${restaurant.address_line || ''} ${restaurant.city || ''}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: '#2563EB',
+              color: '#FFFFFF',
+              padding: '7px 14px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5
+            }}
+          >
+            <span>🗺️</span>
+            <span>Get Directions</span>
+          </a>
+        </div>
+      )}
 
       {/* 2. CRISP WHITE RESTAURANT HEADER CARD (ZOMATO THEME) */}
       <header style={{
@@ -875,6 +1073,78 @@ function MenuContent() {
               </div>
             ))}
 
+            {/* CAKE & BAKERY CUSTOMIZATIONS (CRUSTO BAKERS FEATURE) */}
+            {(customizingItem.name.toLowerCase().includes('cake') ||
+              customizingItem.name.toLowerCase().includes('pastry') ||
+              customizingItem.name.toLowerCase().includes('pie') ||
+              customizingItem.name.toLowerCase().includes('sweet') ||
+              customizingItem.name.toLowerCase().includes('dessert') ||
+              customizingItem.name.toLowerCase().includes('bakery') ||
+              customizingItem.name.toLowerCase().includes('pizza')) && (
+              <div
+                style={{
+                  background: '#FFFBEB',
+                  border: '1.5px solid #FDE68A',
+                  borderRadius: 12,
+                  padding: '14px 16px',
+                  marginBottom: 18
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <span style={{ fontSize: 18 }}>🎂</span>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, color: '#92400E', margin: 0 }}>
+                    Bakery Customization & Message
+                  </h4>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: '#B45309',
+                    background: 'rgba(255,255,255,0.7)',
+                    padding: '5px 10px',
+                    borderRadius: 6,
+                    marginBottom: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5
+                  }}
+                >
+                  <span>⚖️</span>
+                  <span><strong>Servings Guide:</strong> 0.5 Kg serves 4–6 guests • 1.0 Kg serves 8–12 guests</span>
+                </div>
+
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#92400E', marginBottom: 4 }}>
+                  Message on Cake / Ribbon (Max 35 chars):
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Happy Birthday Priya! 🎂"
+                  maxLength={35}
+                  value={cakeMessage}
+                  onChange={(e) => setCakeMessage(e.target.value)}
+                  className="input-field"
+                  style={{
+                    fontSize: 13,
+                    padding: '9px 12px',
+                    borderColor: '#FCD34D',
+                    background: '#FFFFFF',
+                    marginBottom: 10
+                  }}
+                />
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12, color: '#78350F', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={includeCutlery}
+                    onChange={(e) => setIncludeCutlery(e.target.checked)}
+                    style={{ width: 16, height: 16, accentColor: '#D97706', cursor: 'pointer' }}
+                  />
+                  <span>Include complimentary birthday candle & wooden knife (Free)</span>
+                </label>
+              </div>
+            )}
+
             {/* SPECIAL INSTRUCTIONS */}
             <div style={{ marginBottom: 22 }}>
               <label style={{ display: 'block', fontSize: 12.5, color: '#696969', marginBottom: 6 }}>
@@ -1360,6 +1630,38 @@ function MenuContent() {
           </a>
         </div>
       )}
+
+      {/* 9. FLOATING WHATSAPP CHEF / BAKER LIVE HELP (CRUSTO BAKERS FEATURE) */}
+      <a
+        href={`https://wa.me/${(restaurant.phone || '919876543210').replace(/\D/g, '')}?text=${encodeURIComponent(
+          `Hi ${restaurant.name}! 👋 I am browsing your menu on DirectDine. I have a query regarding a custom cake or party order.`
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Chat with Chef / Order Custom Cake"
+        style={{
+          position: 'fixed',
+          bottom: itemCount > 0 ? 84 : 22,
+          right: 18,
+          zIndex: 990,
+          background: '#25D366',
+          color: '#FFFFFF',
+          borderRadius: 30,
+          padding: '10px 16px',
+          boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          textDecoration: 'none',
+          fontWeight: 800,
+          fontSize: 12.5,
+          border: '2px solid #FFFFFF',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <span style={{ fontSize: 17 }}>💬</span>
+        <span>Chat with Chef</span>
+      </a>
     </div>
   );
 }

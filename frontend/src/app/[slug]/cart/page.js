@@ -14,7 +14,7 @@ function CartContent() {
   const searchParams = useSearchParams();
   const initialTable = searchParams?.get('table') || '';
 
-  const { cart, restaurant, updateQuantity, removeItem, clearCart, itemCount, cartSubtotalPaise, setRestaurantInfo } = useCart();
+  const { cart, restaurant, updateQuantity, removeItem, clearCart, itemCount, cartSubtotalPaise, setRestaurantInfo, addItem } = useCart();
 
   // Order Details: 'delivery', 'dine_in', 'pickup'
   const [orderType, setOrderType] = useState(initialTable ? 'dine_in' : 'delivery');
@@ -25,6 +25,16 @@ function CartContent() {
   const [pincode, setPincode] = useState('400050');
   const [tableNo, setTableNo] = useState(initialTable || '4');
   const [cookingNotes, setCookingNotes] = useState('');
+
+  // Crusto Bakers Features: Advance Scheduling & Delivery Slots
+  const [deliveryScheduleType, setDeliveryScheduleType] = useState('instant'); // 'instant' or 'scheduled'
+  const [scheduledDay, setScheduledDay] = useState('Today'); // 'Today', 'Tomorrow', 'Day After'
+  const [scheduledSlot, setScheduledSlot] = useState('04:00 PM - 07:00 PM (Evening)');
+
+  // Cake Custom Message & Cutlery State
+  const [cartCakeMessage, setCartCakeMessage] = useState('');
+  const [cartIncludeCutlery, setCartIncludeCutlery] = useState(true);
+  const [partyAddonToast, setPartyAddonToast] = useState('');
 
   // OTP Auth State
   const [otpSent, setOtpSent] = useState(false);
@@ -118,6 +128,8 @@ function CartContent() {
     } else {
       setIsLoggedIn(false);
     }
+    const storedPin = localStorage.getItem('user_pincode');
+    if (storedPin) setPincode(storedPin);
   }, []);
 
   const handleLogout = () => {
@@ -275,7 +287,12 @@ function CartContent() {
         coupon_code: appliedCoupon ? appliedCoupon.code : null,
         loyalty_points_redeemed: useLoyalty ? Math.min(loyaltyPoints, Math.floor(cartSubtotalPaise / 100)) : 0,
         payment_method: paymentMethod,
-        customer_note: cookingNotes || ''
+        customer_note: cookingNotes || '',
+        scheduled_date: deliveryScheduleType === 'scheduled' ? scheduledDay : null,
+        scheduled_slot: deliveryScheduleType === 'scheduled' ? scheduledSlot : null,
+        cake_message: cartCakeMessage || null,
+        include_cutlery: cartIncludeCutlery,
+        pincode: pincode
       };
 
       const res = await fetchAPI('/orders', {
@@ -490,6 +507,197 @@ function CartContent() {
           🥡 Takeaway
         </button>
       </div>
+
+      {/* DELIVERY TIME SLOT SCHEDULER (CRUSTO BAKERS FEATURE) */}
+      {orderType === 'delivery' && (
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: 14,
+            padding: '16px 18px',
+            marginBottom: 18,
+            border: '1px solid #ECEEF2',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>⏰</span>
+              <h3 style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', margin: 0 }}>
+                Delivery Scheduling & Time Slots
+              </h3>
+            </div>
+            <span style={{ fontSize: 11, background: '#EDF8F0', color: '#15803D', fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+              On-Time Guarantee
+            </span>
+          </div>
+
+          {/* Instant vs Advance Toggle */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            <button
+              type="button"
+              onClick={() => setDeliveryScheduleType('instant')}
+              style={{
+                flex: 1,
+                padding: '9px 12px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 800,
+                border: deliveryScheduleType === 'instant' ? '2px solid var(--primary)' : '1px solid #D1D5DB',
+                background: deliveryScheduleType === 'instant' ? '#FFF1F2' : '#F9FAFB',
+                color: deliveryScheduleType === 'instant' ? 'var(--primary)' : '#4B5563',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 5
+              }}
+            >
+              <span>⚡</span>
+              <span>Instant (35-45 mins)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDeliveryScheduleType('scheduled')}
+              style={{
+                flex: 1,
+                padding: '9px 12px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 800,
+                border: deliveryScheduleType === 'scheduled' ? '2px solid var(--primary)' : '1px solid #D1D5DB',
+                background: deliveryScheduleType === 'scheduled' ? '#FFF1F2' : '#F9FAFB',
+                color: deliveryScheduleType === 'scheduled' ? 'var(--primary)' : '#4B5563',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 5
+              }}
+            >
+              <span>📅</span>
+              <span>Schedule Slot</span>
+            </button>
+          </div>
+
+          {/* If scheduled is selected, show Day & Time Slot chips */}
+          {deliveryScheduleType === 'scheduled' && (
+            <div style={{ background: '#F8F9FA', borderRadius: 10, padding: 12, border: '1px solid #E5E7EB' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                Select Delivery Date:
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                {['Today', 'Tomorrow', 'Day After Tomorrow'].map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => setScheduledDay(day)}
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      border: scheduledDay === day ? '2px solid #E23744' : '1px solid #D1D5DB',
+                      background: scheduledDay === day ? '#FFFFFF' : 'transparent',
+                      color: scheduledDay === day ? '#E23744' : '#4B5563',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                Select Time Window:
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  { id: '10:00 AM - 01:00 PM (Morning)', label: '🌅 10 AM - 1 PM', sub: 'Morning Slot' },
+                  { id: '01:00 PM - 04:00 PM (Lunch)', label: '🍱 1 PM - 4 PM', sub: 'Lunch Slot' },
+                  { id: '04:00 PM - 07:00 PM (Evening)', label: '☕ 4 PM - 7 PM', sub: 'Evening Slot' },
+                  { id: '07:00 PM - 10:00 PM (Dinner & Cake)', label: '🌙 7 PM - 10 PM', sub: 'Dinner / Party' }
+                ].map((slot) => (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    onClick={() => setScheduledSlot(slot.id)}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      textAlign: 'left',
+                      border: scheduledSlot === slot.id ? '2px solid #E23744' : '1px solid #D1D5DB',
+                      background: scheduledSlot === slot.id ? '#FFF1F2' : '#FFFFFF',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ fontSize: 12, fontWeight: 800, color: scheduledSlot === slot.id ? '#E23744' : '#1C1C1C' }}>
+                      {slot.label}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: '#696969' }}>
+                      {slot.sub}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAKEAWAY KITCHEN DETAILS (CRUSTO BAKERS FEATURE) */}
+      {orderType === 'pickup' && (
+        <div
+          style={{
+            background: '#EFF6FF',
+            borderRadius: 14,
+            padding: '16px 18px',
+            marginBottom: 18,
+            border: '1.5px solid #BFDBFE',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 24 }}>🥡</span>
+            <div>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1E40AF' }}>
+                Store Pickup from {restaurant?.name || 'Restaurant'}
+              </div>
+              <div style={{ fontSize: 12, color: '#1D4ED8', marginTop: 2 }}>
+                📍 {restaurant?.address_line || 'Bandra West, Mumbai'} • ⏱️ Ready in 20-25 mins
+              </div>
+            </div>
+          </div>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${restaurant?.name || ''} ${restaurant?.address_line || ''}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: '#2563EB',
+              color: '#FFFFFF',
+              padding: '8px 14px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5
+            }}
+          >
+            <span>🗺️</span>
+            <span>Get Directions</span>
+          </a>
+        </div>
+      )}
 
       {/* DINE-IN TABLE SELECTOR */}
       {orderType === 'dine_in' && (
@@ -764,6 +972,148 @@ function CartContent() {
               🥡 Takeaway order: Please collect your parcel from the restaurant counter when ready.
             </div>
           )}
+        </div>
+      </div>
+
+      {/* CAKE WORDING & BIRTHDAY ESSENTIALS (CRUSTO BAKERS FEATURE) */}
+      <div
+        style={{
+          background: '#FFFBEB',
+          borderRadius: 14,
+          padding: '16px 18px',
+          marginBottom: 18,
+          border: '1.5px solid #FDE68A',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 20 }}>🎂</span>
+          <div>
+            <h3 style={{ fontSize: 14.5, fontWeight: 800, color: '#92400E', margin: 0 }}>
+              Custom Cake Message & Cutlery
+            </h3>
+            <p style={{ fontSize: 11.5, color: '#B45309', margin: '2px 0 0' }}>
+              Special wording piped on your cake or celebration box
+            </p>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <input
+            type="text"
+            placeholder="e.g. Happy 25th Birthday Rhea! 🎉 (Optional)"
+            maxLength={35}
+            value={cartCakeMessage}
+            onChange={(e) => setCartCakeMessage(e.target.value)}
+            className="input-field"
+            style={{
+              height: 42,
+              background: '#FFFFFF',
+              borderColor: '#FCD34D',
+              fontSize: 13
+            }}
+          />
+        </div>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12.5, color: '#78350F', fontWeight: 600 }}>
+          <input
+            type="checkbox"
+            checked={cartIncludeCutlery}
+            onChange={(e) => setCartIncludeCutlery(e.target.checked)}
+            style={{ width: 17, height: 17, accentColor: '#D97706', cursor: 'pointer' }}
+          />
+          <span>Include complimentary birthday candle & wooden knife set (Free)</span>
+        </label>
+      </div>
+
+      {/* PARTY & CELEBRATION ADD-ONS UPSELL (CRUSTO BAKERS FEATURE) */}
+      <div
+        style={{
+          background: '#FFFFFF',
+          borderRadius: 14,
+          padding: '16px 18px',
+          marginBottom: 18,
+          border: '1px solid #ECEEF2',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div>
+            <h3 style={{ fontSize: 14.5, fontWeight: 800, color: '#1C1C1C', margin: 0 }}>
+              🎉 Party & Celebration Essentials
+            </h3>
+            <p style={{ fontSize: 11.5, color: '#666', margin: '2px 0 0' }}>
+              Add celebration kits, candles and party props to your order
+            </p>
+          </div>
+          {partyAddonToast && (
+            <span style={{ fontSize: 11, background: '#DCFCE7', color: '#15803D', fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+              ✓ {partyAddonToast}
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {[
+            { id: 'sparkler-candle', name: 'Sparkler Fountain Candle', pricePaise: 3000, icon: '✨', desc: 'Golden sparkler' },
+            { id: 'party-popper', name: 'Party Confetti Popper', pricePaise: 6000, icon: '🎊', desc: 'Party blast' },
+            { id: 'balloons-pack', name: 'Metallic Balloons (10 Pcs)', pricePaise: 9900, icon: '🎈', desc: 'Celebration set' },
+            { id: 'greeting-card', name: 'Handwritten Greeting Card', pricePaise: 4900, icon: '💌', desc: 'Custom wish' }
+          ].map((addon) => {
+            const alreadyInCart = cart.some(item => item.itemId === addon.id);
+            return (
+              <div
+                key={addon.id}
+                style={{
+                  background: '#F9FAFB',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: 10,
+                  padding: 10,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: '#1C1C1C', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>{addon.icon}</span>
+                    <span>{addon.name}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>
+                    ₹{(addon.pricePaise / 100).toFixed(0)} • {addon.desc}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    addItem({
+                      id: addon.id,
+                      name: addon.name,
+                      base_price_paise: addon.pricePaise,
+                      veg_type: 'veg'
+                    });
+                    setPartyAddonToast(`Added ${addon.name}!`);
+                    setTimeout(() => setPartyAddonToast(''), 2000);
+                  }}
+                  style={{
+                    background: alreadyInCart ? '#DCFCE7' : 'var(--primary)',
+                    color: alreadyInCart ? '#15803D' : '#FFFFFF',
+                    border: 'none',
+                    padding: '5px 10px',
+                    borderRadius: 6,
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  {alreadyInCart ? '+1 More' : '+ Add'}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 

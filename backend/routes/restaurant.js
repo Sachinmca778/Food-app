@@ -166,4 +166,55 @@ router.get('/:slug/coupons', asyncHandler(async (req, res) => {
   res.json({ success: true, coupons });
 }));
 
+// GET /api/restaurant/:slug/check-pincode?pincode=110037
+router.get('/:slug/check-pincode', asyncHandler(async (req, res) => {
+  const { pincode } = req.query;
+  const { rows: [restaurant] } = await query(
+    'SELECT id, name, slug, address_line, city, pincode, delivery_fee_paise, free_delivery_above_paise, min_order_paise, avg_prep_minutes FROM restaurants WHERE slug = $1 AND is_active = true',
+    [req.params.slug]
+  );
+  if (!restaurant) throw new ApiError(404, 'Restaurant not found');
+
+  const cleanPin = String(pincode || '').trim();
+  if (!cleanPin || cleanPin.length !== 6 || !/^\d{6}$/.test(cleanPin)) {
+    return res.json({
+      success: false,
+      serviceable: false,
+      message: 'Please enter a valid 6-digit postal pincode'
+    });
+  }
+
+  // Check if primary pincode match or nearby zone
+  const restPin = String(restaurant.pincode || '400050').trim();
+  const restPrefix = restPin.substring(0, 3);
+  const pinPrefix = cleanPin.substring(0, 3);
+
+  const isDirectZone = cleanPin === restPin || restPrefix === pinPrefix;
+  const isMetroHub = (restPin.startsWith('11') || restPin.startsWith('12') || restPin.startsWith('20'))
+    ? (cleanPin.startsWith('11') || cleanPin.startsWith('12') || cleanPin.startsWith('20'))
+    : (restPin.substring(0, 2) === cleanPin.substring(0, 2));
+
+  const serviceable = isDirectZone || isMetroHub;
+
+  if (serviceable) {
+    res.json({
+      success: true,
+      serviceable: true,
+      pincode: cleanPin,
+      deliveryFeePaise: restaurant.delivery_fee_paise || 3000,
+      freeDeliveryAbovePaise: restaurant.free_delivery_above_paise || 49900,
+      estimatedMins: `${restaurant.avg_prep_minutes || 25}-${(restaurant.avg_prep_minutes || 25) + 15} mins`,
+      message: `Delivering hot & fresh to ${cleanPin}! Free delivery above ₹${((restaurant.free_delivery_above_paise || 49900) / 100).toFixed(0)}.`
+    });
+  } else {
+    res.json({
+      success: true,
+      serviceable: false,
+      pincode: cleanPin,
+      message: `Pincode ${cleanPin} is beyond our direct delivery radius. You can still order for Store Pickup!`,
+      allowsPickup: true
+    });
+  }
+}));
+
 module.exports = router;

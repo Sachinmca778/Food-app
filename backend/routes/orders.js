@@ -27,6 +27,11 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
     deliveryLat, delivery_lat,
     deliveryLng, delivery_lng,
     customerNote, customer_note, special_instructions,
+    scheduledDate, scheduled_date, deliveryDate, delivery_date,
+    scheduledSlot, scheduled_slot, deliveryTimeSlot, delivery_time_slot,
+    cakeMessage, cake_message,
+    includeCutlery, include_cutlery,
+    pincode,
     source = 'web',
     couponId, coupon_id, coupon_code,
     paymentMethod, payment_method = 'upi'
@@ -122,7 +127,29 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
     if (cpn) resolvedCouponId = cpn.id;
   }
 
-  // 7. Create order via orderService
+  // 7. Assemble comprehensive note (including advance slot & cake wording)
+  const schDate = scheduledDate || scheduled_date || deliveryDate || delivery_date;
+  const schSlot = scheduledSlot || scheduled_slot || deliveryTimeSlot || delivery_time_slot;
+  const ckMsg = cakeMessage || cake_message;
+  const incCutlery = includeCutlery !== undefined ? includeCutlery : include_cutlery;
+
+  let noteParts = [];
+  if (schDate || schSlot) {
+    noteParts.push(`📅 Scheduled: ${schDate || 'Today'} (${schSlot || 'Standard Delivery'})`);
+  }
+  if (ckMsg && String(ckMsg).trim()) {
+    noteParts.push(`🎂 Cake Msg: "${String(ckMsg).trim()}"`);
+  }
+  if (incCutlery) {
+    noteParts.push(`🍴 Candles & Knife Set: Included`);
+  }
+  const baseNote = customerNote || customer_note || special_instructions;
+  if (baseNote && String(baseNote).trim()) {
+    noteParts.push(String(baseNote).trim());
+  }
+  const finalCustomerNote = noteParts.join(' • ') || null;
+
+  // 8. Create order via orderService
   const order = await orderService.createOrder({
     restaurantId,
     customerId,
@@ -134,7 +161,7 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
     deliveryLat: lat,
     deliveryLng: lng,
     deliveryDistanceM,
-    customerNote: customerNote || customer_note || special_instructions,
+    customerNote: finalCustomerNote,
     source,
     couponId: resolvedCouponId,
     paymentMethod
