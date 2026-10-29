@@ -32,6 +32,7 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
     cakeMessage, cake_message,
     includeCutlery, include_cutlery,
     pincode,
+    riderTipPaise, rider_tip_paise, tipPaise, tip_paise,
     source = 'web',
     couponId, coupon_id, coupon_code,
     paymentMethod, payment_method = 'upi'
@@ -142,6 +143,10 @@ const handleOrderCreation = asyncHandler(async (req, res) => {
   }
   if (incCutlery) {
     noteParts.push(`🍴 Candles & Knife Set: Included`);
+  }
+  const tipAmount = riderTipPaise || rider_tip_paise || tipPaise || tip_paise;
+  if (tipAmount && Number(tipAmount) > 0) {
+    noteParts.push(`🚴 Rider Tip: ₹${Math.round(Number(tipAmount) / 100)}`);
   }
   const baseNote = customerNote || customer_note || special_instructions;
   if (baseNote && String(baseNote).trim()) {

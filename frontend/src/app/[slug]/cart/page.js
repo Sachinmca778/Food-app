@@ -36,6 +36,9 @@ function CartContent() {
   const [cartIncludeCutlery, setCartIncludeCutlery] = useState(true);
   const [partyAddonToast, setPartyAddonToast] = useState('');
 
+  // Rider Tip State (Crusto Bakers Feature #3)
+  const [riderTipPaise, setRiderTipPaise] = useState(0);
+
   // OTP Auth State
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -230,7 +233,7 @@ function CartContent() {
   const discountPaise = appliedCoupon?.discountPaise || 0;
   const loyaltyDiscountPaise = useLoyalty ? Math.min((loyaltyPoints || 240) * 100, cartSubtotalPaise) : 0;
 
-  const grandTotalPaise = Math.max(0, cartSubtotalPaise + deliveryFeePaise + gstPaise - discountPaise - loyaltyDiscountPaise);
+  const grandTotalPaise = Math.max(0, cartSubtotalPaise + deliveryFeePaise + gstPaise + riderTipPaise - discountPaise - loyaltyDiscountPaise);
 
   const handlePlaceOrder = async () => {
     // 1. Mandatory Customer Login check
@@ -292,7 +295,8 @@ function CartContent() {
         scheduled_slot: deliveryScheduleType === 'scheduled' ? scheduledSlot : null,
         cake_message: cartCakeMessage || null,
         include_cutlery: cartIncludeCutlery,
-        pincode: pincode
+        pincode: pincode,
+        rider_tip_paise: riderTipPaise
       };
 
       const res = await fetchAPI('/orders', {
@@ -1371,6 +1375,80 @@ function CartContent() {
         </div>
       </div>
 
+      {/* RIDER TIP CARD (CRUSTO BAKERS FEATURE #3) */}
+      {orderType === 'delivery' && (
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: 14,
+            padding: '16px 18px',
+            marginBottom: 18,
+            border: '1px solid #ECEEF2',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🚴</span>
+              <div>
+                <h3 style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C', margin: 0 }}>
+                  Tip your delivery partner
+                </h3>
+                <p style={{ fontSize: 11.5, color: '#666', margin: '2px 0 0' }}>
+                  100% of your tip goes directly to your rider
+                </p>
+              </div>
+            </div>
+            {riderTipPaise > 0 && (
+              <button
+                type="button"
+                onClick={() => setRiderTipPaise(0)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#DC2626',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                ✕ Clear
+              </button>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {[
+              { label: '₹20', sub: 'Chai on me ☕', paise: 2000 },
+              { label: '₹30', sub: 'Thank you 🚴', paise: 3000 },
+              { label: '₹50', sub: 'Super Rider 🌟', paise: 5000 }
+            ].map((tip) => (
+              <button
+                key={tip.paise}
+                type="button"
+                onClick={() => setRiderTipPaise(riderTipPaise === tip.paise ? 0 : tip.paise)}
+                style={{
+                  padding: '10px 8px',
+                  borderRadius: 10,
+                  border: riderTipPaise === tip.paise ? '2px solid #E23744' : '1px solid #E5E7EB',
+                  background: riderTipPaise === tip.paise ? '#FFF1F2' : '#F9FAFB',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ fontSize: 14, fontWeight: 900, color: riderTipPaise === tip.paise ? '#E23744' : '#1C1C1C' }}>
+                  {tip.label}
+                </div>
+                <div style={{ fontSize: 10.5, color: riderTipPaise === tip.paise ? '#E23744' : '#666', marginTop: 2 }}>
+                  {tip.sub}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ITEMIZED BILL BREAKDOWN */}
       <div style={{ background: '#FFFFFF', borderRadius: 14, padding: '18px 20px', marginBottom: 20, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: 16, color: '#1C1C1C', marginBottom: 14 }}>📋 Bill Details</h2>
@@ -1405,6 +1483,13 @@ function CartContent() {
               <span style={{ fontWeight: 600, color: isFreeDelivery ? '#15803D' : '#1C1C1C' }}>
                 {isFreeDelivery ? 'FREE' : `₹${(deliveryFeePaise / 100).toFixed(2)}`}
               </span>
+            </div>
+          )}
+
+          {riderTipPaise > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#1C1C1C' }}>
+              <span style={{ color: '#4F4F4F' }}>Delivery Partner Tip 🚴</span>
+              <span style={{ fontWeight: 600 }}>₹{(riderTipPaise / 100).toFixed(2)}</span>
             </div>
           )}
 

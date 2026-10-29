@@ -217,4 +217,73 @@ router.get('/:slug/check-pincode', asyncHandler(async (req, res) => {
   }
 }));
 
+// POST /api/restaurant/:slug/bulk-enquiry — Corporate & Party Catering Enquiry (Crusto Bakers Feature #4)
+router.post('/:slug/bulk-enquiry', asyncHandler(async (req, res) => {
+  const { customerName, customerPhone, eventType, guestCount, eventDate, budgetPerPerson, notes } = req.body;
+  const { rows: [restaurant] } = await query(
+    'SELECT id, name, slug, phone FROM restaurants WHERE slug = $1 AND is_active = true',
+    [req.params.slug]
+  );
+  if (!restaurant) throw new ApiError(404, 'Restaurant not found');
+
+  if (!customerPhone || !customerName) {
+    throw new ApiError(400, 'Name and phone number are required for catering quotation');
+  }
+
+  await query(
+    `INSERT INTO bulk_enquiries (restaurant_id, customer_name, customer_phone, event_type, guest_count, event_date, budget_per_person, notes)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [
+      restaurant.id,
+      customerName,
+      customerPhone,
+      eventType || 'Party / Celebration',
+      guestCount || '25-50 guests',
+      eventDate || null,
+      budgetPerPerson || null,
+      notes || null
+    ]
+  );
+
+  res.json({
+    success: true,
+    message: '🎉 Enquiry received! Our banquet & event team has been alerted and will reach out with customized food packages shortly.',
+    restaurantPhone: restaurant.phone
+  });
+}));
+
+// POST /api/restaurant/:slug/save-occasion — Occasion & Birthday Reminder Club (Crusto Bakers Feature #5)
+router.post('/:slug/save-occasion', asyncHandler(async (req, res) => {
+  const { customerPhone, customerName, occasionName, occasionDate, notes } = req.body;
+  const { rows: [restaurant] } = await query(
+    'SELECT id, name, slug FROM restaurants WHERE slug = $1 AND is_active = true',
+    [req.params.slug]
+  );
+  if (!restaurant) throw new ApiError(404, 'Restaurant not found');
+
+  if (!customerPhone || !occasionName || !occasionDate) {
+    throw new ApiError(400, 'Phone, occasion name, and date are required');
+  }
+
+  await query(
+    `INSERT INTO customer_occasions (restaurant_id, customer_phone, customer_name, occasion_name, occasion_date, notes)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [
+      restaurant.id,
+      customerPhone,
+      customerName || 'Valued Member',
+      occasionName,
+      occasionDate,
+      notes || null
+    ]
+  );
+
+  res.json({
+    success: true,
+    couponCode: 'VIPBIRTHDAY15',
+    discountPercent: 15,
+    message: `🎂 Congratulations! Your occasion (${occasionName}) is saved. Your exclusive 15% VIP Coupon code is VIPBIRTHDAY15.`
+  });
+}));
+
 module.exports = router;

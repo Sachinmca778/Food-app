@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
 import { useCart } from '@/lib/cartContext';
 import { getFoodImageUrl } from '@/lib/foodImages';
+import confetti from 'canvas-confetti';
 
 function MenuContent() {
   const params = useParams();
@@ -43,6 +44,27 @@ function MenuContent() {
   // Cake / Bakery Customization State
   const [cakeMessage, setCakeMessage] = useState('');
   const [includeCutlery, setIncludeCutlery] = useState(true);
+
+  // Corporate & Bulk Catering Enquiry State (Crusto Bakers Feature #4)
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkEventType, setBulkEventType] = useState('🎂 Birthday Party');
+  const [bulkGuestCount, setBulkGuestCount] = useState('25 - 50 guests');
+  const [bulkDate, setBulkDate] = useState('');
+  const [bulkName, setBulkName] = useState('');
+  const [bulkPhone, setBulkPhone] = useState('');
+  const [bulkNotes, setBulkNotes] = useState('');
+  const [bulkSuccessMsg, setBulkSuccessMsg] = useState('');
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
+  // Occasion & Birthday Reminder Club State (Crusto Bakers Feature #5)
+  const [occasionModalOpen, setOccasionModalOpen] = useState(false);
+  const [occasionName, setOccasionName] = useState('🎂 My Birthday');
+  const [occasionDate, setOccasionDate] = useState('');
+  const [occasionPhone, setOccasionPhone] = useState('');
+  const [occasionCustomerName, setOccasionCustomerName] = useState('');
+  const [occasionSuccessMsg, setOccasionSuccessMsg] = useState('');
+  const [occasionCouponCode, setOccasionCouponCode] = useState('');
+  const [occasionSubmitting, setOccasionSubmitting] = useState(false);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,6 +165,76 @@ function MenuContent() {
       handleOpenCustomize(item);
     } else {
       addItem(item, null, [], '');
+    }
+  };
+
+  // Bulk & Party Catering Form Handler
+  const handleBulkEnquirySubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!bulkPhone || !bulkName) {
+      alert('Please provide your name and phone number');
+      return;
+    }
+    setBulkSubmitting(true);
+    setBulkSuccessMsg('');
+    try {
+      const res = await fetchAPI(`/restaurant/${slug}/bulk-enquiry`, {
+        method: 'POST',
+        body: JSON.stringify({
+          customerName: bulkName,
+          customerPhone: bulkPhone,
+          eventType: bulkEventType,
+          guestCount: bulkGuestCount,
+          eventDate: bulkDate,
+          notes: bulkNotes
+        })
+      });
+      if (res.success) {
+        setBulkSuccessMsg(res.message);
+        setTimeout(() => {
+          setBulkModalOpen(false);
+          setBulkSuccessMsg('');
+        }, 3200);
+      } else {
+        alert(res.error || 'Failed to submit enquiry');
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
+  // Birthday & Occasion Reminder Club Handler
+  const handleSaveOccasionSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!occasionPhone || !occasionDate) {
+      alert('Please provide your phone number and occasion date');
+      return;
+    }
+    setOccasionSubmitting(true);
+    setOccasionSuccessMsg('');
+    try {
+      const res = await fetchAPI(`/restaurant/${slug}/save-occasion`, {
+        method: 'POST',
+        body: JSON.stringify({
+          customerPhone: occasionPhone,
+          customerName: occasionCustomerName || 'Valued Member',
+          occasionName: occasionName,
+          occasionDate: occasionDate
+        })
+      });
+      if (res.success) {
+        try { confetti(); } catch (e) {}
+        setOccasionCouponCode(res.couponCode || 'VIPBIRTHDAY15');
+        setOccasionSuccessMsg(res.message || 'Occasion saved! 15% VIP Coupon code is VIPBIRTHDAY15.');
+      } else {
+        alert(res.error || 'Failed to save occasion');
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setOccasionSubmitting(false);
     }
   };
 
@@ -326,6 +418,46 @@ function MenuContent() {
             >
               🪙 240 pts
             </span>
+          </button>
+
+          <button
+            onClick={() => setBulkModalOpen(true)}
+            style={{
+              background: '#EFF6FF',
+              color: '#1E40AF',
+              border: '1px solid #BFDBFE',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>🎈</span>
+            <span>Bulk Orders</span>
+          </button>
+
+          <button
+            onClick={() => setOccasionModalOpen(true)}
+            style={{
+              background: '#FFF1F2',
+              color: '#BE123C',
+              border: '1px solid #FECDD3',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>🎂</span>
+            <span>Birthday Club</span>
           </button>
 
           {orderMode === 'dine_in' && (
@@ -682,6 +814,74 @@ function MenuContent() {
           }}
         >
           View Perks ➔
+        </div>
+      </div>
+
+      {/* 2C. CRUSTO BAKERS DUAL FEATURE STRIP: BULK CATERING & BIRTHDAY CLUB */}
+      <div
+        style={{
+          margin: '0 14px 14px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10
+        }}
+      >
+        {/* Bulk Catering Card */}
+        <div
+          onClick={() => setBulkModalOpen(true)}
+          style={{
+            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+            border: '1.5px solid #93C5FD',
+            borderRadius: 12,
+            padding: '11px 14px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(37,99,235,0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 16 }}>🎈</span>
+              <strong style={{ fontSize: 13, color: '#1E40AF' }}>Bulk & Party Catering</strong>
+            </div>
+            <div style={{ fontSize: 11, color: '#2563EB', marginTop: 3, lineHeight: 1.35 }}>
+              Party boxes & office lunches for 15+ guests
+            </div>
+          </div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#1D4ED8', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+            Get Quote ➔
+          </div>
+        </div>
+
+        {/* Birthday Club Card */}
+        <div
+          onClick={() => setOccasionModalOpen(true)}
+          style={{
+            background: 'linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%)',
+            border: '1.5px solid #FECDD3',
+            borderRadius: 12,
+            padding: '11px 14px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(226,55,68,0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 16 }}>🎂</span>
+              <strong style={{ fontSize: 13, color: '#9F1239' }}>Birthday & Occasion Club</strong>
+            </div>
+            <div style={{ fontSize: 11, color: '#BE123C', marginTop: 3, lineHeight: 1.35 }}>
+              Save special dates • Get Flat 15% VIP code
+            </div>
+          </div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#E23744', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+            Join Free ➔
+          </div>
         </div>
       </div>
 
@@ -1572,6 +1772,450 @@ function MenuContent() {
                 <span>➔</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7C. BULK & PARTY CATERING ENQUIRY MODAL (CRUSTO BAKERS FEATURE #4) */}
+      {bulkModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 1050,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !bulkSubmitting) setBulkModalOpen(false);
+          }}
+        >
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 20,
+              width: '100%',
+              maxWidth: 540,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              position: 'relative',
+              padding: 24
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 24 }}>🎈</span>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1C1C1C', margin: 0 }}>
+                    Corporate & Party Bulk Orders
+                  </h3>
+                  <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+                    Snack boxes, celebration cakes & meal packages for 15+ guests
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setBulkModalOpen(false)}
+                style={{
+                  background: '#F5F5F5',
+                  border: 'none',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#666'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {bulkSuccessMsg ? (
+              <div
+                style={{
+                  background: '#DCFCE7',
+                  border: '1.5px solid #86EFAC',
+                  borderRadius: 14,
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  color: '#15803D'
+                }}
+              >
+                <div style={{ fontSize: 32, marginBottom: 8 }}>🎉</div>
+                <h4 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 6px' }}>Enquiry Received!</h4>
+                <p style={{ fontSize: 13, lineHeight: 1.5, margin: 0 }}>{bulkSuccessMsg}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleBulkEnquirySubmit}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                  Event Occasion:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+                  {['🎂 Birthday Party', '💼 Office Lunch', '🏠 House Gathering', '🎓 Farewell / Event'].map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setBulkEventType(type)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: bulkEventType === type ? '2px solid #2563EB' : '1px solid #D1D5DB',
+                        background: bulkEventType === type ? '#EFF6FF' : '#F9FAFB',
+                        color: bulkEventType === type ? '#1E40AF' : '#374151',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                  Expected Guest Count:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 14 }}>
+                  {['15-25', '25-50', '50-100', '100+'].map(count => (
+                    <button
+                      key={count}
+                      type="button"
+                      onClick={() => setBulkGuestCount(count)}
+                      style={{
+                        padding: '7px 4px',
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        border: bulkGuestCount === count ? '2px solid #2563EB' : '1px solid #D1D5DB',
+                        background: bulkGuestCount === count ? '#EFF6FF' : '#F9FAFB',
+                        color: bulkGuestCount === count ? '#1E40AF' : '#374151',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {count} guests
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                      Event Date:
+                    </label>
+                    <input
+                      type="date"
+                      value={bulkDate}
+                      onChange={(e) => setBulkDate(e.target.value)}
+                      className="input-field"
+                      style={{ height: 38, fontSize: 12.5 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                      WhatsApp Phone:
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="10-digit number"
+                      value={bulkPhone}
+                      onChange={(e) => setBulkPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className="input-field"
+                      style={{ height: 38, fontSize: 12.5 }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    Your Name:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rahul Sharma"
+                    value={bulkName}
+                    onChange={(e) => setBulkName(e.target.value)}
+                    className="input-field"
+                    style={{ height: 38, fontSize: 12.5 }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    Special Requirements (Items / Budget):
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 30 mini burgers + 30 truffle pastries + mocktails"
+                    value={bulkNotes}
+                    onChange={(e) => setBulkNotes(e.target.value)}
+                    className="input-field"
+                    style={{ height: 38, fontSize: 12.5 }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <a
+                    href={`https://wa.me/${(restaurant?.phone || '919876543210').replace(/\D/g, '')}?text=${encodeURIComponent(
+                      `👋 Hi ${restaurant?.name || 'DirectDine'}! I am inquiring about a bulk catering order for a ${bulkEventType} on ${bulkDate || 'upcoming date'} for ~${bulkGuestCount}. My name is ${bulkName || 'Guest'} (${bulkPhone}). Details: ${bulkNotes || 'Please share customized package rates'}.`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      flex: 1,
+                      background: '#25D366',
+                      color: '#FFFFFF',
+                      padding: 12,
+                      borderRadius: 10,
+                      fontWeight: 800,
+                      fontSize: 13,
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6
+                    }}
+                  >
+                    💬 WhatsApp Quote
+                  </a>
+                  <button
+                    type="submit"
+                    disabled={bulkSubmitting}
+                    className="btn-primary"
+                    style={{
+                      flex: 1,
+                      padding: 12,
+                      borderRadius: 10,
+                      fontWeight: 800,
+                      fontSize: 13
+                    }}
+                  >
+                    {bulkSubmitting ? 'Sending...' : 'Submit Enquiry 🚀'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 7D. BIRTHDAY & OCCASION REMINDER CLUB MODAL (CRUSTO BAKERS FEATURE #5) */}
+      {occasionModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.65)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 1050,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !occasionSubmitting) setOccasionModalOpen(false);
+          }}
+        >
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 20,
+              width: '100%',
+              maxWidth: 520,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+              position: 'relative',
+              padding: 24
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 24 }}>🎂</span>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1C1C1C', margin: 0 }}>
+                    Birthday & Occasion Club
+                  </h3>
+                  <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+                    Save special dates • Get 2-day reminder + Flat 15% VIP Coupon
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setOccasionModalOpen(false)}
+                style={{
+                  background: '#F5F5F5',
+                  border: 'none',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#666'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {occasionSuccessMsg ? (
+              <div
+                style={{
+                  background: '#FFF1F2',
+                  border: '1.5px solid #FECDD3',
+                  borderRadius: 14,
+                  padding: '24px 20px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
+                <h4 style={{ fontSize: 17, fontWeight: 900, color: '#9F1239', margin: '0 0 6px' }}>
+                  Occasion Saved in VIP Club!
+                </h4>
+                <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  {occasionSuccessMsg}
+                </p>
+
+                <div
+                  style={{
+                    background: '#FFFFFF',
+                    border: '2px dashed #E23744',
+                    borderRadius: 12,
+                    padding: '12px 16px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16
+                  }}
+                >
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: 11, color: '#666', fontWeight: 600 }}>YOUR EXCLUSIVE 15% VIP CODE</div>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: '#E23744', letterSpacing: 1 }}>
+                      {occasionCouponCode || 'VIPBIRTHDAY15'}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined') {
+                        navigator.clipboard.writeText(occasionCouponCode || 'VIPBIRTHDAY15');
+                        alert('Coupon code VIPBIRTHDAY15 copied!');
+                      }
+                    }}
+                    style={{
+                      background: '#E23744',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '7px 12px',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Copy Code
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setOccasionModalOpen(false)}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: 12, borderRadius: 10, fontSize: 13, fontWeight: 800 }}
+                >
+                  Start Ordering Now ➔
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveOccasionSubmit}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>
+                  Select Celebration:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+                  {['🎂 My Birthday', '❤️ Anniversary', '👨 Mom / Dad', '👧 Child Birthday'].map(occ => (
+                    <button
+                      key={occ}
+                      type="button"
+                      onClick={() => setOccasionName(occ)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: occasionName === occ ? '2px solid #E23744' : '1px solid #D1D5DB',
+                        background: occasionName === occ ? '#FFF1F2' : '#F9FAFB',
+                        color: occasionName === occ ? '#E23744' : '#374151',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {occ}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    Celebration Date:
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={occasionDate}
+                    onChange={(e) => setOccasionDate(e.target.value)}
+                    className="input-field"
+                    style={{ height: 40, fontSize: 13 }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    WhatsApp Phone Number (for 2-day reminder):
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="10-digit number"
+                    value={occasionPhone}
+                    onChange={(e) => setOccasionPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="input-field"
+                    style={{ height: 40, fontSize: 13 }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>
+                    Celebrant / Member Name:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Priya Sharma"
+                    value={occasionCustomerName}
+                    onChange={(e) => setOccasionCustomerName(e.target.value)}
+                    className="input-field"
+                    style={{ height: 40, fontSize: 13 }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={occasionSubmitting}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: 13, borderRadius: 10, fontSize: 14, fontWeight: 800 }}
+                >
+                  {occasionSubmitting ? 'Saving...' : 'Save Date & Unlock 15% VIP Code ✨'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
