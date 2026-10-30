@@ -41,7 +41,7 @@ export default function LoginPage() {
         {/* Card 1: Restaurant Partner / Kitchen Staff */}
         <div style={{
           background: '#FFFFFF',
-          border: '1.5px solid #E3E5EB',
+          border: '1px solid #E5E7EB',
           borderRadius: 20,
           padding: '28px 24px',
           boxShadow: 'var(--shadow-sm)',
@@ -70,21 +70,21 @@ export default function LoginPage() {
             <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               RESTAURANT MERCHANTS & KITCHEN STAFF
             </div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
               Kitchen Partner Portal
             </h2>
-            <p style={{ fontSize: 13, color: '#4F4F4F', lineHeight: 1.5, marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
               For restaurant owners, chefs, and floor managers to manage live orders (KDS), dish availability, table QRs, and customer loyalty CRM.
             </p>
 
             <div style={{
-              background: '#F8F9FA',
+              background: '#F8FAFC',
               borderRadius: 10,
               padding: '10px 12px',
               fontSize: 12,
-              color: '#4F4F4F',
+              color: '#4B5563',
               marginBottom: 20,
-              border: '1px solid #ECEEF2'
+              border: '1px solid #E2E8F0'
             }}>
               <strong>Demo Logins:</strong>
               <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -106,7 +106,7 @@ export default function LoginPage() {
         {/* Card 2: Super Admin Console */}
         <div style={{
           background: '#FFFFFF',
-          border: '1.5px solid #E3E5EB',
+          border: '1px solid #E5E7EB',
           borderRadius: 20,
           padding: '28px 24px',
           boxShadow: 'var(--shadow-sm)',
@@ -120,36 +120,36 @@ export default function LoginPage() {
               width: 48,
               height: 48,
               borderRadius: 12,
-              background: '#F3E8FF',
-              color: '#7C3AED',
+              background: '#F1F5F9',
+              color: '#0F172A',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 24,
               marginBottom: 14,
-              border: '1px solid #DDD6FE'
+              border: '1px solid #E2E8F0'
             }}>
               👑
             </div>
 
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               PLATFORM OWNER & SAAS ADMINISTRATOR
             </div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
               Master Super Admin
             </h2>
-            <p style={{ fontSize: 13, color: '#4F4F4F', lineHeight: 1.5, marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
               For platform administrators to onboard new restaurants, track platform-wide GMV, manage multi-tenant accounts, and download branded QR kits.
             </p>
 
             <div style={{
-              background: '#F8F9FA',
+              background: '#F8FAFC',
               borderRadius: 10,
               padding: '10px 12px',
               fontSize: 12,
-              color: '#4F4F4F',
+              color: '#4B5563',
               marginBottom: 20,
-              border: '1px solid #ECEEF2'
+              border: '1px solid #E2E8F0'
             }}>
               <strong>Master Admin Login:</strong>
               <div style={{ marginTop: 4 }}>
@@ -166,13 +166,13 @@ export default function LoginPage() {
               fontSize: 14,
               fontWeight: 800,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+              background: '#0F172A',
               color: '#FFFFFF',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               textDecoration: 'none',
-              boxShadow: '0 4px 14px rgba(67, 56, 202, 0.25)'
+              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
             }}
           >
             Enter Super Admin Console ➔

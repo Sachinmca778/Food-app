@@ -155,18 +155,18 @@ export default function SuperAdminPage() {
               width: 58,
               height: 58,
               borderRadius: 16,
-              background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+              background: '#0F172A',
               color: '#FFFFFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 28,
               margin: '0 auto 14px',
-              boxShadow: '0 8px 24px rgba(67, 56, 202, 0.3)'
+              boxShadow: '0 8px 24px rgba(15, 23, 42, 0.25)'
             }}>
               👑
             </div>
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#4338CA', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               MASTER PLATFORM CONSOLE
             </div>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: '#0F172A', margin: '4px 0 6px' }}>
@@ -187,9 +187,9 @@ export default function SuperAdminPage() {
               }}
               style={{
                 width: '100%',
-                background: '#EEF2FF',
-                color: '#3730A3',
-                border: '1px dashed #A5B4FC',
+                background: '#F1F5F9',
+                color: '#0F172A',
+                border: '1px solid #CBD5E1',
                 padding: '8px 12px',
                 borderRadius: 10,
                 fontSize: 12,
@@ -253,11 +253,11 @@ export default function SuperAdminPage() {
                 fontWeight: 800,
                 marginTop: 4,
                 borderRadius: 10,
-                background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+                background: '#0F172A',
                 color: '#FFFFFF',
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(67, 56, 202, 0.25)'
+                boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
               }}
             >
               {loginLoading ? 'Authenticating...' : 'Enter Super Admin Console ➔'}

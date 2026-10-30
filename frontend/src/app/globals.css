@@ -4,8 +4,8 @@
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Zomato Signature White & Red Aesthetic */
-  --bg-deep: #F4F5F8;
+  /* Modern Clean Food App Palette (High Harmony, Low Visual Noise) */
+  --bg-deep: #F8F9FA;
   --bg-main: #FFFFFF;
   --bg-surface: #FFFFFF;
   --bg-surface-elevated: #FFFFFF;
@@ -13,60 +13,62 @@
   --bg-card-hover: #FAFAFA;
   --bg-glass: rgba(255, 255, 255, 0.96);
 
-  /* Borders & Dividers */
-  --border-subtle: #F0F1F4;
-  --border-medium: #E3E5EB;
-  --border-highlight: #CBD0D9;
+  /* Subtle, Cohesive Borders */
+  --border-subtle: #F3F4F6;
+  --border-medium: #E5E7EB;
+  --border-highlight: #D1D5DB;
   --border-focus: #E23744;
 
-  /* Zomato Iconic Red Accents */
+  /* DirectDine Signature Red */
   --primary: #E23744;
-  --primary-light: #FF5261;
+  --primary-light: #EF4444;
   --primary-dark: #CB202D;
-  --primary-glow: rgba(226, 55, 68, 0.18);
-  --primary-glow-subtle: rgba(226, 55, 68, 0.08);
+  --primary-soft: #FEF2F2;
+  --primary-border: #FECDD3;
+  --primary-glow: rgba(226, 55, 68, 0.16);
+  --primary-glow-subtle: rgba(226, 55, 68, 0.06);
 
   --accent: #E23744;
   --accent-light: #F43F5E;
-  --accent-glow: rgba(226, 55, 68, 0.16);
+  --accent-glow: rgba(226, 55, 68, 0.14);
 
-  --gradient-brand: linear-gradient(135deg, #E23744 0%, #EA2635 100%);
+  --gradient-brand: linear-gradient(135deg, #E23744 0%, #D32332 100%);
   --gradient-red: linear-gradient(135deg, #E23744 0%, #C9202E 100%);
   --gradient-card: #FFFFFF;
 
-  /* Semantic Status Colors */
-  --veg-color: #24963F;
-  --veg-bg: #EDF8F0;
-  --veg-border: #24963F;
+  /* Crisp Semantic Status Colors */
+  --veg-color: #16A34A;
+  --veg-bg: #F0FDF4;
+  --veg-border: #BBF7D0;
 
-  --nonveg-color: #E23744;
-  --nonveg-bg: #FEECEE;
-  --nonveg-border: #E23744;
+  --nonveg-color: #DC2626;
+  --nonveg-bg: #FEF2F2;
+  --nonveg-border: #FECDD3;
 
   --status-pending: #F59E0B;
   --status-prep: #2563EB;
   --status-ready: #7C3AED;
   --status-delivery: #0284C7;
-  --status-delivered: #24963F;
+  --status-delivered: #16A34A;
   --status-cancel: #DC2626;
 
-  /* Zomato Clean Typography */
-  --text-main: #1C1C1C;
-  --text-muted: #4F4F4F;
-  --text-dim: #696969;
-  --text-subtle: #9C9C9C;
+  /* High Legibility Typography */
+  --text-main: #111827;
+  --text-muted: #4B5563;
+  --text-dim: #6B7280;
+  --text-subtle: #9CA3AF;
 
-  /* Geometry & Shadows */
+  /* Geometry & Soft Shadows */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 3px 12px rgba(28, 28, 28, 0.06);
-  --shadow-lg: 0 8px 26px rgba(28, 28, 28, 0.09);
-  --shadow-glow: 0 4px 16px rgba(226, 55, 68, 0.22);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.07);
+  --shadow-glow: 0 4px 16px rgba(226, 55, 68, 0.18);
 }
 
 * {
@@ -156,7 +158,7 @@ button {
 /* Clean Secondary Button */
 .btn-secondary {
   background: #FFFFFF;
-  color: #1C1C1C !important;
+  color: #1F2937 !important;
   font-weight: 700;
   padding: 11px 20px;
   border-radius: var(--radius-md);
@@ -171,21 +173,21 @@ button {
 }
 
 .btn-secondary:hover {
-  background: #F8F9FA;
-  border-color: #CBD0D9;
+  background: #F9FAFB;
+  border-color: #D1D5DB;
 }
 
 /* Zomato Food Item ADD Button */
 .zomato-add-btn {
   background: #FFFFFF;
   color: var(--primary);
-  border: 1px solid var(--border-medium);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 2px 6px rgba(226, 55, 68, 0.08);
   border-radius: 8px;
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 0.03em;
-  padding: 8px 22px;
+  padding: 7px 20px;
   text-align: center;
   transition: all 0.18s ease;
   cursor: pointer;
@@ -196,10 +198,10 @@ button {
 }
 
 .zomato-add-btn:hover {
-  background: #FDF0F1;
+  background: var(--primary-soft);
   border-color: var(--primary);
   color: var(--primary-dark);
-  box-shadow: 0 3px 12px rgba(226, 55, 68, 0.2);
+  box-shadow: 0 3px 10px rgba(226, 55, 68, 0.18);
 }
 
 /* Quantity Control Stepper */
@@ -207,7 +209,7 @@ button {
   display: inline-flex;
   align-items: center;
   background: #FFFFFF;
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(226, 55, 68, 0.12);
@@ -225,22 +227,22 @@ button {
 }
 
 .zomato-qty-pill button:hover {
-  background: #FEECEE;
+  background: var(--primary-soft);
 }
 
 .zomato-qty-pill span {
   font-weight: 800;
   font-size: 14px;
-  color: #1C1C1C;
+  color: #111827;
   min-width: 24px;
   text-align: center;
 }
 
 /* Zomato Green Rating Pill */
 .zomato-rating-pill {
-  background: #24963F;
+  background: var(--veg-color);
   color: #FFFFFF;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 6px;

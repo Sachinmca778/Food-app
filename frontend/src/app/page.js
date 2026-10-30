@@ -238,7 +238,7 @@ export default function HomePage() {
       
       {/* 0. CLIENT PRESENTATION & ROLE DEMO HUB */}
       <div style={{
-        background: 'linear-gradient(90deg, #0F172A 0%, #1E293B 100%)',
+        background: '#0F172A',
         color: '#FFFFFF',
         borderRadius: 14,
         padding: '11px 18px',
@@ -248,16 +248,16 @@ export default function HomePage() {
         alignItems: 'center',
         flexWrap: 'wrap',
         gap: 10,
-        boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)'
+        boxShadow: '0 4px 14px rgba(15, 23, 42, 0.15)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 18 }}>🏢</span>
           <div>
             <span style={{ fontSize: 13, fontWeight: 800, color: '#FCD34D' }}>
-              Client Demo &amp; Role Switcher:
+              DirectDine Ecosystem Demo:
             </span>
             <span style={{ fontSize: 12, color: '#94A3B8', marginLeft: 6 }}>
-              Show your client the 3 distinct platform layers:
+              3 dedicated stakeholder experiences:
             </span>
           </div>
         </div>
@@ -276,17 +276,18 @@ export default function HomePage() {
           <Link
             href="/spice-garden"
             style={{
-              background: 'rgba(226, 55, 68, 0.2)',
-              color: '#FECDD3',
-              border: '1px solid rgba(226, 55, 68, 0.4)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0
+              gap: 5,
+              flexShrink: 0,
+              transition: 'all 0.18s ease'
             }}
           >
             <span>🍛</span>
@@ -296,17 +297,18 @@ export default function HomePage() {
           <Link
             href="/chai-and-bites"
             style={{
-              background: 'rgba(217, 119, 6, 0.2)',
-              color: '#FDE68A',
-              border: '1px solid rgba(217, 119, 6, 0.4)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0
+              gap: 5,
+              flexShrink: 0,
+              transition: 'all 0.18s ease'
             }}
           >
             <span>🥐</span>
@@ -316,17 +318,18 @@ export default function HomePage() {
           <Link
             href="/dashboard"
             style={{
-              background: 'rgba(59, 130, 246, 0.2)',
-              color: '#BFDBFE',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0
+              gap: 5,
+              flexShrink: 0,
+              transition: 'all 0.18s ease'
             }}
           >
             <span>👨‍🍳</span>
@@ -336,17 +339,18 @@ export default function HomePage() {
           <Link
             href="/admin"
             style={{
-              background: 'rgba(147, 51, 234, 0.2)',
-              color: '#E9D5FF',
-              border: '1px solid rgba(147, 51, 234, 0.4)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0
+              gap: 5,
+              flexShrink: 0,
+              transition: 'all 0.18s ease'
             }}
           >
             <span>👑</span>
@@ -356,17 +360,18 @@ export default function HomePage() {
           <Link
             href="/login"
             style={{
-              background: '#FFFFFF',
-              color: '#0F172A',
-              border: '1px solid #CBD5E1',
-              padding: '6px 12px',
+              background: 'var(--primary)',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '6px 14px',
               borderRadius: 8,
               fontSize: 12,
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0
+              gap: 5,
+              flexShrink: 0,
+              boxShadow: '0 2px 8px var(--primary-glow)'
             }}
           >
             <span>🚪</span>
@@ -700,11 +705,11 @@ export default function HomePage() {
           <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
             COMPLETE FOOD OPERATING SYSTEM
           </div>
-          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', color: '#1C1C1C', fontWeight: 900 }}>
+          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', color: '#111827', fontWeight: 900 }}>
             3 Dedicated Experiences for Every Stakeholder
           </h2>
-          <p style={{ color: '#696969', fontSize: 14, maxWidth: 640, margin: '6px auto 0' }}>
-            Built specifically so customers, restaurant staff, and platform administrators have their own tailored interface.
+          <p style={{ color: '#6B7280', fontSize: 14, maxWidth: 640, margin: '6px auto 0' }}>
+            Built specifically so customers, restaurant staff, and platform administrators have their own clean, tailored interface.
           </p>
         </div>
 
@@ -716,7 +721,7 @@ export default function HomePage() {
           {/* Layer 1: Customer Storefront */}
           <div style={{
             background: '#FFFFFF',
-            border: '1.5px solid #E2E8F0',
+            border: '1px solid #E5E7EB',
             borderRadius: 18,
             padding: '24px 22px',
             boxShadow: 'var(--shadow-sm)',
@@ -729,7 +734,7 @@ export default function HomePage() {
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                background: '#FFF1F2',
+                background: '#FEF2F2',
                 color: 'var(--primary)',
                 display: 'flex',
                 alignItems: 'center',
@@ -741,13 +746,13 @@ export default function HomePage() {
                 🍽️
               </div>
               <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                LAYER 1 • END-CONSUMERS
+                LAYER 1 • CONSUMER STOREFRONTS
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
                 Restaurant Brand Storefront
               </h3>
-              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
-                Each restaurant has its own dedicated website (<code>/[slug]</code>) where foodies browse the menu, customize cake messages, redeem VIP cash points, and pay via instant UPI.
+              <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
+                Each restaurant has its own branded storefront (<code>/[slug]</code>) where diners browse menus, customize dishes, redeem VIP cash points, and pay via instant UPI.
               </p>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -755,14 +760,14 @@ export default function HomePage() {
                 href="/spice-garden"
                 style={{
                   flex: 1,
-                  background: '#FFF1F2',
-                  color: 'var(--primary)',
-                  border: '1px solid #FECDD3',
+                  background: 'var(--primary)',
+                  color: '#FFFFFF',
                   padding: '9px 12px',
                   borderRadius: 8,
                   fontSize: 12,
                   fontWeight: 800,
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  boxShadow: '0 2px 6px var(--primary-glow)'
                 }}
               >
                 🍛 Spice Garden ➔
@@ -771,9 +776,9 @@ export default function HomePage() {
                 href="/chai-and-bites"
                 style={{
                   flex: 1,
-                  background: '#FFFBEB',
-                  color: '#B45309',
-                  border: '1px solid #FDE68A',
+                  background: '#FFFFFF',
+                  color: '#111827',
+                  border: '1px solid #E5E7EB',
                   padding: '9px 12px',
                   borderRadius: 8,
                   fontSize: 12,
@@ -789,7 +794,7 @@ export default function HomePage() {
           {/* Layer 2: Kitchen KDS & Partner Portal */}
           <div style={{
             background: '#FFFFFF',
-            border: '1.5px solid #BFDBFE',
+            border: '1px solid #E5E7EB',
             borderRadius: 18,
             padding: '24px 22px',
             boxShadow: 'var(--shadow-sm)',
@@ -802,24 +807,24 @@ export default function HomePage() {
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                background: '#EFF6FF',
-                color: '#2563EB',
+                background: '#F1F5F9',
+                color: '#1E293B',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 22,
                 marginBottom: 12,
-                border: '1px solid #BFDBFE'
+                border: '1px solid #CBD5E1'
               }}>
                 👨‍🍳
               </div>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 LAYER 2 • RESTAURANT OWNER &amp; STAFF
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
                 Kitchen Order Display (KDS)
               </h3>
-              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
+              <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
                 For chefs and floor managers to accept/dispatch live orders with audio chimes, update dish pricing, print table QR standees, and manage repeat customer CRM.
               </p>
             </div>
@@ -831,11 +836,12 @@ export default function HomePage() {
                 fontSize: 12.5,
                 fontWeight: 800,
                 borderRadius: 8,
-                background: 'linear-gradient(135deg, #1E40AF 0%, #2563EB 100%)',
+                background: '#1E293B',
                 color: '#FFFFFF',
                 textAlign: 'center',
                 display: 'inline-block',
-                textDecoration: 'none'
+                textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(30, 41, 59, 0.2)'
               }}
             >
               Open Kitchen Dashboard ➔
@@ -845,7 +851,7 @@ export default function HomePage() {
           {/* Layer 3: Super Admin Console */}
           <div style={{
             background: '#FFFFFF',
-            border: '1.5px solid #DDD6FE',
+            border: '1px solid #E5E7EB',
             borderRadius: 18,
             padding: '24px 22px',
             boxShadow: 'var(--shadow-sm)',
@@ -858,25 +864,25 @@ export default function HomePage() {
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                background: '#FAF5FF',
-                color: '#7C3AED',
+                background: '#FFFBEB',
+                color: '#B45309',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 22,
                 marginBottom: 12,
-                border: '1px solid #DDD6FE'
+                border: '1px solid #FDE68A'
               }}>
                 👑
               </div>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                LAYER 3 • PLATFORM OWNER
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                LAYER 3 • PLATFORM MASTER ADMIN
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1C1C1C', margin: '4px 0 8px' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
                 Master Super Admin Console
               </h3>
-              <p style={{ fontSize: 12.5, color: '#64748B', lineHeight: 1.5, marginBottom: 14 }}>
-                For the SaaS platform owner to onboard new restaurant brands in 2 minutes, monitor global GMV, and track platform-wide commission savings.
+              <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
+                For the platform owner to onboard new restaurant brands in 2 minutes, monitor global GMV, and track platform-wide commission savings.
               </p>
             </div>
             <Link
@@ -887,11 +893,12 @@ export default function HomePage() {
                 fontSize: 12.5,
                 fontWeight: 800,
                 borderRadius: 8,
-                background: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%)',
+                background: '#0F172A',
                 color: '#FFFFFF',
                 textAlign: 'center',
                 display: 'inline-block',
-                textDecoration: 'none'
+                textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(15, 23, 42, 0.25)'
               }}
             >
               Enter Super Admin Console ➔

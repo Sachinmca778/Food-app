@@ -552,7 +552,7 @@ function MenuContent() {
             href="#menu-section"
             className="btn-primary"
             style={{
-              padding: '7px 14px',
+              padding: '7px 15px',
               fontSize: 12,
               fontWeight: 800,
               borderRadius: 8,
@@ -562,21 +562,21 @@ function MenuContent() {
             🍽️ Order Now
           </a>
 
-          {/* Interactive Feature Shortcuts */}
+          {/* Interactive Feature Shortcuts - Sleek Harmonized Frosted Slate Pills */}
           <button
             onClick={() => setBulkModalOpen(true)}
             style={{
-              background: 'rgba(37, 99, 235, 0.2)',
-              color: '#93C5FD',
-              border: '1px solid rgba(147, 197, 253, 0.3)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 11.5,
-              fontWeight: 800,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
               flexShrink: 0
             }}
           >
@@ -587,17 +587,17 @@ function MenuContent() {
           <button
             onClick={() => setOccasionModalOpen(true)}
             style={{
-              background: 'rgba(226, 55, 68, 0.2)',
-              color: '#FECDD3',
-              border: '1px solid rgba(254, 205, 211, 0.3)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 11.5,
-              fontWeight: 800,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
               flexShrink: 0
             }}
           >
@@ -608,24 +608,23 @@ function MenuContent() {
           <button
             onClick={() => setLoyaltyModalOpen(true)}
             style={{
-              background: 'linear-gradient(135deg, #78350F, #B45309)',
-              color: '#FEF3C7',
-              border: '1px solid #FCD34D',
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: '#F8FAFC',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 11.5,
-              fontWeight: 800,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
-              flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(180, 83, 9, 0.3)'
+              gap: 5,
+              flexShrink: 0
             }}
           >
             <span>👑 VIP Pass</span>
-            <span style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: 6, fontSize: 10.5 }}>
-              🪙 240 pts
+            <span style={{ background: 'rgba(245, 158, 11, 0.22)', color: '#FCD34D', padding: '1px 6px', borderRadius: 6, fontSize: 10.5, fontWeight: 800 }}>
+              240 pts
             </span>
           </button>
 
@@ -643,7 +642,7 @@ function MenuContent() {
               fontWeight: 800,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
               flexShrink: 0
             }}
           >
@@ -654,17 +653,17 @@ function MenuContent() {
           <button
             onClick={() => setStaffModalOpen(true)}
             style={{
-              background: 'rgba(255, 255, 255, 0.12)',
+              background: 'rgba(255, 255, 255, 0.08)',
               color: '#F8FAFC',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
               padding: '6px 12px',
               borderRadius: 8,
               fontSize: 11.5,
-              fontWeight: 800,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
               flexShrink: 0
             }}
           >
@@ -838,30 +837,31 @@ function MenuContent() {
       {spotlightItems.length > 0 && (
         <section style={{
           margin: '0 14px 24px',
-          background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
-          border: '1.5px solid #FED7AA',
+          background: '#FFFFFF',
+          border: '1px solid #E5E7EB',
           borderRadius: 18,
           padding: '16px 18px',
-          boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)'
+          boxShadow: 'var(--shadow-sm)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 18 }}>⭐</span>
-                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#9A3412', margin: 0 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 900, color: '#111827', margin: 0 }}>
                   Chef's Signature Specials & Bestsellers
                 </h3>
               </div>
-              <p style={{ fontSize: 12, color: '#C2410C', margin: '3px 0 0' }}>
+              <p style={{ fontSize: 12, color: '#6B7280', margin: '3px 0 0' }}>
                 Handpicked most loved recipes straight from our master kitchen
               </p>
             </div>
             <span style={{
-              background: '#EA580C',
-              color: '#FFFFFF',
+              background: '#FFFBEB',
+              color: '#B45309',
+              border: '1px solid #FDE68A',
               fontSize: 11,
               fontWeight: 800,
-              padding: '3px 8px',
+              padding: '3px 9px',
               borderRadius: 20
             }}>
               Must Try
@@ -881,10 +881,10 @@ function MenuContent() {
                 <div
                   key={`spotlight-${item.id}`}
                   style={{
-                    background: '#FFFFFF',
+                    background: '#FAFAFA',
                     borderRadius: 14,
                     padding: '12px 14px',
-                    border: '1px solid #FFEDD5',
+                    border: '1px solid #E5E7EB',
                     display: 'flex',
                     justifyContent: 'space-between',
                     gap: 12,
@@ -1650,7 +1650,7 @@ function MenuContent() {
         background: '#FFFFFF',
         borderRadius: 18,
         padding: '20px 24px',
-        border: '1.5px solid #FBCED2',
+        border: '1px solid #E5E7EB',
         boxShadow: 'var(--shadow-sm)',
         display: 'flex',
         justifyContent: 'space-between',
@@ -1663,13 +1663,14 @@ function MenuContent() {
             width: 44,
             height: 44,
             borderRadius: 12,
-            background: '#FFF1F2',
+            background: 'var(--primary-soft)',
             color: 'var(--primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 22,
-            flexShrink: 0
+            flexShrink: 0,
+            border: '1px solid #FECDD3'
           }}>
             👨‍🍳
           </div>
@@ -1677,10 +1678,10 @@ function MenuContent() {
             <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               RESTAURANT MANAGEMENT
             </div>
-            <h4 style={{ fontSize: 16, fontWeight: 800, color: '#1C1C1C', margin: '2px 0 0' }}>
+            <h4 style={{ fontSize: 16, fontWeight: 800, color: '#111827', margin: '2px 0 0' }}>
               {restaurant.name} Kitchen Staff &amp; Owner Portal
             </h4>
-            <p style={{ fontSize: 12.5, color: '#696969', margin: '2px 0 0' }}>
+            <p style={{ fontSize: 12.5, color: '#6B7280', margin: '2px 0 0' }}>
               Manage live KDS orders, dish pricing, table QR codes, and customer loyalty profiles.
             </p>
           </div>
@@ -2072,11 +2073,12 @@ function MenuContent() {
               {/* Metallic VIP Pass Card */}
               <div
                 style={{
-                  background: 'linear-gradient(135deg, #1C1917 0%, #78350F 55%, #B45309 100%)',
+                  background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #334155 100%)',
                   borderRadius: 16,
                   padding: '22px 24px',
                   color: '#FFFFFF',
-                  boxShadow: '0 14px 30px rgba(180, 83, 9, 0.3)',
+                  boxShadow: '0 12px 28px rgba(15, 23, 42, 0.22)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
                   position: 'relative',
                   overflow: 'hidden',
                   marginBottom: 20
@@ -2383,9 +2385,9 @@ function MenuContent() {
                         borderRadius: 8,
                         fontSize: 12,
                         fontWeight: 700,
-                        border: bulkEventType === type ? '2px solid #2563EB' : '1px solid #D1D5DB',
-                        background: bulkEventType === type ? '#EFF6FF' : '#F9FAFB',
-                        color: bulkEventType === type ? '#1E40AF' : '#374151',
+                        border: bulkEventType === type ? '1.5px solid var(--primary)' : '1px solid #E5E7EB',
+                        background: bulkEventType === type ? 'var(--primary-soft)' : '#FFFFFF',
+                        color: bulkEventType === type ? 'var(--primary)' : '#374151',
                         cursor: 'pointer'
                       }}
                     >
@@ -2408,9 +2410,9 @@ function MenuContent() {
                         borderRadius: 8,
                         fontSize: 11.5,
                         fontWeight: 800,
-                        border: bulkGuestCount === count ? '2px solid #2563EB' : '1px solid #D1D5DB',
-                        background: bulkGuestCount === count ? '#EFF6FF' : '#F9FAFB',
-                        color: bulkGuestCount === count ? '#1E40AF' : '#374151',
+                        border: bulkGuestCount === count ? '1.5px solid var(--primary)' : '1px solid #E5E7EB',
+                        background: bulkGuestCount === count ? 'var(--primary-soft)' : '#FFFFFF',
+                        color: bulkGuestCount === count ? 'var(--primary)' : '#374151',
                         cursor: 'pointer'
                       }}
                     >
@@ -2652,9 +2654,9 @@ function MenuContent() {
                         borderRadius: 8,
                         fontSize: 12,
                         fontWeight: 700,
-                        border: occasionName === occ ? '2px solid #E23744' : '1px solid #D1D5DB',
-                        background: occasionName === occ ? '#FFF1F2' : '#F9FAFB',
-                        color: occasionName === occ ? '#E23744' : '#374151',
+                        border: occasionName === occ ? '1.5px solid var(--primary)' : '1px solid #E5E7EB',
+                        background: occasionName === occ ? 'var(--primary-soft)' : '#FFFFFF',
+                        color: occasionName === occ ? 'var(--primary)' : '#374151',
                         cursor: 'pointer'
                       }}
                     >

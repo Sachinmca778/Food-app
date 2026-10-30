@@ -656,11 +656,11 @@ function CartContent() {
       {orderType === 'pickup' && (
         <div
           style={{
-            background: '#EFF6FF',
+            background: '#F8FAFC',
             borderRadius: 14,
             padding: '16px 18px',
             marginBottom: 18,
-            border: '1.5px solid #BFDBFE',
+            border: '1px solid #E2E8F0',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -671,10 +671,10 @@ function CartContent() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 24 }}>🥡</span>
             <div>
-              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1E40AF' }}>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A' }}>
                 Store Pickup from {restaurant?.name || 'Restaurant'}
               </div>
-              <div style={{ fontSize: 12, color: '#1D4ED8', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>
                 📍 {restaurant?.address_line || 'Bandra West, Mumbai'} • ⏱️ Ready in 20-25 mins
               </div>
             </div>
@@ -686,7 +686,7 @@ function CartContent() {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              background: '#2563EB',
+              background: '#0F172A',
               color: '#FFFFFF',
               padding: '8px 14px',
               borderRadius: 8,
@@ -708,7 +708,7 @@ function CartContent() {
       {orderType === 'dine_in' && (
         <div style={{
           background: '#FFFFFF',
-          border: '1.5px solid #FBCED2',
+          border: '1px solid #E5E7EB',
           borderRadius: 14,
           padding: '16px 18px',
           marginBottom: 18,
@@ -716,10 +716,10 @@ function CartContent() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
-              <span style={{ fontWeight: 800, fontSize: 14, color: '#1C1C1C' }}>🍽️ Dine-In Table Selection</span>
-              <p style={{ fontSize: 12, color: '#696969', marginTop: 2 }}>Food will be served directly to your table</p>
+              <span style={{ fontWeight: 800, fontSize: 14, color: '#111827' }}>🍽️ Dine-In Table Selection</span>
+              <p style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>Food will be served directly to your table</p>
             </div>
-            <span style={{ background: '#FEECEE', color: 'var(--primary)', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+            <span style={{ background: 'var(--primary-soft)', color: 'var(--primary)', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
               Table #{tableNo || '1'}
             </span>
           </div>
@@ -736,8 +736,8 @@ function CartContent() {
                   fontSize: 13,
                   fontWeight: 800,
                   background: tableNo === num ? 'var(--primary)' : '#F8F9FA',
-                  color: tableNo === num ? '#FFFFFF' : '#1C1C1C',
-                  border: `1.5px solid ${tableNo === num ? 'var(--primary)' : '#E3E5EB'}`,
+                  color: tableNo === num ? '#FFFFFF' : '#111827',
+                  border: `1.5px solid ${tableNo === num ? 'var(--primary)' : '#E5E7EB'}`,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
