@@ -545,6 +545,22 @@ export default function HomePage() {
             + List Restaurant
           </button>
 
+          <Link href="/video" style={{
+            background: 'linear-gradient(135deg, #1E1B4B, #312E81)',
+            color: '#F8FAFC',
+            border: '1px solid #4338CA',
+            padding: '8px 14px',
+            fontSize: 12.5,
+            borderRadius: 8,
+            textDecoration: 'none',
+            fontWeight: 800,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6
+          }}>
+            🎬 60s Video
+          </Link>
+
           <Link href="/dashboard" className="btn-secondary" style={{ padding: '8px 14px', fontSize: 12.5, borderRadius: 8 }}>
             👨‍🍳 Kitchen
           </Link>
