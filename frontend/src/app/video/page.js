@@ -3,137 +3,107 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-// Detailed Scene Definitions with Pure Devanagari Hindi Voiceover & High-Fidelity UI Screens
-const SCENES = [
+// All 6 core screens of the application with real high-resolution imagery and non-stop continuous Hindi narration
+const SCREENS = [
   {
-    id: 1,
-    tag: 'SCENE 1: THE HOOK',
-    title: '30% Commission Band Karo',
+    id: 'landing',
+    screenNumber: '01 / 06',
+    title: 'Landing Page & Multi-Restaurant Hub',
+    hindiTag: 'होम पेज & रेस्टोरेंट हब',
     duration: 10,
     startTime: 0,
-    badge: '30% Commission Saved',
-    color: '#EF4444',
-    hindiHeadline: 'अरे भइया! Swiggy-Zomato को 30% कमीशन देना बंद करो!',
-    hindiSubtext: 'मेहनत आपकी, खाना आपका, और भारी कमीशन ले जाते हैं डिलीवरी ऐप्स! अब अपना खुद का डायरेक्ट सिस्टम चलाएं।',
-    hindiVoiceover: 'अरे भइया! क्या आप भी हर महीने स्विगी और ज़ोमैटो को पच्चीस से तीस परसेंट कमीशन दे देकर परेशान हो चुके हैं? मेहनत आपकी, खाना आपका, और सारा मुनाफा ले जाते हैं डिलीवरी ऐप्स! अब ये भारी कमीशन देना बिल्कुल बंद कीजिए।',
-    screenType: 'hook_comparison',
-    appSection: 'Direct vs Aggregator Loss Calculator'
+    voiceover: 'नमस्ते दोस्तों! यह है हमारा कंप्लीट रेस्टोरेंट डायरेक्ट ऑर्डरिंग सॉफ़्टवेयर। सबसे पहले देखिए यह शानदार होमपेज, जहाँ कस्टमर बिरयानी, पिज़्ज़ा, और नॉर्थ इंडियन जैसी कैटेगरीज़ से शहर के बेस्ट रेस्टोरेंट्स खोज सकता है, टेबल से वेटर को बुला सकता है, और शून्य परसेंट कमीशन पर डायरेक्ट आर्डर कर सकता है।',
+    accentColor: '#EF4444'
   },
   {
-    id: 2,
-    tag: 'SCENE 2: CUSTOMER STOREFRONT',
-    title: '10 Second QR Mobile Ordering',
-    duration: 12,
+    id: 'menu',
+    screenNumber: '02 / 06',
+    title: 'Customer Digital Storefront (/spice-garden)',
+    hindiTag: 'कस्टमर मेनू & टेबल QR',
+    duration: 11,
     startTime: 10,
-    badge: '0% Commission Storefront',
-    color: '#10B981',
-    hindiHeadline: 'कस्टमर टेबल से QR स्कैन करेगा — 10 सेकंड में डायरेक्ट आर्डर!',
-    hindiSubtext: 'बिना कोई ऐप डाउनलोड किए पूरा डिजिटल मेनू, फोटो, वेज-नॉनवेज फ़िल्टर और कस्टमाइज़ेशन।',
-    hindiVoiceover: 'ये देखिए हमारा डायरेक्ट डाइन सॉफ़्टवेयर! कस्टमर टेबल पर रखे क्यूआर कोड को स्कैन करेगा या व्हाट्सएप लिंक खोलेगा। बिना कोई ऐप डाउनलोड किए सिर्फ दस सेकंड में पूरा डिजिटल मेनू देखेगा और सीधे आर्डर कर देगा। शून्य परसेंट कमीशन, सारा पैसा सीधा आपके बैंक में!',
-    screenType: 'customer_menu',
-    appSection: 'Live Customer Menu: Spice Garden (/spice-garden)'
+    voiceover: 'जैसे ही कस्टमर टेबल पर लगे क्यूआर कोड को स्कैन करेगा, बिना किसी ऐप डाउनलोड के तुरंत यह मोबाइल मेनू खुल जाएगा। यहाँ वेज और नॉन-वेज का साफ़ फ़िल्टर है, पसंदीदा डिश जैसे पनीर बटर मसाला या दम बिरयानी को हाफ या फुल प्लेट में चुन सकते हैं, और स्पेशल कुकिंग नोट्स भी लिख सकते हैं।',
+    accentColor: '#10B981'
   },
   {
-    id: 3,
-    tag: 'SCENE 3: 1-TAP CHECKOUT',
-    title: 'Instant OTP & UPI Payment',
+    id: 'checkout',
+    screenNumber: '03 / 06',
+    title: '1-Tap OTP & Direct UPI Checkout (/cart)',
+    hindiTag: '1-टैप चेकआउट & डायरेक्ट UPI',
     duration: 10,
-    startTime: 22,
-    badge: '1-Tap UPI / COD',
-    color: '#8B5CF6',
-    hindiHeadline: '1-टैप OTP लॉगिन, कूपन और डायरेक्ट UPI पेमेंट',
-    hindiSubtext: 'PhonePe, Google Pay, Paytm या Cash on Delivery — सीधा पैसा आपके खाते में बिना कटे।',
-    hindiVoiceover: 'चेकआउट करना बच्चों का खेल है। वन-टैप ओटीपी वेरिफिकेशन, कूपन कोड, और सीधा फोनपे, गूगल-पे या पेटीएम से तुरंत पेमेंट। कोई झंझट नहीं, कोई बीच का दलाल नहीं।',
-    screenType: 'customer_checkout',
-    appSection: 'Checkout Flow: (/spice-garden/cart)'
+    startTime: 21,
+    voiceover: 'अब देखिए इसका सुपर-फास्ट चेकआउट! कस्टमर अपना मोबाइल नंबर डालेगा और तुरंत ऑटो-ओटीपी से लॉगिन हो जाएगा। डिस्काउंट कूपन लगते ही तुरंत छूट मिलेगी, और गूगल-पे, फोनपे, पेटीएम या कैश ऑन डिलीवरी से एक टैप में पेमेंट हो जाएगी — बिना किसी कमीशन कट के सीधा आपके बैंक में!',
+    accentColor: '#8B5CF6'
   },
   {
-    id: 4,
-    tag: 'SCENE 4: KITCHEN DISPLAY (KDS)',
-    title: 'Live Kitchen Dashboard & Bell Alert',
-    duration: 14,
-    startTime: 32,
-    badge: 'Live Ringing Audio Bell',
-    color: '#3B82F6',
-    hindiHeadline: 'नया आर्डर आते ही बजेगी घंटी, 1-क्लिक में आर्डर एक्सेप्ट!',
-    hindiSubtext: '15, 25 या 40 मिनट का प्रेप टाइमर, थर्मल KOT प्रिंट, और कोई डिश खत्म हो तो तुरंत स्टॉक ऑफ।',
-    hindiVoiceover: 'अब देखिए रेस्टोरेंट का किचन डैशबोर्ड! जैसे ही नया आर्डर आएगा, लाउड साउंड बेल बजेगी। शेफ सिर्फ एक क्लिक में पच्चीस मिनट का टाइमर सेट करके आर्डर एक्सेप्ट करेगा, और किचन टिकट प्रिंट कर लेगा। अगर कोई डिश खत्म हो गई, तो एक टैप में उसे ऑफ कर सकते हैं।',
-    screenType: 'kitchen_dashboard',
-    appSection: 'Kitchen Operations: (/dashboard)'
-  },
-  {
-    id: 5,
-    tag: 'SCENE 5: WHATSAPP BOT & TRACKING',
-    title: 'Automated WhatsApp Bot & Live Tracking',
+    id: 'kitchen',
+    screenNumber: '04 / 06',
+    title: 'Live Kitchen Display System (KDS) (/dashboard)',
+    hindiTag: 'लाइव किचन डैशबोर्ड & साउंड बेल',
     duration: 12,
-    startTime: 46,
-    badge: 'WhatsApp Cloud API',
-    color: '#16A34A',
-    hindiHeadline: 'कस्टमर के WhatsApp पर ऑटोमैटिक बिल और लाइव ट्रैकिंग!',
-    hindiSubtext: 'आर्डर कन्फर्मेशन, डिलीवरी बॉय का नाम, फोन नंबर और 5-स्टार रेटिंग रिव्यु सिस्टम।',
-    hindiVoiceover: 'और कस्टमर को क्या मिलेगा? उसके व्हाट्सएप पर तुरंत पक्का बिल, लाइव डिलीवरी ट्रैकिंग लिंक और राइडर का नंबर पहुंच जाएगा। कस्टमर भी खुश, और आप भी खुश!',
-    screenType: 'whatsapp_tracking',
-    appSection: 'WhatsApp Bot & Live Tracking (/track/[token])'
+    startTime: 31,
+    voiceover: 'और यह है रेस्टोरेंट का पावरफुल किचन डैशबोर्ड! नया आर्डर आते ही किचन में लाउड साउंड बेल बजेगी ताकि शेफ कोई आर्डर मिस न करे। शेफ तुरंत पंद्रह या पच्चीस मिनट का टाइमर सेट करके आर्डर एक्सेप्ट करेगा, थर्मल KOT रसीद प्रिंट करेगा, और कोई आइटम खत्म होने पर तुरंत स्टॉक ऑफ कर सकेगा।',
+    accentColor: '#3B82F6'
   },
   {
-    id: 6,
-    tag: 'SCENE 6: SUPER ADMIN & OFFER',
-    title: '1-Min Setup & Own The Software',
-    duration: 12,
-    startTime: 58,
-    badge: 'Own This Software Today',
-    color: '#F59E0B',
-    hindiHeadline: '1 मिनट में नया रेस्टोरेंट ऑनबोर्ड करें — आज ही सॉफ्टवेयर खरीदें!',
-    hindiSubtext: 'सुपर एडमिन से अनलिमिटेड रेस्टोरेंट बनाएं, टेबल QR कोड जनरेट करें। मंथली SaaS या लाइफटाइम सोर्स कोड।',
-    hindiVoiceover: 'सुपर एडमिन पैनल से आप एक मिनट में नया रेस्टोरेंट जोड़ सकते हैं और टेबल क्यूआर कोड डाउनलोड कर सकते हैं। तो चाहे अपने रेस्टोरेंट के लिए लेना हो, या अपनी एजेंसी के लिए पूरा सॉफ़्टवेयर खरीदना हो — आज ही नीचे दिए गए नंबर पर संपर्क करें और लाइव डेमो देखें!',
-    screenType: 'super_admin',
-    appSection: 'Super Admin & QR Engine (/admin)'
+    id: 'tracking',
+    screenNumber: '05 / 06',
+    title: 'WhatsApp Bot & Live Order Tracking (/track)',
+    hindiTag: 'व्हाट्सएप बॉट & लाइव ट्रैकिंग',
+    duration: 10,
+    startTime: 43,
+    voiceover: 'आर्डर होते ही कस्टमर के पर्सनल व्हाट्सएप पर ऑटोमैटिक बिल, डिलीवरी बॉय का नाम, नंबर और लाइव डिलीवरी ट्रैकिंग लिंक पहुंच जाएगा। कस्टमर घर बैठे या टेबल पर अपने आर्डर की पल-पल की लाइव स्थिति देख सकता है।',
+    accentColor: '#16A34A'
+  },
+  {
+    id: 'admin',
+    screenNumber: '06 / 06',
+    title: 'Super Admin & Instant QR Standee Engine (/admin)',
+    hindiTag: 'सुपर एडमिन & टेबल QR जनरेटर',
+    duration: 11,
+    startTime: 53,
+    voiceover: 'आखिर में देखिए सुपर एडमिन पैनल! यहाँ से आप सिर्फ एक मिनट में नया रेस्टोरेंट जोड़ सकते हैं और हाई-क्वालिटी प्रिंट-रेडी टेबल क्यूआर कोड डाउनलोड कर सकते हैं। तो चाहे अपने रेस्टोरेंट के लिए मंथली प्लान लेना हो, या पूरा सोर्स कोड अपनी एजेंसी के लिए — आज ही संपर्क करें और लाइव डेमो देखें!',
+    accentColor: '#F59E0B'
   }
 ];
 
-export default function VideoDemoPage() {
+export default function NonStopVideoStudio() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [aspectRatio, setAspectRatio] = useState('16:9'); // '16:9' or '9:16'
-  const [selectedSceneIndex, setSelectedSceneIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState('video'); // 'video', 'screens', 'script', 'pitch'
-  const [recording, setRecording] = useState(false);
+  const [speechRate, setSpeechRate] = useState(1.1); // Fast, energetic, non-stop cadence
   const [selectedVoice, setSelectedVoice] = useState(null);
-  const [availableVoices, setAvailableVoices] = useState([]);
-  const [speechRate, setSpeechRate] = useState(1.0);
+  const [recording, setRecording] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState('16:9'); // '16:9' or '9:16'
+  const [activeTab, setActiveTab] = useState('video'); // 'video', 'all_screens', 'script'
 
   const timerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
-  const totalDuration = 70; // 70-second complete deep-dive video
+  const totalDuration = 64; // 64 seconds of continuous, non-stop banger presentation
 
-  // Find active scene based on currentTime
-  const activeSceneIndex = SCENES.findIndex(
-    (s, idx) => currentTime >= s.startTime && (idx === SCENES.length - 1 || currentTime < SCENES[idx + 1].startTime)
+  // Find active screen based on currentTime
+  const activeIndex = SCREENS.findIndex(
+    (s, idx) => currentTime >= s.startTime && (idx === SCREENS.length - 1 || currentTime < SCREENS[idx + 1].startTime)
   );
-  const currentScene = SCENES[activeSceneIndex] || SCENES[0];
+  const currentScreen = SCREENS[activeIndex] || SCREENS[0];
 
-  // Initialize Speech Synthesis & Indian / Hindi Voice Detection
+  // Initialize Indian / Hindi Voice Detection
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const updateVoices = () => {
+      const loadVoices = () => {
         const voices = window.speechSynthesis.getVoices();
-        setAvailableVoices(voices);
-
-        // Find best Hindi voice or Indian voice
-        const hindiVoice = voices.find(
-          v => v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.toLowerCase().includes('hi')
+        const hiVoice = voices.find(
+          v => v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.name.toLowerCase().includes('hindi')
         );
-        const indianVoice = voices.find(
+        const inVoice = voices.find(
           v => v.lang.includes('IN') || v.name.toLowerCase().includes('india')
         );
-        setSelectedVoice(hindiVoice || indianVoice || voices[0] || null);
+        setSelectedVoice(hiVoice || inVoice || voices[0] || null);
       };
-
-      updateVoices();
-      window.speechSynthesis.onvoiceschanged = updateVoices;
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
     }
   }, []);
 
@@ -146,15 +116,15 @@ export default function VideoDemoPage() {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
-      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      osc.frequency.setValueAtTime(850, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1250, ctx.currentTime + 0.1);
+      osc.frequency.exponentialRampToValueAtTime(850, ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.6);
+      osc.stop(ctx.currentTime + 0.5);
     } catch {
       // Audio autoplay policy
     }
@@ -170,51 +140,50 @@ export default function VideoDemoPage() {
       const gain = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
-      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.24); // G5
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
       gain.gain.setValueAtTime(0.25, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.5);
+      osc.stop(ctx.currentTime + 0.45);
     } catch {
       // Audio autoplay policy
     }
   };
 
-  // Pure Devanagari Hindi Text-To-Speech with correct lang
-  const speakHindi = (text) => {
+  // Immediate Non-Stop Speech Execution
+  const speakImmediate = (text) => {
     if (!voiceEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // kill any stale queue instantly
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'hi-IN';
     utterance.rate = speechRate;
-    utterance.pitch = 1.02;
+    utterance.pitch = 1.05;
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
     }
-
     window.speechSynthesis.speak(utterance);
   };
 
-  // Trigger speech & sound when scene changes during video play
+  // Trigger voice & sound without delay whenever scene changes
   useEffect(() => {
     if (isPlaying) {
-      speakHindi(currentScene.hindiVoiceover);
+      speakImmediate(currentScreen.voiceover);
 
-      if (currentScene.id === 3) {
-        setTimeout(playUPIChime, 800);
+      if (currentScreen.id === 'kitchen') {
+        setTimeout(playKitchenBell, 300);
       }
-      if (currentScene.id === 4) {
-        setTimeout(playKitchenBell, 400);
+      if (currentScreen.id === 'checkout') {
+        setTimeout(playUPIChime, 600);
       }
     }
-  }, [activeSceneIndex, isPlaying]);
+  }, [activeIndex, isPlaying]);
 
-  // Playback Timer
+  // Non-stop timer loop
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
@@ -240,9 +209,9 @@ export default function VideoDemoPage() {
       setCurrentTime(0);
       setIsPlaying(true);
     } else {
-      const nextState = !isPlaying;
-      setIsPlaying(nextState);
-      if (!nextState && window.speechSynthesis) {
+      const next = !isPlaying;
+      setIsPlaying(next);
+      if (!next && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
     }
@@ -253,14 +222,14 @@ export default function VideoDemoPage() {
     setIsPlaying(true);
   };
 
-  const jumpToScene = (scene) => {
-    setCurrentTime(scene.startTime);
+  const jumpToScreen = (screen) => {
+    setCurrentTime(screen.startTime);
     if (!isPlaying) {
       setIsPlaying(true);
     }
   };
 
-  // Screen Recording Handler
+  // Screen Recording for instant video export
   const startRecording = async () => {
     try {
       recordedChunksRef.current = [];
@@ -280,7 +249,7 @@ export default function VideoDemoPage() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `DirectDine-Hindi-Sales-Video-${Date.now()}.webm`;
+        a.download = `DirectDine-Continuous-Video-${Date.now()}.webm`;
         a.click();
         URL.revokeObjectURL(url);
         setRecording(false);
@@ -304,47 +273,46 @@ export default function VideoDemoPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0B0F19', color: '#F1F5F9', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* Studio Header */}
+    <div style={{ minHeight: '100vh', background: '#090D16', color: '#F1F5F9', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {/* Top Banner */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 28px',
+        padding: '12px 24px',
         borderBottom: '1px solid #1E293B',
-        background: 'rgba(11, 15, 25, 0.95)',
-        backdropFilter: 'blur(12px)',
+        background: 'rgba(9, 13, 22, 0.95)',
+        backdropFilter: 'blur(10px)',
         position: 'sticky',
         top: 0,
         zIndex: 100
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
-            background: 'linear-gradient(135deg, #EF4444, #991B1B)',
-            width: 42,
-            height: 42,
-            borderRadius: 12,
+            background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
+            width: 38,
+            height: 38,
+            borderRadius: 10,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 22,
-            boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)'
+            fontSize: 20,
+            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
           }}>
-            🎥
+            ⚡
           </div>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
-              DirectDine <span style={{ background: '#EF4444', color: '#FFF', fontSize: 11, padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>हिंदी सेल्स वीडियो</span>
+            <h1 style={{ fontSize: 17, fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              DirectDine <span style={{ background: '#10B981', color: '#000', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 900 }}>NON-STOP VIDEO DEMO</span>
             </h1>
-            <p style={{ margin: 0, fontSize: 12, color: '#94A3B8' }}>
-              असली स्क्रीन्स, शुद्ध हिंदी वॉयसओवर और एप्लीकेशन का पूरा डेमो
+            <p style={{ margin: 0, fontSize: 11.5, color: '#94A3B8' }}>
+              कंटीन्यूअस हिंदी वॉयसओवर • रियल स्क्रीन्स • जीरो पॉज़
             </p>
           </div>
         </div>
 
-        {/* Studio Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Aspect Ratio Switcher */}
+        {/* View Options & Recording */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', background: '#1E293B', borderRadius: 8, padding: 3 }}>
             <button
               onClick={() => setAspectRatio('16:9')}
@@ -352,14 +320,14 @@ export default function VideoDemoPage() {
                 background: aspectRatio === '16:9' ? '#3B82F6' : 'transparent',
                 color: '#FFF',
                 border: 'none',
-                padding: '6px 12px',
+                padding: '5px 12px',
                 borderRadius: 6,
                 fontSize: 12,
                 fontWeight: 700,
                 cursor: 'pointer'
               }}
             >
-              🖥️ Desktop (16:9)
+              🖥️ 16:9 Wide
             </button>
             <button
               onClick={() => setAspectRatio('9:16')}
@@ -367,14 +335,14 @@ export default function VideoDemoPage() {
                 background: aspectRatio === '9:16' ? '#3B82F6' : 'transparent',
                 color: '#FFF',
                 border: 'none',
-                padding: '6px 12px',
+                padding: '5px 12px',
                 borderRadius: 6,
                 fontSize: 12,
                 fontWeight: 700,
                 cursor: 'pointer'
               }}
             >
-              📱 Reel / Status (9:16)
+              📱 9:16 Reel
             </button>
           </div>
 
@@ -383,9 +351,9 @@ export default function VideoDemoPage() {
             style={{
               background: '#1E293B',
               color: '#CBD5E1',
-              padding: '8px 14px',
+              padding: '6px 14px',
               borderRadius: 8,
-              fontSize: 13,
+              fontSize: 12.5,
               textDecoration: 'none',
               fontWeight: 600,
               border: '1px solid #334155'
@@ -396,45 +364,39 @@ export default function VideoDemoPage() {
         </div>
       </header>
 
-      {/* Main Content Layout */}
-      <div style={{ maxWidth: 1380, margin: '0 auto', padding: '24px 20px' }}>
+      {/* Main Container */}
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 20px' }}>
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 20, borderBottom: '1px solid #1E293B', paddingBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 18, borderBottom: '1px solid #1E293B', paddingBottom: 12 }}>
           <button
             onClick={() => setActiveTab('video')}
             style={{
               background: activeTab === 'video' ? '#EF4444' : '#1E293B',
               color: '#FFF',
               border: 'none',
-              padding: '10px 18px',
+              padding: '9px 18px',
               borderRadius: 8,
               fontSize: 13.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
+              fontWeight: 800,
+              cursor: 'pointer'
             }}
           >
-            ▶️ 1-Minute Live Video Demo
+            ▶️ Continuous Live Video
           </button>
           <button
-            onClick={() => setActiveTab('screens')}
+            onClick={() => setActiveTab('all_screens')}
             style={{
-              background: activeTab === 'screens' ? '#EF4444' : '#1E293B',
+              background: activeTab === 'all_screens' ? '#EF4444' : '#1E293B',
               color: '#FFF',
               border: 'none',
-              padding: '10px 18px',
+              padding: '9px 18px',
               borderRadius: 8,
               fontSize: 13.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
+              fontWeight: 800,
+              cursor: 'pointer'
             }}
           >
-            🖼️ All Application Screens & Features
+            🖼️ View All 6 Full Application Screens
           </button>
           <button
             onClick={() => setActiveTab('script')}
@@ -442,58 +404,37 @@ export default function VideoDemoPage() {
               background: activeTab === 'script' ? '#EF4444' : '#1E293B',
               color: '#FFF',
               border: 'none',
-              padding: '10px 18px',
+              padding: '9px 18px',
               borderRadius: 8,
               fontSize: 13.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
+              fontWeight: 800,
+              cursor: 'pointer'
             }}
           >
-            📜 Pure Hindi Voiceover Script (शुद्ध हिंदी)
-          </button>
-          <button
-            onClick={() => setActiveTab('pitch')}
-            style={{
-              background: activeTab === 'pitch' ? '#EF4444' : '#1E293B',
-              color: '#FFF',
-              border: 'none',
-              padding: '10px 18px',
-              borderRadius: 8,
-              fontSize: 13.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
-            }}
-          >
-            💬 Ready WhatsApp Message to Sell
+            🎙️ Continuous Hindi Voiceover Text
           </button>
         </div>
 
-        {/* TAB 1: INTERACTIVE LIVE VIDEO DEMO */}
+        {/* TAB 1: CONTINUOUS VIDEO STAGE */}
         {activeTab === 'video' && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: aspectRatio === '16:9' ? '1fr 360px' : '520px 1fr',
-            gap: 24,
+            gridTemplateColumns: aspectRatio === '16:9' ? '1fr 340px' : '520px 1fr',
+            gap: 20,
             alignItems: 'start'
           }}>
-            {/* Video Stage Frame */}
+            {/* The Video Display Frame */}
             <div style={{
               background: '#020617',
               borderRadius: 20,
-              border: '1px solid #1E293B',
+              border: '2px solid #1E293B',
               overflow: 'hidden',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9)',
               position: 'relative'
             }}>
-              {/* Screen Top Bar */}
+              {/* Browser Header Bar */}
               <div style={{
-                background: '#0F172A',
+                background: '#0B1120',
                 padding: '12px 18px',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -501,59 +442,59 @@ export default function VideoDemoPage() {
                 borderBottom: '1px solid #1E293B'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444' }} />
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F59E0B' }} />
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }} />
-                  <span style={{ fontSize: 12, color: '#94A3B8', marginLeft: 8, fontWeight: 600 }}>
-                    {currentScene.appSection}
+                  <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#EF4444' }} />
+                  <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#F59E0B' }} />
+                  <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#10B981' }} />
+                  <span style={{ fontSize: 12, color: '#94A3B8', marginLeft: 8, fontWeight: 700 }}>
+                    {currentScreen.title}
                   </span>
                 </div>
 
                 <div style={{
-                  background: currentScene.color + '22',
-                  color: currentScene.color,
-                  border: `1px solid ${currentScene.color}55`,
-                  padding: '3px 10px',
+                  background: currentScreen.accentColor + '22',
+                  color: currentScreen.accentColor,
+                  border: `1px solid ${currentScreen.accentColor}55`,
+                  padding: '3px 12px',
                   borderRadius: 20,
                   fontSize: 11,
-                  fontWeight: 800
+                  fontWeight: 900
                 }}>
-                  {currentScene.badge}
+                  {currentScreen.screenNumber} • {currentScreen.hindiTag}
                 </div>
               </div>
 
-              {/* Dynamic Video Stage (Renders Realistic Actual App Screenshots) */}
+              {/* Dynamic Video Stage (Seamless High-Fidelity App UI Render) */}
               <div style={{
-                minHeight: aspectRatio === '16:9' ? 520 : 660,
+                minHeight: aspectRatio === '16:9' ? 560 : 700,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: 24,
-                background: 'radial-gradient(ellipse at 50% 10%, #1E1B4B 0%, #030712 90%)',
+                background: 'radial-gradient(ellipse at 50% 0%, #171B33 0%, #030712 90%)',
                 position: 'relative',
                 overflow: 'hidden'
               }}>
-                {/* Top Badge & Timer */}
+                {/* Live Screen Header HUD */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
                   <div style={{
-                    background: currentScene.color,
+                    background: currentScreen.accentColor,
                     color: '#FFF',
                     fontWeight: 900,
-                    fontSize: 11,
+                    fontSize: 12,
                     padding: '4px 12px',
                     borderRadius: 6,
-                    letterSpacing: '0.05em'
+                    letterSpacing: '0.04em'
                   }}>
-                    {currentScene.tag}
+                    {currentScreen.hindiTag}
                   </div>
 
                   <div style={{
-                    background: 'rgba(15, 23, 42, 0.8)',
+                    background: 'rgba(15, 23, 42, 0.85)',
                     padding: '4px 12px',
                     borderRadius: 20,
                     border: '1px solid #334155',
                     fontSize: 13,
-                    fontWeight: 800,
+                    fontWeight: 900,
                     fontVariantNumeric: 'tabular-nums',
                     color: '#F8FAFC'
                   }}>
@@ -561,209 +502,222 @@ export default function VideoDemoPage() {
                   </div>
                 </div>
 
-                {/* SCENE VISUAL: HIGH-FIDELITY ACTUAL APP SCREENS */}
-                <div style={{ margin: 'auto 0', zIndex: 10, padding: '16px 0' }}>
-                  {/* SCENE 1: Aggregator Loss Calculator */}
-                  {currentScene.id === 1 && (
+                {/* THE ACTUAL APPLICATION SCREEN DISPLAY (Full High-Fidelity UI) */}
+                <div style={{ margin: 'auto 0', zIndex: 10, padding: '12px 0' }}>
+                  {/* SCREEN 1: LANDING PAGE */}
+                  {currentScreen.id === 'landing' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 580,
-                        margin: '0 auto 16px',
-                        background: '#0F172A',
-                        borderRadius: 16,
-                        border: '1px solid #334155',
+                        maxWidth: 620,
+                        margin: '0 auto 12px',
+                        background: '#FFFFFF',
+                        color: '#111827',
+                        borderRadius: 20,
                         padding: 20,
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.7)',
+                        textAlign: 'left'
                       }}>
-                        <div style={{ fontSize: 13, color: '#94A3B8', marginBottom: 12, fontWeight: 700 }}>
-                          📊 MONTHLY RESTAURANT PROFIT LOSS (ON ₹2,00,000 SALES)
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          <div style={{ background: '#7F1D1D22', border: '1px solid #EF4444', borderRadius: 12, padding: 14 }}>
-                            <div style={{ fontSize: 12, color: '#FCA5A5' }}>Swiggy / Zomato Cut</div>
-                            <div style={{ fontSize: 28, fontWeight: 900, color: '#EF4444', margin: '4px 0' }}>-₹60,000</div>
-                            <div style={{ fontSize: 11, color: '#94A3B8' }}>30% Commission Lost Every Month!</div>
+                        {/* Top Nav */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E5E7EB', paddingBottom: 10, marginBottom: 12 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 20 }}>🍽️</span>
+                            <strong style={{ fontSize: 16, color: '#E23744' }}>DirectDine</strong>
+                            <span style={{ fontSize: 11, background: '#FEECEE', color: '#E23744', padding: '2px 6px', borderRadius: 4, fontWeight: 800 }}>0% Commission</span>
                           </div>
-                          <div style={{ background: '#064E3B22', border: '1px solid #10B981', borderRadius: 12, padding: 14 }}>
-                            <div style={{ fontSize: 12, color: '#6EE7B7' }}>DirectDine Platform Cut</div>
-                            <div style={{ fontSize: 28, fontWeight: 900, color: '#10B981', margin: '4px 0' }}>₹0 Cut</div>
-                            <div style={{ fontSize: 11, color: '#6EE7B7', fontWeight: 700 }}>100% Direct to Bank!</div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <span style={{ background: '#F3F4F6', fontSize: 11, padding: '4px 8px', borderRadius: 6, fontWeight: 700 }}>📍 Bandra West, Mumbai</span>
+                            <span style={{ background: '#10B981', color: '#FFF', fontSize: 11, padding: '4px 8px', borderRadius: 6, fontWeight: 800 }}>🛎️ Call Waiter</span>
+                          </div>
+                        </div>
+
+                        {/* Cravings Chips */}
+                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 12 }}>
+                          {['🍲 Biryani', '🥘 North Indian', '🍕 Pizza', '🍱 Thali', '🥟 Momos'].map((c, i) => (
+                            <span key={i} style={{ background: i === 0 ? '#E23744' : '#F1F5F9', color: i === 0 ? '#FFF' : '#334155', padding: '4px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+
+                        {/* Restaurant Cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 10, background: '#FAFAFA' }}>
+                            <div style={{ height: 80, borderRadius: 8, background: 'url(https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80) center/cover', marginBottom: 6 }} />
+                            <strong style={{ fontSize: 13, color: '#0F172A' }}>🌿 Spice Garden</strong>
+                            <div style={{ fontSize: 11, color: '#64748B' }}>North Indian • ★ 4.8 (500+)</div>
+                            <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 800, marginTop: 2 }}>⚡ Table QR & Delivery Active</div>
+                          </div>
+                          <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 10, background: '#FAFAFA' }}>
+                            <div style={{ height: 80, borderRadius: 8, background: 'url(https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=80) center/cover', marginBottom: 6 }} />
+                            <strong style={{ fontSize: 13, color: '#0F172A' }}>☕ Chai & Bites</strong>
+                            <div style={{ fontSize: 11, color: '#64748B' }}>Cafe & Snacks • ★ 4.7 (320+)</div>
+                            <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 800, marginTop: 2 }}>⚡ Table QR & Delivery Active</div>
                           </div>
                         </div>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        डायरेक्ट फूड ऑर्डरिंग हब — 0% कमीशन पर
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
 
-                  {/* SCENE 2: Actual Customer Mobile Storefront (/spice-garden) */}
-                  {currentScene.id === 2 && (
+                  {/* SCREEN 2: CUSTOMER STOREFRONT */}
+                  {currentScreen.id === 'menu' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 380,
-                        margin: '0 auto 16px',
+                        maxWidth: 400,
+                        margin: '0 auto 12px',
                         background: '#FFFFFF',
                         color: '#111827',
                         borderRadius: 24,
                         padding: 16,
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
                         textAlign: 'left'
                       }}>
-                        {/* Restaurant Top Banner */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                           <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span style={{ fontSize: 18 }}>🌿</span>
-                              <strong style={{ fontSize: 15, color: '#111827' }}>Spice Garden</strong>
-                              <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 4 }}>0% Fee</span>
-                            </div>
-                            <div style={{ fontSize: 11, color: '#6B7280' }}>Bandra West • Table #4 Dine-In</div>
+                            <strong style={{ fontSize: 16, color: '#0F172A' }}>🌿 Spice Garden</strong>
+                            <div style={{ fontSize: 11, color: '#64748B' }}>Table #4 Dine-In • ⏱️ 20-25 Mins</div>
                           </div>
-                          <span style={{ background: '#FEF3C7', color: '#D97706', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
-                            ★ 4.8 (500+)
+                          <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                            0% Extra Fee
                           </span>
                         </div>
 
-                        {/* Dish Item 1 */}
-                        <div style={{ background: '#F8FAFC', padding: 10, borderRadius: 12, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #E2E8F0' }}>
-                          <div>
+                        {/* Food Item with Real Photo */}
+                        <div style={{ display: 'flex', gap: 10, background: '#F8FAFC', padding: 10, borderRadius: 14, border: '1px solid #E2E8F0', marginBottom: 8, alignItems: 'center' }}>
+                          <div style={{ width: 68, height: 68, borderRadius: 10, background: 'url(https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80) center/cover', flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <span style={{ width: 10, height: 10, borderRadius: 2, border: '2px solid #16A34A', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#16A34A' }} />
-                              </span>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A' }} />
                               <strong style={{ fontSize: 13, color: '#0F172A' }}>Paneer Butter Masala</strong>
                             </div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginTop: 2 }}>₹280 <span style={{ fontSize: 10, color: '#64748B', fontWeight: 400 }}>(Best Seller)</span></div>
+                            <div style={{ fontSize: 11, color: '#64748B' }}>Rich buttery cashew gravy</div>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: '#E23744', marginTop: 2 }}>₹280</div>
                           </div>
-                          <button style={{ background: '#EF4444', color: '#FFF', border: 'none', padding: '6px 14px', borderRadius: 8, fontWeight: 800, fontSize: 12 }}>
+                          <button style={{ background: '#E23744', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 800, fontSize: 12 }}>
                             Add +
                           </button>
                         </div>
 
-                        {/* Dish Item 2 */}
-                        <div style={{ background: '#F8FAFC', padding: 10, borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #E2E8F0' }}>
-                          <div>
+                        {/* Food Item 2 */}
+                        <div style={{ display: 'flex', gap: 10, background: '#F8FAFC', padding: 10, borderRadius: 14, border: '1px solid #E2E8F0', alignItems: 'center' }}>
+                          <div style={{ width: 68, height: 68, borderRadius: 10, background: 'url(https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80) center/cover', flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <span style={{ width: 10, height: 10, borderRadius: 2, border: '2px solid #DC2626', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#DC2626' }} />
-                              </span>
-                              <strong style={{ fontSize: 13, color: '#0F172A' }}>Chicken Dum Biryani</strong>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC2626' }} />
+                              <strong style={{ fontSize: 13, color: '#0F172A' }}>Dum Biryani</strong>
                             </div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginTop: 2 }}>₹340</div>
+                            <div style={{ fontSize: 11, color: '#64748B' }}>Slow cooked fragrant basmati</div>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: '#E23744', marginTop: 2 }}>₹340</div>
                           </div>
-                          <button style={{ background: '#EF4444', color: '#FFF', border: 'none', padding: '6px 14px', borderRadius: 8, fontWeight: 800, fontSize: 12 }}>
+                          <button style={{ background: '#E23744', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: 8, fontWeight: 800, fontSize: 12 }}>
                             Add +
                           </button>
                         </div>
 
-                        {/* Direct Bottom Bar */}
-                        <div style={{ background: '#10B981', color: '#FFF', padding: '10px 14px', borderRadius: 10, textAlign: 'center', fontWeight: 800, fontSize: 13, marginTop: 12 }}>
-                          ⚡ 1 Item Added • View Cart (₹280) ➔
+                        {/* View Cart Bar */}
+                        <div style={{ background: '#10B981', color: '#FFF', padding: '10px 14px', borderRadius: 12, textAlign: 'center', fontWeight: 800, fontSize: 13, marginTop: 12 }}>
+                          🛒 1 Item Added • View Cart (₹280) ➔
                         </div>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        10-सेकंड QR कोड मेनू — बिना ऐप डाउनलोड किए
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
 
-                  {/* SCENE 3: 1-Tap OTP & UPI Checkout (/spice-garden/cart) */}
-                  {currentScene.id === 3 && (
+                  {/* SCREEN 3: 1-TAP CHECKOUT */}
+                  {currentScreen.id === 'checkout' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 380,
-                        margin: '0 auto 16px',
+                        maxWidth: 400,
+                        margin: '0 auto 12px',
                         background: '#FFFFFF',
                         color: '#111827',
                         borderRadius: 24,
                         padding: 16,
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
                         textAlign: 'left'
                       }}>
-                        <div style={{ borderBottom: '1px solid #E5E7EB', paddingBottom: 8, marginBottom: 10, display: 'flex', justifyContent: 'space-between' }}>
-                          <strong style={{ fontSize: 14 }}>🛒 Order Summary</strong>
-                          <span style={{ fontSize: 11, background: '#DCFCE7', color: '#15803D', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>Coupon Applied: FLAT50</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E5E7EB', paddingBottom: 8, marginBottom: 10 }}>
+                          <strong style={{ fontSize: 14 }}>🛒 Order Checkout</strong>
+                          <span style={{ fontSize: 11, background: '#DCFCE7', color: '#15803D', fontWeight: 800, padding: '2px 8px', borderRadius: 4 }}>
+                            Coupon: FLAT50 Applied
+                          </span>
                         </div>
 
                         <div style={{ fontSize: 12, color: '#4B5563', marginBottom: 8 }}>
                           1x Paneer Butter Masala (₹280) + 2x Garlic Naan (₹90)
                         </div>
 
-                        <div style={{ background: '#F3F4F6', padding: 10, borderRadius: 10, marginBottom: 10 }}>
+                        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: 10, borderRadius: 10, marginBottom: 10 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                             <span>Subtotal:</span>
                             <strong>₹370</strong>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#16A34A', fontWeight: 700 }}>
-                            <span>Discount (FLAT50):</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#16A34A', fontWeight: 800 }}>
+                            <span>Instant Discount:</span>
                             <span>-₹50</span>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 900, marginTop: 4, borderTop: '1px dashed #D1D5DB', paddingTop: 4 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 900, marginTop: 4, borderTop: '1px dashed #D1D5DB', paddingTop: 6, color: '#E23744' }}>
                             <span>Total Payable:</span>
-                            <span style={{ color: '#EF4444' }}>₹320</span>
+                            <span>₹320</span>
                           </div>
                         </div>
 
-                        {/* 1-Tap Login & UPI Button */}
-                        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: 8, borderRadius: 8, fontSize: 11, color: '#64748B', marginBottom: 10 }}>
-                          🔐 Verified Phone: <strong>+91 98765 43210</strong> (Auto-OTP 123456)
+                        {/* Phone & Auto OTP */}
+                        <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: 8, borderRadius: 8, fontSize: 11, color: '#1E40AF', marginBottom: 10 }}>
+                          📱 Verified: <strong>+91 98765 43210</strong> (Auto OTP: 123456)
                         </div>
 
+                        {/* 1-Tap UPI */}
                         <button style={{
                           width: '100%',
                           background: 'linear-gradient(135deg, #10B981, #059669)',
                           color: '#FFF',
                           border: 'none',
                           padding: '12px',
-                          borderRadius: 10,
-                          fontWeight: 800,
+                          borderRadius: 12,
+                          fontWeight: 900,
                           fontSize: 14,
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: 8,
-                          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+                          boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)'
                         }}>
                           ⚡ Pay via UPI (PhonePe / GPay / Paytm)
                         </button>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        1-टैप OTP लॉगिन & डायरेक्ट UPI सेटलमेंट
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
 
-                  {/* SCENE 4: Kitchen Dashboard & Live Ringing KDS (/dashboard) */}
-                  {currentScene.id === 4 && (
+                  {/* SCREEN 4: KITCHEN DISPLAY SYSTEM */}
+                  {currentScreen.id === 'kitchen' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 520,
-                        margin: '0 auto 16px',
+                        maxWidth: 540,
+                        margin: '0 auto 12px',
                         background: '#0F172A',
-                        borderRadius: 18,
+                        borderRadius: 20,
                         border: '2px solid #3B82F6',
                         padding: 18,
                         textAlign: 'left',
-                        boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)'
+                        boxShadow: '0 20px 45px rgba(59, 130, 246, 0.4)'
                       }}>
-                        {/* Ringing Alert Header */}
+                        {/* Ringing Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ fontSize: 24, animation: 'bounce 0.8s infinite' }}>🔔</span>
                             <div>
-                              <strong style={{ fontSize: 15, color: '#38BDF8' }}>LIVE KITCHEN DISPLAY (KDS)</strong>
-                              <div style={{ fontSize: 11, color: '#94A3B8' }}>Audio Bell Chime Active</div>
+                              <strong style={{ fontSize: 15, color: '#38BDF8' }}>LIVE KITCHEN DASHBOARD</strong>
+                              <div style={{ fontSize: 11, color: '#94A3B8' }}>Instant Ringing Audio Alert Active</div>
                             </div>
                           </div>
                           <span style={{
@@ -780,17 +734,17 @@ export default function VideoDemoPage() {
                         </div>
 
                         {/* Order Details */}
-                        <div style={{ background: '#1E293B', padding: 12, borderRadius: 10, marginBottom: 12 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 13, color: '#F8FAFC' }}>
+                        <div style={{ background: '#1E293B', padding: 12, borderRadius: 12, marginBottom: 12 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 13, color: '#F8FAFC' }}>
                             <span>Table #4 • Rahul S.</span>
                             <span style={{ color: '#10B981' }}>₹320 (PAID UPI)</span>
                           </div>
                           <div style={{ fontSize: 12, color: '#CBD5E1', marginTop: 4 }}>
-                            • 1x Paneer Butter Masala<br />
+                            • 1x Paneer Butter Masala (Full Plate)<br />
                             • 2x Garlic Naan (Butter Crispy)
                           </div>
-                          <div style={{ fontSize: 11, color: '#F59E0B', marginTop: 4, fontWeight: 600 }}>
-                            📝 Note: "Less spicy, extra green chutney please"
+                          <div style={{ fontSize: 11, color: '#F59E0B', marginTop: 4, fontWeight: 700 }}>
+                            📝 Chef Note: "Make it spicy, add extra chutney"
                           </div>
                         </div>
 
@@ -800,44 +754,41 @@ export default function VideoDemoPage() {
                             ✓ Accept (25 Mins)
                           </button>
                           <button style={{ background: '#334155', color: '#E2E8F0', border: 'none', padding: '10px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13 }}>
-                            🖨️ Print KOT
+                            🖨️ Thermal KOT
                           </button>
                           <button style={{ background: '#7F1D1D', color: '#FCA5A5', border: 'none', padding: '10px 12px', borderRadius: 8, fontWeight: 700, fontSize: 12 }}>
                             86 Item Off
                           </button>
                         </div>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        साउंड अलार्म के साथ लाइव किचन डिस्प्ले & प्रेप टाइमर
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
 
-                  {/* SCENE 5: WhatsApp Bot & Live Delivery Tracking */}
-                  {currentScene.id === 5 && (
+                  {/* SCREEN 5: WHATSAPP BOT & TRACKING */}
+                  {currentScreen.id === 'tracking' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 420,
-                        margin: '0 auto 16px',
+                        maxWidth: 440,
+                        margin: '0 auto 12px',
                         background: '#0B141A',
                         borderRadius: 20,
                         padding: 16,
                         border: '1px solid #1F2C34',
                         textAlign: 'left',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.7)'
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.8)'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #1F2C34', paddingBottom: 10, marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #1F2C34', paddingBottom: 8, marginBottom: 10 }}>
                           <span style={{ fontSize: 22 }}>💬</span>
                           <div>
                             <strong style={{ color: '#E9EDEF', fontSize: 14 }}>Spice Garden WhatsApp Bot</strong>
-                            <div style={{ fontSize: 11, color: '#00A884' }}>● Automated Order Engine</div>
+                            <div style={{ fontSize: 11, color: '#00A884' }}>● Automated Order Status Engine</div>
                           </div>
                         </div>
 
-                        {/* WhatsApp Message Bubble */}
+                        {/* Message Bubble */}
                         <div style={{ background: '#005C4B', color: '#E9EDEF', padding: 12, borderRadius: '0 12px 12px 12px', fontSize: 12.5, lineHeight: 1.6, marginBottom: 10 }}>
                           <strong>Order Confirmed! 🍛🎉</strong><br />
                           Hi Rahul, your delicious meal is being prepared!<br />
@@ -846,56 +797,54 @@ export default function VideoDemoPage() {
                           🔗 <span style={{ color: '#53BDEB', textDecoration: 'underline' }}>Track Order: directdine.in/track/ord_1042</span>
                         </div>
 
-                        {/* Live Tracking Progress Pill */}
-                        <div style={{ background: '#1F2C34', padding: 10, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
-                          <span style={{ color: '#00A884', fontWeight: 700 }}>✓ Kitchen Preparing</span>
+                        {/* Tracking Bar */}
+                        <div style={{ background: '#1F2C34', padding: 10, borderRadius: 10, display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                          <span style={{ color: '#00A884', fontWeight: 800 }}>✓ Kitchen Preparing</span>
                           <span style={{ color: '#94A3B8' }}>➔ Out for Delivery</span>
                           <span style={{ color: '#94A3B8' }}>➔ Delivered</span>
                         </div>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        कस्टमर के WhatsApp पर ऑटोमैटिक बिल & लाइव ट्रैकिंग
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
 
-                  {/* SCENE 6: Super Admin & Software Purchase Offer */}
-                  {currentScene.id === 6 && (
+                  {/* SCREEN 6: SUPER ADMIN & OFFER */}
+                  {currentScreen.id === 'admin' && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        maxWidth: 500,
-                        margin: '0 auto 16px',
+                        maxWidth: 520,
+                        margin: '0 auto 12px',
                         background: 'linear-gradient(135deg, #1E1B4B, #0F172A)',
                         borderRadius: 20,
                         border: '2px solid #F59E0B',
-                        padding: 22,
-                        boxShadow: '0 20px 40px rgba(245, 158, 11, 0.25)'
+                        padding: 20,
+                        boxShadow: '0 20px 40px rgba(245, 158, 11, 0.3)'
                       }}>
-                        <div style={{ display: 'inline-block', background: '#F59E0B', color: '#000', fontWeight: 900, fontSize: 12, padding: '4px 12px', borderRadius: 20, marginBottom: 10 }}>
-                          👑 SUPER ADMIN + FULL SOURCE CODE
+                        <div style={{ display: 'inline-block', background: '#F59E0B', color: '#000', fontWeight: 900, fontSize: 11, padding: '3px 10px', borderRadius: 20, marginBottom: 8 }}>
+                          👑 SUPER ADMIN & FULL SAAS SOURCE CODE
                         </div>
-                        <h3 style={{ fontSize: 22, fontWeight: 900, color: '#FFF', margin: '6px 0 12px' }}>
-                          इस पूरे सॉफ़्टवेयर को अपना बनाएं!
+                        <h3 style={{ fontSize: 20, fontWeight: 900, color: '#FFF', margin: '4px 0 10px' }}>
+                          इस पूरे सॉफ़्टवेयर को अभी खरीदें!
                         </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, textAlign: 'left', marginBottom: 16 }}>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, textAlign: 'left', marginBottom: 14 }}>
                           <div style={{ background: '#1E293B', padding: 10, borderRadius: 10, border: '1px solid #334155' }}>
-                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Option A: Restaurant SaaS</div>
-                            <strong style={{ fontSize: 16, color: '#10B981' }}>₹499 - ₹999/Month</strong>
-                            <div style={{ fontSize: 10, color: '#64748B' }}>0% Commission per restaurant</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Option 1: Monthly SaaS</div>
+                            <strong style={{ fontSize: 16, color: '#10B981' }}>₹499 - ₹999/mo</strong>
+                            <div style={{ fontSize: 10, color: '#64748B' }}>Per Restaurant License</div>
                           </div>
                           <div style={{ background: '#1E293B', padding: 10, borderRadius: 10, border: '1px solid #334155' }}>
-                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Option B: Full Source Code</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8' }}>Option 2: Full Source Code</div>
                             <strong style={{ fontSize: 16, color: '#F59E0B' }}>Lifetime License</strong>
-                            <div style={{ fontSize: 10, color: '#64748B' }}>Agencies & Developers ke liye</div>
+                            <div style={{ fontSize: 10, color: '#64748B' }}>Agencies & Developers</div>
                           </div>
                         </div>
 
-                        <div style={{ display: 'inline-flex', gap: 12, alignItems: 'center' }}>
+                        <div style={{ display: 'inline-flex', gap: 10, alignItems: 'center' }}>
                           <a
-                            href="https://wa.me/919876543210?text=Hi%20DirectDine%20Software%20Demo"
+                            href="https://wa.me/919876543210?text=Hello%20DirectDine%20Live%20Demo"
                             target="_blank"
                             rel="noreferrer"
                             style={{
@@ -903,48 +852,42 @@ export default function VideoDemoPage() {
                               color: '#FFF',
                               padding: '10px 20px',
                               borderRadius: 10,
-                              fontWeight: 800,
+                              fontWeight: 900,
                               fontSize: 14,
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 6
+                              textDecoration: 'none'
                             }}
                           >
-                            💬 WhatsApp for Demo: +91 98765 43210
+                            💬 WhatsApp for Live Demo: +91 98765 43210
                           </a>
                         </div>
                       </div>
-                      <h2 style={{ fontSize: 24, fontWeight: 800, margin: '8px 0', color: '#FFF' }}>
-                        {currentScene.hindiHeadline}
+                      <h2 style={{ fontSize: 23, fontWeight: 800, margin: '6px 0', color: '#FFF' }}>
+                        1-मिनट में नया रेस्टोरेंट ऑनबोर्ड करें & टेबल QR बनाएं
                       </h2>
-                      <p style={{ fontSize: 14, color: '#94A3B8', maxWidth: 540, margin: '0 auto' }}>
-                        {currentScene.hindiSubtext}
-                      </p>
                     </div>
                   )}
                 </div>
 
-                {/* Real Pure Hindi Subtitle Bar */}
+                {/* Subtitle / Voiceover Captions */}
                 <div style={{
-                  background: 'rgba(15, 23, 42, 0.9)',
+                  background: 'rgba(15, 23, 42, 0.95)',
                   border: '1px solid #334155',
-                  padding: '14px 20px',
-                  borderRadius: 14,
-                  backdropFilter: 'blur(10px)',
+                  padding: '12px 18px',
+                  borderRadius: 12,
+                  backdropFilter: 'blur(8px)',
                   textAlign: 'center',
                   zIndex: 10
                 }}>
-                  <div style={{ fontSize: 11, color: '#EF4444', fontWeight: 900, letterSpacing: '0.05em', marginBottom: 4 }}>
-                    🗣️ शुद्ध हिंदी वॉयसओवर (Live Hindi Speech):
+                  <div style={{ fontSize: 11, color: currentScreen.accentColor, fontWeight: 900, marginBottom: 3 }}>
+                    🗣️ नॉन-स्टॉप हिंदी वॉयसओवर:
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: '#F8FAFC', lineHeight: 1.5 }}>
-                    "{currentScene.hindiVoiceover}"
+                  <div style={{ fontSize: 14.5, fontWeight: 600, color: '#F8FAFC', lineHeight: 1.45 }}>
+                    "{currentScreen.voiceover}"
                   </div>
                 </div>
               </div>
 
-              {/* Video Timeline Progress */}
+              {/* Seamless Timeline Bar */}
               <div
                 style={{
                   height: 6,
@@ -967,28 +910,28 @@ export default function VideoDemoPage() {
                 }} />
               </div>
 
-              {/* Video Control Bar */}
+              {/* Video Bottom Toolbar */}
               <div style={{
-                background: '#0F172A',
-                padding: '14px 20px',
+                background: '#0B1120',
+                padding: '12px 18px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                gap: 12
+                gap: 10
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button
                     onClick={handlePlayPause}
                     style={{
                       background: isPlaying ? '#E2E8F0' : '#EF4444',
                       color: isPlaying ? '#0F172A' : '#FFF',
                       border: 'none',
-                      width: 44,
-                      height: 44,
+                      width: 42,
+                      height: 42,
                       borderRadius: '50%',
                       fontSize: 18,
-                      fontWeight: 800,
+                      fontWeight: 900,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1005,14 +948,14 @@ export default function VideoDemoPage() {
                       background: '#1E293B',
                       color: '#CBD5E1',
                       border: 'none',
-                      padding: '8px 14px',
+                      padding: '7px 12px',
                       borderRadius: 8,
                       fontSize: 12,
                       fontWeight: 700,
                       cursor: 'pointer'
                     }}
                   >
-                    🔄 Restart (00:00)
+                    🔄 Restart
                   </button>
 
                   <button
@@ -1020,13 +963,13 @@ export default function VideoDemoPage() {
                       const next = !voiceEnabled;
                       setVoiceEnabled(next);
                       if (!next && window.speechSynthesis) window.speechSynthesis.cancel();
-                      if (next && isPlaying) speakHindi(currentScene.hindiVoiceover);
+                      if (next && isPlaying) speakImmediate(currentScreen.voiceover);
                     }}
                     style={{
                       background: voiceEnabled ? '#10B98122' : '#334155',
                       color: voiceEnabled ? '#10B981' : '#94A3B8',
                       border: `1px solid ${voiceEnabled ? '#10B98155' : '#475569'}`,
-                      padding: '8px 14px',
+                      padding: '7px 12px',
                       borderRadius: 8,
                       fontSize: 12,
                       fontWeight: 700,
@@ -1036,7 +979,7 @@ export default function VideoDemoPage() {
                     {voiceEnabled ? '🔊 हिंदी आवाज़: चालू' : '🔇 आवाज़: बंद'}
                   </button>
 
-                  {/* Speech Rate Adjustment */}
+                  {/* Non-stop High Speed */}
                   <select
                     value={speechRate}
                     onChange={(e) => setSpeechRate(Number(e.target.value))}
@@ -1044,20 +987,20 @@ export default function VideoDemoPage() {
                       background: '#1E293B',
                       color: '#CBD5E1',
                       border: '1px solid #334155',
-                      padding: '7px 10px',
+                      padding: '6px 10px',
                       borderRadius: 8,
                       fontSize: 12,
                       cursor: 'pointer'
                     }}
                   >
-                    <option value={0.9}>0.9x (धीमी आवाज़)</option>
                     <option value={1.0}>1.0x (Normal)</option>
-                    <option value={1.15}>1.15x (तेज़ वॉयस)</option>
+                    <option value={1.15}>1.15x (Fast & Energetic)</option>
+                    <option value={1.25}>1.25x (Super Fast)</option>
                   </select>
                 </div>
 
-                {/* Record Button */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Direct Video File Recording */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {!recording ? (
                     <button
                       onClick={startRecording}
@@ -1065,15 +1008,14 @@ export default function VideoDemoPage() {
                         background: '#DC2626',
                         color: '#FFF',
                         border: 'none',
-                        padding: '10px 18px',
+                        padding: '9px 16px',
                         borderRadius: 8,
-                        fontSize: 13,
-                        fontWeight: 800,
+                        fontSize: 12.5,
+                        fontWeight: 900,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
-                        boxShadow: '0 4px 14px rgba(220, 38, 38, 0.4)'
+                        gap: 6
                       }}
                     >
                       ⏺ Record & Download Video File
@@ -1085,14 +1027,14 @@ export default function VideoDemoPage() {
                         background: '#B91C1C',
                         color: '#FFF',
                         border: 'none',
-                        padding: '10px 18px',
+                        padding: '9px 16px',
                         borderRadius: 8,
-                        fontSize: 13,
-                        fontWeight: 800,
+                        fontSize: 12.5,
+                        fontWeight: 900,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
+                        gap: 6,
                         animation: 'pulse 1s infinite'
                       }}
                     >
@@ -1103,43 +1045,40 @@ export default function VideoDemoPage() {
               </div>
             </div>
 
-            {/* Sidebar Scene Navigator */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Video Scenes (क्लिक करके चलाएं)
+            {/* Sidebar Screen Jump List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 900, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Application Screens (Click to view)
               </div>
-              {SCENES.map((scene) => {
-                const isActive = currentScene.id === scene.id;
+              {SCREENS.map((screen) => {
+                const isActive = currentScreen.id === screen.id;
                 return (
                   <div
-                    key={scene.id}
-                    onClick={() => jumpToScene(scene)}
+                    key={screen.id}
+                    onClick={() => jumpToScreen(screen)}
                     style={{
-                      background: isActive ? '#1E293B' : '#0F172A',
-                      border: `1px solid ${isActive ? '#EF4444' : '#1E293B'}`,
+                      background: isActive ? '#1E293B' : '#0B1120',
+                      border: `1px solid ${isActive ? screen.accentColor : '#1E293B'}`,
                       borderRadius: 12,
-                      padding: 14,
+                      padding: 12,
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                       <span style={{
                         fontSize: 11,
                         fontWeight: 900,
-                        color: isActive ? '#EF4444' : '#64748B'
+                        color: isActive ? screen.accentColor : '#64748B'
                       }}>
-                        {scene.tag}
+                        {screen.screenNumber} • {screen.hindiTag}
                       </span>
                       <span style={{ fontSize: 11, color: '#94A3B8', fontVariantNumeric: 'tabular-nums' }}>
-                        {scene.duration}s
+                        {screen.duration}s
                       </span>
                     </div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#F8FAFC', marginBottom: 4 }}>
-                      {scene.hindiHeadline}
-                    </div>
-                    <div style={{ fontSize: 11.5, color: '#94A3B8', lineHeight: 1.4 }}>
-                      {scene.appSection}
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#F8FAFC' }}>
+                      {screen.title}
                     </div>
                   </div>
                 );
@@ -1148,197 +1087,129 @@ export default function VideoDemoPage() {
           </div>
         )}
 
-        {/* TAB 2: DETAILED SCREENSHOTS & FEATURE EXPLAINER */}
-        {activeTab === 'screens' && (
-          <div style={{ background: '#0F172A', borderRadius: 16, border: '1px solid #1E293B', padding: 28 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 8px', color: '#FFF' }}>
-              एप्लीकेशन के सभी मुख्य फीचर्स & स्क्रीन्स (How Every Screen Works)
+        {/* TAB 2: VIEW ALL 6 FULL APPLICATION SCREENS (SIDE BY SIDE) */}
+        {activeTab === 'all_screens' && (
+          <div style={{ background: '#0F172A', borderRadius: 16, border: '1px solid #1E293B', padding: 24 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#FFF' }}>
+              एप्लीकेशन के सभी 6 मुख्य स्क्रीन्स (Complete Visual Walkthrough)
             </h2>
             <p style={{ fontSize: 14, color: '#94A3B8', margin: '0 0 24px' }}>
-              इस सेक्शन में आपकी एप्लीकेशन की हर एक स्क्रीन का असली वर्कफ़्लो दिया गया है ताकि आप किसी भी क्लाइंट को आसानी से समझा सकें:
+              आपकी एप्लीकेशन का हर एक पार्ट असली डेटा और फीचर्स के साथ यहाँ लाइव है:
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 20 }}>
-              {/* Screen 1: Customer Storefront */}
-              <div style={{ background: '#1E293B', borderRadius: 14, padding: 20, border: '1px solid #334155' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ background: '#10B981', color: '#FFF', fontWeight: 800, fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>
-                    SCREEN 1: STOREFRONT
-                  </span>
-                  <Link href="/spice-garden" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
-                    Open Live (/spice-garden) ↗
-                  </Link>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 20 }}>
+              {/* Screen 1 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#EF4444', color: '#FFF', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>01. HOMEPAGE</span>
+                  <Link href="/" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '0 0 8px' }}>
-                  कस्टमर मोबाइल मेनू & टेबल QR
-                </h3>
-                <ul style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.7, paddingLeft: 18, margin: 0 }}>
-                  <li><strong>Instant QR Scan:</strong> बिना कोई ऐप इनस्टॉल किए तुरंत मोबाइल में मेनू खुलता है।</li>
-                  <li><strong>Veg / Non-Veg Switcher:</strong> शुद्ध शाकाहारी और नॉनवेज फ़िल्टर 1-टैप में।</li>
-                  <li><strong>Portion Sizes:</strong> हाफ / फुल प्लेट और कुकिंग इंस्ट्रक्शन नोट्स।</li>
-                  <li><strong>Table Waiter Call:</strong> टेबल 4 से वेटर को 1 क्लिक में बुलाने का बटन।</li>
-                </ul>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>DirectDine Multi-Storefront Hub</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  कस्टमर्स के लिए शहर के टॉप रेस्टोरेंट्स (Spice Garden, Chai & Bites), बिरयानी, पिज़्ज़ा, मोमोज़ फ़िल्टर और टेबल से वेटर बुलाने का फीचर।
+                </p>
               </div>
 
-              {/* Screen 2: 1-Tap Checkout */}
-              <div style={{ background: '#1E293B', borderRadius: 14, padding: 20, border: '1px solid #334155' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ background: '#8B5CF6', color: '#FFF', fontWeight: 800, fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>
-                    SCREEN 2: CHECKOUT
-                  </span>
-                  <Link href="/spice-garden/cart" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
-                    Open Live (/cart) ↗
-                  </Link>
+              {/* Screen 2 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#10B981', color: '#000', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>02. STOREFRONT</span>
+                  <Link href="/spice-garden" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '0 0 8px' }}>
-                  1-टैप OTP & डायरेक्ट पेमेंट
-                </h3>
-                <ul style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.7, paddingLeft: 18, margin: 0 }}>
-                  <li><strong>Instant Demo OTP:</strong> कस्टमर का फोन नंबर डालते ही OTP आ जाता है।</li>
-                  <li><strong>Coupons:</strong> WELCOME10 और FLAT50 जैसे कूपन्स तुरंत डिस्काउंट देते हैं।</li>
-                  <li><strong>Direct UPI:</strong> PhonePe, GPay, Paytm या COD — पैसा सीधा मर्चेंट के बैंक में।</li>
-                  <li><strong>Confetti Animation:</strong> आर्डर होते ही कन्फेटी सेलिब्रेशन।</li>
-                </ul>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>Customer Mobile QR Menu (/spice-garden)</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  पनीर बटर मसाला (₹280), दम बिरयानी (₹340), शुद्ध शाकाहारी फ़िल्टर, हाफ/फुल पोर्शन और 1-क्लिक कार्ट एड।
+                </p>
               </div>
 
-              {/* Screen 3: Kitchen Display System */}
-              <div style={{ background: '#1E293B', borderRadius: 14, padding: 20, border: '1px solid #334155' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ background: '#3B82F6', color: '#FFF', fontWeight: 800, fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>
-                    SCREEN 3: KITCHEN KDS
-                  </span>
-                  <Link href="/dashboard" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
-                    Open Live (/dashboard) ↗
-                  </Link>
+              {/* Screen 3 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#8B5CF6', color: '#FFF', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>03. CHECKOUT</span>
+                  <Link href="/spice-garden/cart" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '0 0 8px' }}>
-                  किचन डैशबोर्ड & रियल-टाइम साउंड अलर्ट
-                </h3>
-                <ul style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.7, paddingLeft: 18, margin: 0 }}>
-                  <li><strong>Sound Chime 🔔:</strong> आर्डर आते ही किचन में लाउड घंटी बजती है।</li>
-                  <li><strong>Prep Timers:</strong> शेफ 15, 25 या 40 मिनट का टाइमर सेट करके Accept करता है।</li>
-                  <li><strong>Thermal KOT Print:</strong> 80mm/58mm किचन प्रिंटर के लिए 1-क्लिक रसीद।</li>
-                  <li><strong>86 Out-of-Stock:</strong> जो आइटम खत्म हो जाए उसे 1 सेकंड में ऑफ करें।</li>
-                </ul>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>1-Tap OTP & UPI Payment (/cart)</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  FLAT50 डिस्काउंट कूपन, डेमो ऑटो-ओटीपी 123456, और GPay/PhonePe/Paytm डायरेक्ट यूपीआई पेमेंट बिना किसी 30% कमीशन कट के।
+                </p>
               </div>
 
-              {/* Screen 4: Super Admin */}
-              <div style={{ background: '#1E293B', borderRadius: 14, padding: 20, border: '1px solid #334155' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ background: '#F59E0B', color: '#000', fontWeight: 800, fontSize: 11, padding: '3px 8px', borderRadius: 6 }}>
-                    SCREEN 4: SUPER ADMIN
-                  </span>
-                  <Link href="/admin" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
-                    Open Live (/admin) ↗
-                  </Link>
+              {/* Screen 4 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#3B82F6', color: '#FFF', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>04. KITCHEN KDS</span>
+                  <Link href="/dashboard" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '0 0 8px' }}>
-                  रेस्टोरेंट ऑनबोर्डिंग & QR जनरेटर
-                </h3>
-                <ul style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.7, paddingLeft: 18, margin: 0 }}>
-                  <li><strong>1-Minute Onboarding:</strong> रेस्टोरेंट का नाम, लोगो और फोन डालते ही सिस्टम रेडी।</li>
-                  <li><strong>High-Res Table QR:</strong> टेबल पर चिपकाने के लिए प्रिंट-रेडी क्यूआर कोड।</li>
-                  <li><strong>Multi-Tenancy:</strong> एक ही सर्वर पर सैकड़ों रेस्टोरेंट चलाएं।</li>
-                  <li><strong>Zero Infrastructure Headache:</strong> पूरा सिस्टम ऑटोमेटेड है।</li>
-                </ul>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>Kitchen Operations & Sound Bell (/dashboard)</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  आर्डर आते ही लाउड साउंड बेल, 15m/25m/40m प्रेप टाइमर के साथ Accept, थर्मल KOT प्रिंट और 86 आउट-ऑफ-स्टॉक टॉगल।
+                </p>
+              </div>
+
+              {/* Screen 5 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#16A34A', color: '#FFF', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>05. WHATSAPP</span>
+                  <Link href="/track/demo" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
+                </div>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>Automated WhatsApp Bot & Live Tracking</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  कस्टमर को व्हाट्सएप पर डिजिटल रसीद, डिलीवरी बॉय का नाम, नंबर और लाइव डिलीवरी ट्रैकिंग लिंक (Kitchen ➔ Delivery ➔ Delivered)।
+                </p>
+              </div>
+
+              {/* Screen 6 */}
+              <div style={{ background: '#1E293B', borderRadius: 14, padding: 18, border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ background: '#F59E0B', color: '#000', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 4 }}>06. SUPER ADMIN</span>
+                  <Link href="/admin" target="_blank" style={{ color: '#38BDF8', fontSize: 12, fontWeight: 700 }}>Open Live ↗</Link>
+                </div>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#FFF', margin: '4px 0 8px' }}>Restaurant Onboarding & QR Generator (/admin)</h3>
+                <p style={{ fontSize: 13, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
+                  1-मिनट में नया रेस्टोरेंट बनाएं, टेबल QR कोड स्टैंडी डाउनलोड करें और मंथली SaaS या लाइफटाइम सोर्स कोड लाइसेंस बेचें।
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 3: PURE HINDI SCRIPT */}
+        {/* TAB 3: NON-STOP PURE HINDI SCRIPT */}
         {activeTab === 'script' && (
-          <div style={{ background: '#0F172A', borderRadius: 16, border: '1px solid #1E293B', padding: 28 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 8px', color: '#FFF' }}>
-              🎙️ शुद्ध हिंदी वॉयसओवर स्क्रिप्ट (अगर आप खुद बोलना चाहें)
-            </h2>
-            <p style={{ fontSize: 14, color: '#94A3B8', margin: '0 0 24px' }}>
-              यह स्क्रिप्ट बिल्कुल स्वाभाविक, इंसानी और असरदार हिंदी में लिखी गई है ताकि वीडियो देखते ही रेस्टोरेंट मालिक या खरीदार इम्प्रेस हो जाए:
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              {SCENES.map((scene, idx) => (
-                <div key={scene.id} style={{ background: '#1E293B', borderRadius: 12, padding: 20, borderLeft: `5px solid ${scene.color}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ fontWeight: 800, color: scene.color, fontSize: 14 }}>
-                      भाग {idx + 1}: {scene.title} ({scene.duration} सेकंड्स)
-                    </span>
-                    <button
-                      onClick={() => speakHindi(scene.hindiVoiceover)}
-                      style={{
-                        background: '#334155',
-                        color: '#FFF',
-                        border: 'none',
-                        padding: '4px 10px',
-                        borderRadius: 6,
-                        fontSize: 11,
-                        cursor: 'pointer',
-                        fontWeight: 700
-                      }}
-                    >
-                      ▶️ सुनें (Play Voice)
-                    </button>
-                  </div>
-
-                  <div style={{ background: '#0F172A', padding: 14, borderRadius: 8, fontSize: 14.5, color: '#F1F5F9', lineHeight: 1.6, fontStyle: 'italic' }}>
-                    "{scene.hindiVoiceover}"
-                  </div>
-
-                  <div style={{ marginTop: 8, fontSize: 12, color: '#94A3B8' }}>
-                    <strong>स्क्रीन पर क्या दिखाना है:</strong> {scene.appSection}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: WHATSAPP PITCH */}
-        {activeTab === 'pitch' && (
-          <div style={{ background: '#0F172A', borderRadius: 16, border: '1px solid #1E293B', padding: 28 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 8px', color: '#FFF' }}>
-              💬 क्लाइंट्स को भेजने के लिए रेडी-मेड व्हाट्सएप पिच
+          <div style={{ background: '#0F172A', borderRadius: 16, border: '1px solid #1E293B', padding: 24 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 6px', color: '#FFF' }}>
+              🎙️ पूरा नॉन-स्टॉप हिंदी वॉयसओवर (बिना किसी रुकावट के)
             </h2>
             <p style={{ fontSize: 14, color: '#94A3B8', margin: '0 0 20px' }}>
-              इस वीडियो के साथ आप यह मैसेज किसी भी रेस्टोरेंट ओनर या डिजिटल एजेंसी को सीधे भेज सकते हैं:
+              यह पूरा पैराग्राफ लगातार एक सांस में बोलने के लिए तैयार किया गया है, ताकि वीडियो में कोई भी अजीब सन्नाटा (pause) न रहे:
             </p>
 
             <div style={{
-              background: '#075E54',
+              background: '#1E293B',
               borderRadius: 14,
               padding: 24,
-              color: '#FFF',
-              fontFamily: 'system-ui, sans-serif',
-              fontSize: 14.5,
+              fontSize: 16,
               lineHeight: 1.8,
-              whiteSpace: 'pre-wrap'
+              color: '#F8FAFC',
+              borderLeft: '5px solid #EF4444'
             }}>
-{`नमस्ते रेस्टोरेंट ओनर / बिज़नेस पार्टनर! 🙏
-
-क्या आप जानते हैं कि स्विगी और ज़ोमैटो आपके रेस्टोरेंट के हर महीने के ऑर्डर्स पर 25% से 30% कमीशन ले जाते हैं?
-
-हमने रेस्टोरेंट्स और कैफ़े के लिए Direct Food Ordering Software बनाया है:
-✅ 0% कमीशन — 100% पैसा सीधा आपके बैंक खाते में
-✅ टेबल QR कोड और व्हाट्सएप डायरेक्ट ऑनलाइन मेनू
-✅ किचन में नया आर्डर आते ही लाउड साउंड बेल अलर्ट
-✅ 1-क्लिक में आर्डर एक्सेप्ट और प्रेप टाइमर
-✅ कस्टमर के व्हाट्सएप पर तुरंत पक्का बिल और लाइव ट्रैकिंग
-✅ कोई डिलीवरी या मार्केटिंग का झंझट नहीं — प्योर प्लग एंड प्ले सॉफ़्टवेयर!
-
-🎥 ऊपर दिया गया 1 मिनट का डेमो वीडियो ज़रूर देखें!
-
-👉 अपने रेस्टोरेंट का लाइव मेनू डेमो देखने के लिए इस नंबर पर 'DEMO' लिखकर रिप्लाई करें।
-ऑफर: सिर्फ ₹499/महीना या पूरा सॉफ़्टवेयर लाइफटाइम लाइसेंस!`}
+              "नमस्ते दोस्तों! यह है हमारा कंप्लीट रेस्टोरेंट डायरेक्ट ऑर्डरिंग सॉफ़्टवेयर। 
+              सबसे पहले देखिए यह शानदार होमपेज, जहाँ कस्टमर शहर के बेस्ट रेस्टोरेंट्स खोज सकता है, टेबल से वेटर को बुला सकता है, और शून्य परसेंट कमीशन पर डायरेक्ट आर्डर कर सकता है। 
+              जैसे ही कस्टमर टेबल पर लगे क्यूआर कोड को स्कैन करेगा, बिना किसी ऐप डाउनलोड के तुरंत मोबाइल मेनू खुल जाएगा। यहाँ वेज और नॉन-वेज का साफ़ फ़िल्टर है, और पसंदीदा डिश जैसे पनीर बटर मसाला या दम बिरयानी को तुरंत कार्ट में जोड़ सकते हैं। 
+              अब देखिए इसका सुपर-फास्ट चेकआउट! कस्टमर अपना मोबाइल नंबर डालेगा और तुरंत ऑटो-ओटीपी से लॉगिन हो जाएगा। डिस्काउंट कूपन लगते ही तुरंत छूट मिलेगी, और गूगल-पे, फोनपे, पेटीएम या कैश ऑन डिलीवरी से एक टैप में डायरेक्ट पेमेंट हो जाएगी। 
+              और यह है रेस्टोरेंट का पावरफुल किचन डैशबोर्ड! नया आर्डर आते ही किचन में लाउड साउंड बेल बजेगी। शेफ तुरंत पच्चीस मिनट का टाइमर सेट करके आर्डर एक्सेप्ट करेगा, थर्मल KOT रसीद प्रिंट करेगा, और कोई आइटम खत्म होने पर तुरंत स्टॉक ऑफ कर सकेगा। 
+              आर्डर होते ही कस्टमर के पर्सनल व्हाट्सएप पर ऑटोमैटिक बिल और लाइव डिलीवरी ट्रैकिंग लिंक पहुंच जाएगा। 
+              आखिर में देखिए सुपर एडमिन पैनल! यहाँ से आप सिर्फ एक मिनट में नया रेस्टोरेंट जोड़ सकते हैं और हाई-क्वालिटी प्रिंट-रेडी टेबल क्यूआर कोड डाउनलोड कर सकते हैं। 
+              तो चाहे अपने रेस्टोरेंट के लिए लेना हो या अपनी एजेंसी के लिए पूरा सोर्स कोड — आज ही संपर्क करें और लाइव डेमो देखें!"
             </div>
 
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`नमस्ते रेस्टोरेंट ओनर / बिज़नेस पार्टनर! 🙏\n\nक्या आप जानते हैं कि स्विगी और ज़ोमैटो आपके रेस्टोरेंट के हर महीने के ऑर्डर्स पर 25% से 30% कमीशन ले जाते हैं?\n\nहमने रेस्टोरेंट्स और कैफ़े के लिए Direct Food Ordering Software बनाया है:\n✅ 0% कमीशन — 100% पैसा सीधा आपके बैंक खाते में\n✅ टेबल QR कोड और व्हाट्सएप डायरेक्ट ऑनलाइन मेनू\n✅ किचन में नया आर्डर आते ही लाउड साउंड बेल अलर्ट\n✅ 1-क्लिक में आर्डर एक्सेप्ट और प्रेप टाइमर\n✅ कस्टमर के व्हाट्सएप पर तुरंत पक्का बिल और लाइव ट्रैकिंग\n✅ कोई डिलीवरी या मार्केटिंग का झंझट नहीं — प्योर प्लग एंड प्ले सॉफ़्टवेयर!\n\n🎥 ऊपर दिया गया 1 मिनट का डेमो वीडियो ज़रूर देखें!\n\n👉 अपने रेस्टोरेंट का लाइव मेनू डेमो देखने के लिए 'DEMO' लिखकर रिप्लाई करें।`);
-                alert('व्हाट्सएप पिच क्लिपबोर्ड पर कॉपी हो गया!');
+                const fullText = SCREENS.map(s => s.voiceover).join(' ');
+                speakImmediate(fullText);
               }}
               style={{
                 marginTop: 16,
-                background: '#25D366',
+                background: '#EF4444',
                 color: '#FFF',
                 border: 'none',
                 padding: '12px 24px',
@@ -1348,7 +1219,7 @@ export default function VideoDemoPage() {
                 cursor: 'pointer'
               }}
             >
-              📋 मैसेज कॉपी करें (Copy WhatsApp Pitch)
+              ▶️ पूरा वॉयसओवर एक साथ सुनें (Play Non-Stop Full Speech)
             </button>
           </div>
         )}
