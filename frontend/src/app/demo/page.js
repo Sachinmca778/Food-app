@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function DemoPage() {
-  const salesWhatsAppUrl = `https://wa.me/919876543210?text=${encodeURIComponent(
+  const salesWhatsAppUrl = `https://wa.me/919310378572?text=${encodeURIComponent(
     'Hello DirectDine Team! I would like to book a 1-on-1 guided live demo of the DirectDine restaurant platform.'
   )}`;
 
@@ -258,14 +258,14 @@ export default function DemoPage() {
           }}>
             🎬
           </div>
-          <div>
+          {/* <div>
             <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111827', margin: '0 0 3px' }}>
               Watch 60-Second Guided Video Tour
             </h3>
             <p style={{ fontSize: 13, color: '#4B5563', margin: 0 }}>
               Complete high-energy overview with Hindi voiceover covering all 6 screens from QR scan to kitchen chime.
             </p>
-          </div>
+          </div> */}
         </div>
 
         <Link

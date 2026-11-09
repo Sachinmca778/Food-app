@@ -88,7 +88,7 @@ export default function LoginPage() {
             }}>
               <strong>Demo Logins:</strong>
               <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <span>• Spice Garden: <code>9876543210</code> / <code>spice123</code></span>
+                <span>• Spice Garden: <code>9310378572</code> / <code>spice123</code></span>
                 <span>• Chai &amp; Bites: <code>9988776655</code> / <code>chai123</code></span>
               </div>
             </div>

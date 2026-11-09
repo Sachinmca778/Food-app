@@ -104,7 +104,7 @@ async function runAuthAudit() {
   const partnerLogin = await apiCall({
     method: 'POST',
     path: '/dashboard/login',
-    body: { phone: '9876543210', password: 'spice123' }
+    body: { phone: '9310378572', password: 'spice123' }
   });
   assert(partnerLogin.status === 200 && partnerLogin.data.token && partnerLogin.data.user?.role === 'owner',
     'Partner login returns JWT with role=owner');
@@ -115,7 +115,7 @@ async function runAuthAudit() {
   const partnerBadPass = await apiCall({
     method: 'POST',
     path: '/dashboard/login',
-    body: { phone: '9876543210', password: 'wrongPassword123' }
+    body: { phone: '9310378572', password: 'wrongPassword123' }
   });
   assert(partnerBadPass.status === 401, 'Partner bad password rejected with 401 Unauthorized');
 

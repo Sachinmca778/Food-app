@@ -25,7 +25,7 @@ INSERT INTO restaurants (
   'spice-garden',
   'Spice Garden',
   'Authentic North Indian cuisine with a modern twist. Fresh ingredients, bold flavors.',
-  '+919876543210',
+  '+919310378572',
   '42, MG Road, Near City Mall',
   'Mumbai',
   '400001',
@@ -47,7 +47,7 @@ VALUES (
   'a0000000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000001',
   'Rajesh Kumar',
-  '+919876543210',
+  '+919310378572',
   'rajesh@spicegarden.in',
   '$2a$10$.VfWux.M1lFH1984ATFXC.NN6y8P8PXWC2EoU1GBMsbZYIx0qOI/2',
   'owner'

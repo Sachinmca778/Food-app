@@ -20,7 +20,7 @@ Zero-commission direct food ordering infrastructure built with **Node.js, Expres
 ## 🔑 Demo Credentials
 
 ### 1. Restaurant Owner Dashboard (`/dashboard`)
-- **Phone:** `+919876543210`
+- **Phone:** `+919310378572`
 - **Password:** `spice123`
 - **Restaurant:** Spice Garden
 
@@ -127,9 +127,9 @@ In Meta Developer Portal:
 You can also trigger bot responses or test live sending directly from terminal:
 ```bash
 # Test Bot intelligence locally:
-node backend/scripts/test-whatsapp.js bot "Hi" 9876543210
-node backend/scripts/test-whatsapp.js bot "biryani" 9876543210
-node backend/scripts/test-whatsapp.js bot "3" 9876543210
+node backend/scripts/test-whatsapp.js bot "Hi" 9310378572
+node backend/scripts/test-whatsapp.js bot "biryani" 9310378572
+node backend/scripts/test-whatsapp.js bot "3" 9310378572
 
 # Test Live Message dispatch to your real phone number:
 node backend/scripts/test-whatsapp.js live 9198XXXXXXXX "Hello! DirectDine Bot test message."

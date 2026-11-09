@@ -125,7 +125,7 @@ export default function HomePage() {
     }
   ];
 
-  const salesWhatsAppUrl = `https://wa.me/919876543210?text=${encodeURIComponent(
+  const salesWhatsAppUrl = `https://wa.me/919310378572?text=${encodeURIComponent(
     'Hello DirectDine Team! I own a restaurant/cloud kitchen and want a live 10-minute demo of DirectDine 0% commission system.'
   )}`;
 
@@ -1831,7 +1831,7 @@ export default function HomePage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
               <a href={salesWhatsAppUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#16A34A', fontWeight: 800, textDecoration: 'none' }}>
-                💬 +91 98765 43210 (Demo Hotline)
+                💬 +91 93103 78572 (Demo Hotline)
               </a>
               <div>📧 sales@directdine.in</div>
               <div>⏱️ 24/7 Merchant WhatsApp Desk</div>
@@ -1934,7 +1934,7 @@ export default function HomePage() {
                   <input
                     type="tel"
                     required
-                    placeholder="10-digit number e.g. 9876543210"
+                    placeholder="10-digit number e.g. 9310378572"
                     value={onboardData.phone}
                     onChange={(e) => setOnboardData({ ...onboardData, phone: e.target.value })}
                     className="input-field"

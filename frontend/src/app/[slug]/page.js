@@ -68,7 +68,7 @@ function MenuContent() {
 
   // Restaurant Staff / Owner Login Modal State
   const [staffModalOpen, setStaffModalOpen] = useState(false);
-  const [staffPhone, setStaffPhone] = useState(slug === 'chai-and-bites' ? '9988776655' : '9876543210');
+  const [staffPhone, setStaffPhone] = useState(slug === 'chai-and-bites' ? '9988776655' : '9310378572');
   const [staffPassword, setStaffPassword] = useState(slug === 'chai-and-bites' ? 'chai123' : 'spice123');
   const [staffLoginLoading, setStaffLoginLoading] = useState(false);
   const [staffLoginError, setStaffLoginError] = useState('');
@@ -302,7 +302,7 @@ function MenuContent() {
   // 1-Tap WhatsApp Direct Ordering Generator
   const buildWhatsAppOrderLink = () => {
     if (!restaurant) return '#';
-    const restPhone = (restaurant.phone || '919876543210').replace(/\D/g, '');
+    const restPhone = (restaurant.phone || '919310378572').replace(/\D/g, '');
     if (cart.length === 0) {
       return `https://wa.me/${restPhone}?text=${encodeURIComponent(`Hi ${restaurant.name}! 👋 I am browsing your menu and would like to place a direct order.`)}`;
     }
@@ -1596,7 +1596,7 @@ function MenuContent() {
           <div style={{ fontSize: 12, color: '#64748B', display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
             <span>🕒 Open Daily: 11:00 AM – 11:30 PM</span>
             <span>•</span>
-            <span>📞 Direct Kitchen: {restaurant.phone || '+91 98765 43210'}</span>
+            <span>📞 Direct Kitchen: {restaurant.phone || '+91 93103 78572'}</span>
           </div>
         </div>
 
@@ -1624,7 +1624,7 @@ function MenuContent() {
           </a>
 
           <a
-            href={`tel:${restaurant.phone || '+919876543210'}`}
+            href={`tel:${restaurant.phone || '+919310378572'}`}
             style={{
               background: '#FFFFFF',
               color: '#0F172A',
@@ -2481,7 +2481,7 @@ function MenuContent() {
 
                 <div style={{ display: 'flex', gap: 10 }}>
                   <a
-                    href={`https://wa.me/${(restaurant?.phone || '919876543210').replace(/\D/g, '')}?text=${encodeURIComponent(
+                    href={`https://wa.me/${(restaurant?.phone || '919310378572').replace(/\D/g, '')}?text=${encodeURIComponent(
                       `👋 Hi ${restaurant?.name || 'DirectDine'}! I am inquiring about a bulk catering order for a ${bulkEventType} on ${bulkDate || 'upcoming date'} for ~${bulkGuestCount}. My name is ${bulkName || 'Guest'} (${bulkPhone}). Details: ${bulkNotes || 'Please share customized package rates'}.`
                     )}`}
                     target="_blank"
@@ -2779,7 +2779,7 @@ function MenuContent() {
 
       {/* 19. FLOATING WHATSAPP CHEF / BAKER LIVE HELP (CRUSTO BAKERS FEATURE) */}
       <a
-        href={`https://wa.me/${(restaurant.phone || '919876543210').replace(/\D/g, '')}?text=${encodeURIComponent(
+        href={`https://wa.me/${(restaurant.phone || '919310378572').replace(/\D/g, '')}?text=${encodeURIComponent(
           `Hi ${restaurant.name}! 👋 I am browsing your menu on DirectDine. I have a query regarding a custom cake or party order.`
         )}`}
         target="_blank"
@@ -2857,17 +2857,17 @@ function MenuContent() {
 
             {/* Quick Demo Fill Helper */}
             <div style={{
-              background: '#FFF1F2',
+              background: 'var(--primary-soft)',
               borderRadius: 10,
               padding: '10px 12px',
-              border: '1px solid #FECDD3',
+              border: '1px solid var(--primary-border)',
               marginBottom: 16,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <div style={{ fontSize: 12, color: '#9F1239' }}>
-                Demo Credentials: <strong>{slug === 'chai-and-bites' ? '9988776655 (chai123)' : '9876543210 (spice123)'}</strong>
+              <div style={{ fontSize: 12, color: 'var(--primary-dark)' }}>
+                Demo Credentials: <strong>{slug === 'chai-and-bites' ? '9988776655 (chai123)' : '9310378572 (spice123)'}</strong>
               </div>
               <button
                 type="button"
@@ -2876,12 +2876,12 @@ function MenuContent() {
                     setStaffPhone('9988776655');
                     setStaffPassword('chai123');
                   } else {
-                    setStaffPhone('9876543210');
+                    setStaffPhone('9310378572');
                     setStaffPassword('spice123');
                   }
                 }}
                 style={{
-                  background: '#E23744',
+                  background: 'var(--primary)',
                   color: '#FFFFFF',
                   border: 'none',
                   padding: '4px 10px',

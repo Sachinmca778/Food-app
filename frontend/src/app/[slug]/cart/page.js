@@ -1582,7 +1582,7 @@ function CartContent() {
       {/* 1-TAP DIRECT WHATSAPP ORDER OPTION */}
       <div style={{ marginTop: 12, textAlign: 'center' }}>
         <a
-          href={`https://wa.me/${restaurant?.phone || '919876543210'}?text=${encodeURIComponent(
+          href={`https://wa.me/${restaurant?.phone || '919310378572'}?text=${encodeURIComponent(
             `👋 Hi ${restaurant?.name || 'Restaurant'}!\nI'd like to place a direct order:\n\n${cart.map(i => `• ${i.quantity}x ${i.name} ${i.variantName ? `(${i.variantName})` : ''} - ₹${((i.unitPricePaise * i.quantity) / 100).toFixed(0)}`).join('\n')}\n\n💰 Total: ₹${(grandTotalPaise / 100).toFixed(0)}\n📍 Mode: ${orderType === 'dine_in' ? `Dine-In (Table ${tableNo || '1'})` : orderType === 'pickup' ? 'Takeaway Pickup' : `Delivery to: ${addressLine || 'Address'}`}\n📞 Customer: ${customerName || 'Guest'} (${customerPhone || ''})\n\nPlease confirm my order!`
           )}`}
           target="_blank"

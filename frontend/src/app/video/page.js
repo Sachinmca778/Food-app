@@ -669,7 +669,7 @@ export default function NonStopVideoStudio() {
 
                         {/* Phone & Auto OTP */}
                         <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: 8, borderRadius: 8, fontSize: 11, color: '#1E40AF', marginBottom: 10 }}>
-                          📱 Verified: <strong>+91 98765 43210</strong> (Auto OTP: 123456)
+                          📱 Verified: <strong>+91 93103 78572</strong> (Auto OTP: 123456)
                         </div>
 
                         {/* 1-Tap UPI */}
@@ -793,7 +793,7 @@ export default function NonStopVideoStudio() {
                           <strong>Order Confirmed! 🍛🎉</strong><br />
                           Hi Rahul, your delicious meal is being prepared!<br />
                           ⏱️ <strong>Ready in:</strong> 25 minutes<br />
-                          🛵 <strong>Rider:</strong> Ramesh Kumar (+91 9876543210)<br />
+                          🛵 <strong>Rider:</strong> Ramesh Kumar (+91 9310378572)<br />
                           🔗 <span style={{ color: '#53BDEB', textDecoration: 'underline' }}>Track Order: directdine.in/track/ord_1042</span>
                         </div>
 
@@ -844,7 +844,7 @@ export default function NonStopVideoStudio() {
 
                         <div style={{ display: 'inline-flex', gap: 10, alignItems: 'center' }}>
                           <a
-                            href="https://wa.me/919876543210?text=Hello%20DirectDine%20Live%20Demo"
+                            href="https://wa.me/919310378572?text=Hello%20DirectDine%20Live%20Demo"
                             target="_blank"
                             rel="noreferrer"
                             style={{
@@ -857,7 +857,7 @@ export default function NonStopVideoStudio() {
                               textDecoration: 'none'
                             }}
                           >
-                            💬 WhatsApp for Live Demo: +91 98765 43210
+                            💬 WhatsApp for Live Demo: +91 93103 78572
                           </a>
                         </div>
                       </div>

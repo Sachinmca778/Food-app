@@ -47,7 +47,7 @@ export default function ExplorePage() {
       locality: 'Bandra West, Mumbai',
       savingsText: 'Save ₹85 vs Aggregators',
       tags: ['biryani', 'north_indian', 'healthy'],
-      phone: '919876543210'
+      phone: '919310378572'
     },
     {
       id: 'chai-and-bites',
@@ -77,7 +77,7 @@ export default function ExplorePage() {
     locality: `${r.address_line || 'Bandra West'}, ${r.city || 'Mumbai'}`,
     savingsText: 'Save ₹80 vs Aggregators',
     tags: ['biryani', 'north_indian', 'healthy'],
-    phone: r.phone || '919876543210'
+    phone: r.phone || '919310378572'
   })) : fallbackRestaurants;
 
   const filteredRestaurants = restaurants.filter(r => {

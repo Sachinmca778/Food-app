@@ -105,6 +105,12 @@ async function autoInitDatabase() {
       else await pool.query(seed);
       console.log('✅ Database schema and seed initialized successfully!');
     }
+
+    // Ensure restaurant and staff credentials reflect current official number (+91 93103 78572)
+    try {
+      await query(`UPDATE restaurants SET phone = '+919310378572' WHERE phone = '+919876543210' OR phone = '9876543210'`);
+      await query(`UPDATE staff_users SET phone = '+919310378572' WHERE phone = '+919876543210' OR phone = '9876543210'`);
+    } catch (_) {}
   } catch (err) {
     // Silent notice in case schema check differs across engines
     console.log('ℹ️ Database check completed');

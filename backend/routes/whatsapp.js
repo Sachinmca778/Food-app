@@ -275,7 +275,7 @@ router.post('/webhook', async (req, res) => {
 /**
  * Simulator Endpoint for Local & Web UI Testing
  * POST /api/whatsapp/simulate
- * Body: { phone: "9876543210", message: "Hi", restaurantPhone: "919999999999" }
+ * Body: { phone: "9310378572", message: "Hi", restaurantPhone: "919999999999" }
  */
 router.post('/simulate', async (req, res) => {
   try {
@@ -301,13 +301,13 @@ router.post('/simulate', async (req, res) => {
 /**
  * Send Live Test WhatsApp Message
  * POST /api/whatsapp/test-send
- * Body: { phone: "919876543210", message: "Optional custom message" }
+ * Body: { phone: "919310378572", message: "Optional custom message" }
  */
 router.post('/test-send', async (req, res) => {
   try {
     const { phone, message } = req.body;
     if (!phone) {
-      return res.status(400).json({ error: 'phone number is required (e.g. 919876543210)' });
+      return res.status(400).json({ error: 'phone number is required (e.g. 919310378572)' });
     }
 
     const { rows: [restaurant] } = await query(

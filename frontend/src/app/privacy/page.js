@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           <p>
             For privacy inquiries or DPDP compliance queries:<br />
             <strong>Grievance Officer:</strong> Data Protection Cell, DirectDine Technologies Inc.<br />
-            Email: <code>privacy@directdine.in</code> | Phone: +91 98765 43210
+            Email: <code>privacy@directdine.in</code> | Phone: +91 93103 78572
           </p>
         </section>
       </div>
