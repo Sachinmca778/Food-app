@@ -365,7 +365,32 @@ function MenuContent() {
   return (
     <div style={{ paddingBottom: itemCount > 0 ? 120 : 60, maxWidth: 1040, margin: '0 auto' }}>
       
-      {/* 1. TOP LUXURY ANNOUNCEMENT TICKER */}
+      {/* Restaurant Header */
+<div style={{ textAlign: 'center', marginBottom: '24px' }}>
+  <h1 style={{ margin: '16px 0 8px' }}>{restaurant?.name}</h1>
+  {restaurant?.logo_url && (
+    <img src={restaurant.logo_url} alt={`${restaurant?.name} logo`} style={{ maxWidth: '120px', borderRadius: '8px', marginBottom: '8px' }} />
+  )}
+  <p>{restaurant?.description}</p>
+  <a
+    href={`https://wa.me/${(restaurant?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I would like to order from your restaurant')}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      display: 'inline-block',
+      marginTop: '12px',
+      padding: '10px 20px',
+      background: 'var(--primary)',
+      color: '#FFF',
+      borderRadius: '4px',
+      textDecoration: 'none'
+    }}
+  >
+    Order via WhatsApp
+  </a>
+</div>
+
+/* 1. TOP LUXURY ANNOUNCEMENT TICKER */}
       <div style={{
         background: 'linear-gradient(90deg, #1C1917 0%, #3B0D11 50%, #1C1917 100%)',
         color: '#FCD34D',

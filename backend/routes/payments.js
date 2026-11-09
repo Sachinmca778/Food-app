@@ -2,7 +2,12 @@
  * Payment Routes — Razorpay webhook + payment verification
  * POST /api/payments/webhook     — Razorpay webhook
  * POST /api/payments/verify      — Client-side payment verification
+ * POST /api/payments/create-subscription — Stripe subscription
+ * POST /api/payments/checkout-success — Verify Stripe checkout
+ * POST /api/payments/confirm-upi
+ * POST /api/payments/confirm-card
  */
+
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
@@ -12,11 +17,11 @@ const paymentService = require('../services/paymentService');
 const orderService = require('../services/orderService');
 const notificationService = require('../services/notificationService');
 
-// POST /api/payments/webhook — Razorpay webhook handler
+// Razorpay webhook
 router.post('/webhook', asyncHandler(async (req, res) => {
   const { event, payload } = req.body;
 
-  // Verify webhook signature (skip in mock mode)
+  // Verify webhook signature if secret is set
   if (process.env.RAZORPAY_WEBHOOK_SECRET) {
     const signature = req.headers['x-razorpay-signature'];
     const expectedSignature = crypto
@@ -39,7 +44,7 @@ router.post('/webhook', asyncHandler(async (req, res) => {
     );
   } catch (err) {
     if (err.code === '23505') {
-      // Duplicate event, already processed
+      // Duplicate event
       return res.json({ status: 'already_processed' });
     }
     throw err;
@@ -52,7 +57,7 @@ router.post('/webhook', asyncHandler(async (req, res) => {
       const result = await paymentService.processPaymentSuccess(
         paymentEntity.order_id,
         paymentEntity.id,
-        null // Signature verified at webhook level
+        null // signature verified at webhook level
       );
 
       // Notify
@@ -72,7 +77,70 @@ router.post('/webhook', asyncHandler(async (req, res) => {
   res.json({ status: 'ok' });
 }));
 
-// POST /api/payments/verify — Client-side verification after Razorpay checkout
+// Create Stripe subscription checkout session
+router.post('/create-subscription', asyncHandler(async (req, res) => {
+  const { slug, plan } = req.body; // plan: 'monthly' or 'annual'
+  if (!slug || !plan) throw new ApiError(400, 'slug and plan are required');
+
+  // Verify restaurant exists
+  const { rows: [restaurant] } = await query(
+    'SELECT id, slug, name FROM restaurants WHERE slug = $1',
+    [slug]
+  );
+  if (!restaurant) throw new ApiError(404, 'Restaurant not found');
+
+  const stripeSecret = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecret) throw new ApiError(500, 'Stripe secret key not configured');
+
+  const stripe = require('stripe')(stripeSecret);
+
+  const priceId = plan === 'annual' ? process.env.STRIPE_PRICE_ANNUAL : process.env.STRIPE_PRICE_MONTHLY;
+  if (!priceId) throw new ApiError(500, 'Stripe price IDs not configured');
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'subscription',
+    line_items: [{ price: priceId, quantity: 1 }],
+    client_reference_id: restaurant.id,
+    metadata: { restaurant_slug: slug, plan },
+    success_url: `${process.env.FRONTEND_URL || 'https://directdine.com'}/owner?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL || 'https://directdine.com'}/owner?canceled=1`,
+  });
+
+  res.json({ success: true, checkoutUrl: session.url });
+}));
+
+// Verify Stripe checkout success
+router.post('/checkout-success', asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) throw new ApiError(400, 'sessionId is required');
+
+  const stripeSecret = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecret) throw new ApiError(500, 'Stripe secret key not configured');
+
+  const stripe = require('stripe')(stripeSecret);
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  if (!session) throw new ApiError(404, 'Checkout session not found');
+
+  const { payment_status, metadata } = session;
+  if (payment_status !== 'paid') {
+    return res.json({ success: false, error: 'Payment not completed' });
+  }
+
+  const { restaurant_slug, plan } = metadata;
+  if (!restaurant_slug) throw new ApiError(400, 'Missing restaurant slug in session metadata');
+
+  const intervalDays = plan === 'annual' ? 365 : 30;
+
+  await query(
+    `UPDATE restaurants SET plan = $1, next_billing_at = now() + ($2 || ' days')::interval WHERE slug = $3`,
+    ['paid', intervalDays, restaurant_slug]
+  );
+
+  res.json({ success: true });
+}));
+
+// Razorpay payment verification (existing)
 router.post('/verify', asyncHandler(async (req, res) => {
   const razorpayOrderId = req.body.razorpayOrderId || req.body.razorpay_order_id;
   const razorpayPaymentId = req.body.razorpayPaymentId || req.body.razorpay_payment_id;
@@ -83,10 +151,11 @@ router.post('/verify', asyncHandler(async (req, res) => {
   }
 
   const result = await paymentService.processPaymentSuccess(
-    razorpayOrderId, razorpayPaymentId, razorpaySignature
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
   );
 
-  // Notify
   const fullOrder = await orderService.getOrderWithItems(result.orderId);
   if (fullOrder) {
     await notificationService.notifyOrderStatusChange(fullOrder, fullOrder.items, 'placed', 'paid');
@@ -95,7 +164,7 @@ router.post('/verify', asyncHandler(async (req, res) => {
   res.json({ success: true, orderId: result.orderId });
 }));
 
-// POST /api/payments/confirm-upi — Direct UPI Payment Confirmation
+// Direct UPI confirmation
 const { customerAuth } = require('../middleware/auth');
 router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
   const { orderId, order_id, publicToken, public_token, utr, upiTxnId } = req.body;
@@ -108,13 +177,12 @@ router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
   );
   if (!order) throw new ApiError(404, 'Order not found');
 
-  const txnRef = utr 
+  const txnRef = utr
     ? `upi_${utr}_${order.order_no || Date.now()}`
     : (upiTxnId || `upi_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
 
-  // Update payment status (or insert if not present)
   const { rowCount } = await query(
-    `UPDATE payments 
+    `UPDATE payments
      SET status = 'success', razorpay_payment_id = $1, paid_at = now()
      WHERE order_id = $2`,
     [txnRef, order.id]
@@ -128,18 +196,13 @@ router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
     );
   }
 
-  // Update order status
-  await query(
-    `UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`,
-    [order.id]
-  );
+  await query(`UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`, [order.id]);
   await query(
     `INSERT INTO order_status_history (order_id, from_status, to_status, changed_by)
      VALUES ($1, 'placed', 'paid', 'customer_upi')`,
     [order.id]
   );
 
-  // Notify restaurant & customer
   const fullOrder = await orderService.getOrderWithItems(order.id);
   if (fullOrder) {
     try {
@@ -151,11 +214,11 @@ router.post('/confirm-upi', customerAuth, asyncHandler(async (req, res) => {
     success: true,
     message: 'UPI Payment confirmed successfully',
     orderId: order.id,
-    publicToken: order.public_token
+    publicToken: order.public_token,
   });
 }));
 
-// POST /api/payments/confirm-card — Direct Card Payment Confirmation
+// Direct Card confirmation
 router.post('/confirm-card', customerAuth, asyncHandler(async (req, res) => {
   const { orderId, order_id, publicToken, public_token, last4, cardBrand } = req.body;
   const targetRef = orderId || order_id || publicToken || public_token;
@@ -169,9 +232,8 @@ router.post('/confirm-card', customerAuth, asyncHandler(async (req, res) => {
 
   const txnRef = `card_${(cardBrand || 'visa').toLowerCase()}_${last4 || '4242'}_${Date.now()}`;
 
-  // Update payment status (or insert if not present)
   const { rowCount } = await query(
-    `UPDATE payments 
+    `UPDATE payments
      SET status = 'success', method = 'card', razorpay_payment_id = $1, paid_at = now()
      WHERE order_id = $2`,
     [txnRef, order.id]
@@ -185,18 +247,13 @@ router.post('/confirm-card', customerAuth, asyncHandler(async (req, res) => {
     );
   }
 
-  // Update order status
-  await query(
-    `UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`,
-    [order.id]
-  );
+  await query(`UPDATE orders SET status = 'paid', expires_at = NULL WHERE id = $1`, [order.id]);
   await query(
     `INSERT INTO order_status_history (order_id, from_status, to_status, changed_by)
      VALUES ($1, 'placed', 'paid', 'customer_card')`,
     [order.id]
   );
 
-  // Notify restaurant & customer
   const fullOrder = await orderService.getOrderWithItems(order.id);
   if (fullOrder) {
     try {
@@ -206,9 +263,9 @@ router.post('/confirm-card', customerAuth, asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    message: 'Card Payment processed successfully',
+    message: 'Card Payment confirmed successfully',
     orderId: order.id,
-    publicToken: order.public_token
+    publicToken: order.public_token,
   });
 }));
 

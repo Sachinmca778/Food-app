@@ -24,7 +24,9 @@ const paymentRoutes = require('./routes/payments');
 const trackingRoutes = require('./routes/tracking');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const tenantRoutes = require('./routes/tenants');
 const ratingRoutes = require('./routes/ratings');
+const qrRoutes = require('./routes/qr');
 const whatsappRoutes = require('./routes/whatsapp');
 
 const app = express();
@@ -80,8 +82,9 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/track', trackingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/qr', qrRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/tenants', tenantRoutes);
 
 const { pool, query } = require('./db/pool');
 

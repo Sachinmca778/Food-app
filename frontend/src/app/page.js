@@ -5,7 +5,33 @@ import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 
 export default function HomePage() {
-  // Language toggle: 'en' for English, 'hi' for Hinglish
+    // Free trial modal state
+  const [trialModalOpen, setTrialModalOpen] = useState(false);
+  const [trialData, setTrialData] = useState({ businessName: '', phone: '', city: '', email: '' });
+  const [trialLoading, setTrialLoading] = useState(false);
+  const [trialResult, setTrialResult] = useState(null);
+
+  const handleTrialChange = (e) => {
+    const { name, value } = e.target;
+    setTrialData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const submitTrial = async (e) => {
+    e.preventDefault();
+    setTrialLoading(true);
+    setTrialResult(null);
+    try {
+      const res = await fetchAPI('/tenants', {
+        method: 'POST',
+        body: JSON.stringify(trialData)
+      });
+      setTrialResult(res);
+    } catch (err) {
+      setTrialResult({ success: false, error: err.message });
+    } finally {
+      setTrialLoading(false);
+    }
+  };
   const [lang, setLang] = useState('en');
 
   // Pricing Toggle ('monthly' vs 'annual')
