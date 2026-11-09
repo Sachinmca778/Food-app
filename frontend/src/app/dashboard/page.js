@@ -2006,7 +2006,7 @@ export default function RestaurantDashboardPage() {
                     ₹{commissionSavedRupees.toLocaleString('en-IN')}
                   </div>
                   <div style={{ fontSize: 11.5, color: '#166534', marginTop: 4, fontWeight: 600 }}>
-                    100% profit kept vs ~28% Zomato/Swiggy commission fee
+                    100% profit kept vs ~28% typical aggregator commission fee
                   </div>
                 </div>
               </div>

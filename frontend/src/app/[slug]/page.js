@@ -495,7 +495,7 @@ function MenuContent() {
                 }}>
                   {restaurant.name}
                 </h1>
-                <span className="zomato-rating-pill" style={{ fontSize: 12, padding: '3px 8px' }}>
+                <span className="dine-rating-pill" style={{ fontSize: 12, padding: '3px 8px' }}>
                   4.8 ★
                 </span>
                 <span style={{ color: '#E2E8F0', fontSize: 11.5, fontWeight: 600, opacity: 0.9 }}>
@@ -691,7 +691,7 @@ function MenuContent() {
             <div style={{ fontSize: 22, marginBottom: 4 }}>💰</div>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>Zero Aggregator Markup</div>
             <div style={{ fontSize: 11.5, color: '#696969', marginTop: 3, lineHeight: 1.35 }}>
-              Kitchen direct prices are 10–20% cheaper than Zomato/Swiggy.
+              Kitchen direct prices are 10–20% cheaper than third-party delivery apps.
             </div>
           </div>
 
@@ -946,7 +946,7 @@ function MenuContent() {
                     </div>
                     <div style={{ marginTop: -12, position: 'relative', zIndex: 2 }}>
                       {cartItem ? (
-                        <div className="zomato-qty-pill" style={{ height: 28 }}>
+                        <div className="dine-qty-pill" style={{ height: 28 }}>
                           <button onClick={() => updateQuantity(cartItem.cartKey, -1)} style={{ padding: '0 8px', fontSize: 14 }}>-</button>
                           <span style={{ fontSize: 12, minWidth: 18 }}>{cartItem.quantity}</span>
                           <button onClick={() => updateQuantity(cartItem.cartKey, 1)} style={{ padding: '0 8px', fontSize: 14 }}>+</button>
@@ -954,7 +954,7 @@ function MenuContent() {
                       ) : (
                         <button
                           onClick={() => handleQuickAdd(item)}
-                          className="zomato-add-btn"
+                          className="dine-add-btn"
                           style={{ padding: '4px 14px', fontSize: 11.5 }}
                         >
                           ADD {hasCustomizations ? '+' : ''}
@@ -1398,7 +1398,7 @@ function MenuContent() {
                               Sold Out
                             </button>
                           ) : cartItem ? (
-                            <div className="zomato-qty-pill">
+                            <div className="dine-qty-pill">
                               <button onClick={() => updateQuantity(cartItem.cartKey, -1)}>-</button>
                               <span>{cartItem.quantity}</span>
                               <button onClick={() => updateQuantity(cartItem.cartKey, 1)}>+</button>
@@ -1406,7 +1406,7 @@ function MenuContent() {
                           ) : (
                             <button
                               onClick={() => handleQuickAdd(item)}
-                              className="zomato-add-btn"
+                              className="dine-add-btn"
                             >
                               ADD {hasCustomizations ? '+' : ''}
                             </button>
@@ -2724,7 +2724,7 @@ function MenuContent() {
 
       {/* 18. FLOATING CART BAR (DUAL ACTION: WEB CHECKOUT + 1-TAP WHATSAPP ORDER) */}
       {itemCount > 0 && (
-        <div className="zomato-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div className="dine-float-cart" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Main Checkout Button */}
           <Link
             href={`/${slug}/cart${orderMode === 'dine_in' && tableNumber ? `?table=${tableNumber}` : ''}`}

@@ -8,7 +8,7 @@ export const metadata = {
   authors: [{ name: 'DirectDine Technologies' }],
   openGraph: {
     title: 'DirectDine — 0% Commission Direct Restaurant Ordering & KDS OS',
-    description: 'Stop paying 30% commissions to Zomato & Swiggy. Own your customers, branded storefront, WhatsApp ordering bot, and instant UPI settlements.',
+    description: 'Stop paying 30% aggregator commissions. Own your customers, branded storefront, WhatsApp ordering bot, and instant UPI settlements.',
     url: 'https://directdine.in',
     siteName: 'DirectDine',
     locale: 'en_IN',

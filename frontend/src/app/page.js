@@ -102,7 +102,7 @@ export default function HomePage() {
     {
       q: lang === 'hi' ? 'Customer data kiska hoga? Kya mujhe phone numbers milenge?' : 'Who owns customer data? Do I get phone numbers?',
       a: lang === 'hi'
-        ? 'Customer data 100% aapka hai! Unlike Zomato/Swiggy jo customer ka number mask kar dete hain, DirectDine par aapko customer ka naam, phone number aur order history milti hai taaki aap WhatsApp par repeat marketing kar sakein.'
+        ? 'Customer data 100% aapka hai! Unlike traditional food aggregator apps jo customer ka number mask kar dete hain, DirectDine par aapko customer ka naam, phone number aur order history milti hai taaki aap WhatsApp par repeat marketing kar sakein.'
         : 'You own 100% of your customer records. Unlike aggregators that mask phone numbers, DirectDine gives you full access to customer names, verified phone numbers, and repeat ordering history for repeat WhatsApp marketing.'
     },
     {
@@ -332,7 +332,7 @@ export default function HomePage() {
             }}>
               {lang === 'hi' ? (
                 <>
-                  Zomato/Swiggy ko 30% commission dena band karo. <br />
+                  Third-party delivery apps ko 30% commission dena band karo. <br />
                   <span style={{ color: 'var(--primary)' }}>Apne customers, apna paisa.</span>
                 </>
               ) : (
@@ -933,7 +933,7 @@ export default function HomePage() {
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
                 <th style={{ padding: '16px 20px', fontSize: 13.5, color: '#475569', fontWeight: 800 }}>Feature / Capability</th>
-                <th style={{ padding: '16px 20px', fontSize: 13.5, color: '#DC2626', fontWeight: 800 }}>Zomato / Swiggy</th>
+                <th style={{ padding: '16px 20px', fontSize: 13.5, color: '#DC2626', fontWeight: 800 }}>Third-Party Food Aggregators</th>
                 <th style={{ padding: '16px 20px', fontSize: 13.5, color: '#166534', fontWeight: 900, background: '#F0FDF4' }}>DirectDine Platform</th>
               </tr>
             </thead>
@@ -1387,7 +1387,7 @@ export default function HomePage() {
           }}>
             <div style={{ color: '#F59E0B', fontSize: 16, marginBottom: 8 }}>★★★★★</div>
             <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.55, fontStyle: 'italic', marginBottom: 16 }}>
-              &ldquo;Hum pehle har mahine ₹1.4 lakh Zomato ko commission me de rahe the. DirectDine lagane ke baad 40% regular customers direct WhatsApp aur table QR se order karne lage. Pehle 45 dino mein hi ₹1.8 lakh ki net bachat hui!&rdquo;
+              &ldquo;Hum pehle har mahine ₹1.4 lakh delivery aggregators ko commission me de rahe the. DirectDine lagane ke baad 40% regular customers direct WhatsApp aur table QR se order karne lage. Pehle 45 dino mein hi ₹1.8 lakh ki net bachat hui!&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
@@ -1410,7 +1410,7 @@ export default function HomePage() {
           }}>
             <div style={{ color: '#F59E0B', fontSize: 16, marginBottom: 8 }}>★★★★★</div>
             <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.55, fontStyle: 'italic', marginBottom: 16 }}>
-              &ldquo;Sabse bada benefit customer data ka hai. Zomato par hume customer ka number tak nahi milta tha. Ab hamare paas 2,400+ loyal customers ka WhatsApp database hai jinko hum weekend specials bhejte hain.&rdquo;
+              &ldquo;Sabse bada benefit customer data ka hai. Delivery apps par hume customer ka number tak nahi milta tha. Ab hamare paas 2,400+ loyal customers ka WhatsApp database hai jinko hum weekend specials bhejte hain.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
@@ -1433,7 +1433,7 @@ export default function HomePage() {
           }}>
             <div style={{ color: '#F59E0B', fontSize: 16, marginBottom: 8 }}>★★★★★</div>
             <p style={{ fontSize: 13.5, color: '#374151', lineHeight: 1.55, fontStyle: 'italic', marginBottom: 16 }}>
-              &ldquo;Daily cash flow dramatically improve ho gaya. Swiggy se 10 din baad payout aata tha, yahan customer ka direct UPI payment seedha hamare bank account me instant credit hota hai.&rdquo;
+              &ldquo;Daily cash flow dramatically improve ho gaya. Aggregator platforms se 10 din baad payout aata tha, yahan customer ka direct UPI payment seedha hamare bank account me instant credit hota hai.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
@@ -1717,7 +1717,7 @@ export default function HomePage() {
         </div>
         <h2 style={{ fontSize: 'clamp(24px, 3.8vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 12px' }}>
           {lang === 'hi'
-            ? 'Aaj Hi Apna Restaurant Zomato/Swiggy Commission Se Azaad Karein'
+            ? 'Aaj Hi Apna Restaurant Aggregator Commission Se Azaad Karein'
             : 'Start Keeping 100% of Your Hard-Earned Food Revenue'}
         </h2>
         <p style={{ color: '#94A3B8', fontSize: 15, maxWidth: 620, margin: '0 auto 28px', lineHeight: 1.6 }}>

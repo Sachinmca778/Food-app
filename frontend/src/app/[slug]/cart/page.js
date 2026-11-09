@@ -778,7 +778,7 @@ function CartContent() {
               </div>
 
               {/* Quantity Counter */}
-              <div className="zomato-qty-pill">
+              <div className="dine-qty-pill">
                 <button onClick={() => updateQuantity(item.cartKey, -1)}>-</button>
                 <span>{item.quantity}</span>
                 <button onClick={() => updateQuantity(item.cartKey, 1)}>+</button>
