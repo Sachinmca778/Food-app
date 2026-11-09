@@ -560,64 +560,6 @@ export default function RestaurantDashboardPage() {
             </p>
           </div>
 
-          {/* Quick Demo Fill Selector */}
-          <div style={{
-            background: '#F8F9FA',
-            borderRadius: 14,
-            padding: '12px 14px',
-            marginBottom: 20,
-            border: '1px solid #ECEEF2'
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#4F4F4F', marginBottom: 8, textTransform: 'uppercase' }}>
-              ⚡ 1-Click Fill Demo Credentials:
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginPhone('9876543210');
-                  setLoginPassword('spice123');
-                }}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1.5px solid #FBCED2',
-                  borderRadius: 8,
-                  padding: '7px 8px',
-                  fontSize: 11.5,
-                  fontWeight: 800,
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                🍛 Spice Garden
-                <div style={{ fontSize: 10, color: '#696969', fontWeight: 600 }}>9876543210</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginPhone('9988776655');
-                  setLoginPassword('chai123');
-                }}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1.5px solid #FBCED2',
-                  borderRadius: 8,
-                  padding: '7px 8px',
-                  fontSize: 11.5,
-                  fontWeight: 800,
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left'
-                }}
-              >
-                🥐 Chai &amp; Bites
-                <div style={{ fontSize: 10, color: '#696969', fontWeight: 600 }}>9988776655</div>
-              </button>
-            </div>
-          </div>
-
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 12.5, color: '#4F4F4F', fontWeight: 700, marginBottom: 5 }}>
@@ -625,7 +567,7 @@ export default function RestaurantDashboardPage() {
               </label>
               <input
                 type="text"
-                placeholder="10-digit number e.g. 9876543210"
+                placeholder="Enter 10-digit registered number"
                 value={loginPhone}
                 onChange={(e) => setLoginPhone(e.target.value)}
                 className="input-field"
@@ -640,7 +582,7 @@ export default function RestaurantDashboardPage() {
               </label>
               <input
                 type="password"
-                placeholder="Enter password (spice123 / chai123)"
+                placeholder="Enter your password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className="input-field"
@@ -1451,17 +1393,7 @@ export default function RestaurantDashboardPage() {
 
         {/* ===================== ENHANCED CUSTOMERS CRM & VIP LOYALTY TAB ===================== */}
         {activeTab === 'customers' && (() => {
-          // Fallback demo VIP customers if list is small or empty
-          const fallbackVipCustomers = [
-            { id: 'c1', customer_id: 'c1', name: 'Aditya Verma', phone: '+919820112233', total_orders: 12, total_spent_paise: 845000, loyalty_points: 480, favorite_dish: 'Mutton Handi Biryani', preferred_mode: 'Dine-In (Table #4)' },
-            { id: 'c2', customer_id: 'c2', name: 'Priya Sharma', phone: '+919123456789', total_orders: 7, total_spent_paise: 465000, loyalty_points: 240, favorite_dish: 'Paneer Butter Masala', preferred_mode: 'Direct Delivery' },
-            { id: 'c3', customer_id: 'c3', name: 'Rohan Mehta', phone: '+919819223344', total_orders: 4, total_spent_paise: 220000, loyalty_points: 120, favorite_dish: 'Chicken Tikka Biryani', preferred_mode: 'Dine-In (Table #2)' },
-            { id: 'c4', customer_id: 'c4', name: 'Ananya Iyer', phone: '+919876554433', total_orders: 3, total_spent_paise: 145000, loyalty_points: 80, favorite_dish: 'Dal Makhani & Naan', preferred_mode: 'Direct Delivery' },
-            { id: 'c5', customer_id: 'c5', name: 'Karan Kapoor', phone: '+919892334455', total_orders: 1, total_spent_paise: 55000, loyalty_points: 50, favorite_dish: 'Butter Garlic Naan', preferred_mode: 'Takeaway' },
-            { id: 'c6', customer_id: 'c6', name: 'Sneha Nair', phone: '+919769445566', total_orders: 1, total_spent_paise: 38000, loyalty_points: 50, favorite_dish: 'Gulab Jamun (2 Pcs)', preferred_mode: 'Dine-In (Table #1)' }
-          ];
-
-          const baseCustomers = customers.length >= 3 ? customers : fallbackVipCustomers;
+          const baseCustomers = customers;
 
           const enrichedCustomers = baseCustomers.map(c => {
             const spentRupees = Math.round((c.total_spent_paise || 0) / 100);

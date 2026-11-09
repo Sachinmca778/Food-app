@@ -202,7 +202,7 @@ export default function DemoPage() {
             <div style={{ background: '#F8FAFC', borderRadius: 10, padding: '12px 14px', border: '1px solid #E2E8F0', marginBottom: 22, fontSize: 12.5, color: '#334155' }}>
               <strong>What to test:</strong>
               <ul style={{ margin: '6px 0 0', paddingLeft: 18, lineHeight: 1.5 }}>
-                <li>Auto-fill demo credentials (Spice Garden: 9876543210 / spice123)</li>
+                <li>Live incoming order sound alert &amp; real-time KDS dispatch</li>
                 <li>Hear loud audio chimes on new orders</li>
                 <li>Print sample thermal KOT receipt slips</li>
                 <li>Generate &amp; download branded table QR standees</li>

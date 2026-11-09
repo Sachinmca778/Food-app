@@ -177,35 +177,6 @@ export default function SuperAdminPage() {
             </p>
           </div>
 
-          {/* Quick Demo Fill Button */}
-          <div style={{ marginBottom: 18 }}>
-            <button
-              type="button"
-              onClick={() => {
-                setAdminPhone('9999999999');
-                setAdminPassword('admin123');
-              }}
-              style={{
-                width: '100%',
-                background: '#F1F5F9',
-                color: '#0F172A',
-                border: '1px solid #CBD5E1',
-                padding: '8px 12px',
-                borderRadius: 10,
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6
-              }}
-            >
-              <span>⚡</span>
-              <span>1-Click Auto-Fill Demo Credentials (9999999999)</span>
-            </button>
-          </div>
-
           <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 12.5, color: '#334155', fontWeight: 700, marginBottom: 5 }}>
@@ -213,7 +184,7 @@ export default function SuperAdminPage() {
               </label>
               <input
                 type="text"
-                placeholder="10-digit number e.g. 9999999999"
+                placeholder="Enter 10-digit registered number"
                 value={adminPhone}
                 onChange={(e) => setAdminPhone(e.target.value)}
                 className="input-field"
@@ -228,7 +199,7 @@ export default function SuperAdminPage() {
               </label>
               <input
                 type="password"
-                placeholder="Enter password (admin123)"
+                placeholder="Enter master password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 className="input-field"

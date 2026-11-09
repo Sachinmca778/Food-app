@@ -73,25 +73,9 @@ export default function LoginPage() {
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
               Kitchen Partner Portal
             </h2>
-            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 20 }}>
               For restaurant owners, chefs, and floor managers to manage live orders (KDS), dish availability, table QRs, and customer loyalty CRM.
             </p>
-
-            <div style={{
-              background: '#F8FAFC',
-              borderRadius: 10,
-              padding: '10px 12px',
-              fontSize: 12,
-              color: '#4B5563',
-              marginBottom: 20,
-              border: '1px solid #E2E8F0'
-            }}>
-              <strong>Demo Logins:</strong>
-              <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <span>• Spice Garden: <code>9310378572</code> / <code>spice123</code></span>
-                <span>• Chai &amp; Bites: <code>9988776655</code> / <code>chai123</code></span>
-              </div>
-            </div>
           </div>
 
           <Link
@@ -138,24 +122,9 @@ export default function LoginPage() {
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#111827', margin: '4px 0 8px' }}>
               Master Super Admin
             </h2>
-            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, marginBottom: 20 }}>
               For platform administrators to onboard new restaurants, track platform-wide GMV, manage multi-tenant accounts, and download branded QR kits.
             </p>
-
-            <div style={{
-              background: '#F8FAFC',
-              borderRadius: 10,
-              padding: '10px 12px',
-              fontSize: 12,
-              color: '#4B5563',
-              marginBottom: 20,
-              border: '1px solid #E2E8F0'
-            }}>
-              <strong>Master Admin Login:</strong>
-              <div style={{ marginTop: 4 }}>
-                <span>• Super Admin: <code>9999999999</code> / <code>admin123</code></span>
-              </div>
-            </div>
           </div>
 
           <Link

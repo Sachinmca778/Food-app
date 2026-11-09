@@ -68,8 +68,8 @@ function MenuContent() {
 
   // Restaurant Staff / Owner Login Modal State
   const [staffModalOpen, setStaffModalOpen] = useState(false);
-  const [staffPhone, setStaffPhone] = useState(slug === 'chai-and-bites' ? '9988776655' : '9310378572');
-  const [staffPassword, setStaffPassword] = useState(slug === 'chai-and-bites' ? 'chai123' : 'spice123');
+  const [staffPhone, setStaffPhone] = useState('');
+  const [staffPassword, setStaffPassword] = useState('');
   const [staffLoginLoading, setStaffLoginLoading] = useState(false);
   const [staffLoginError, setStaffLoginError] = useState('');
 
@@ -2852,46 +2852,6 @@ function MenuContent() {
                 }}
               >
                 ✕
-              </button>
-            </div>
-
-            {/* Quick Demo Fill Helper */}
-            <div style={{
-              background: 'var(--primary-soft)',
-              borderRadius: 10,
-              padding: '10px 12px',
-              border: '1px solid var(--primary-border)',
-              marginBottom: 16,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{ fontSize: 12, color: 'var(--primary-dark)' }}>
-                Demo Credentials: <strong>{slug === 'chai-and-bites' ? '9988776655 (chai123)' : '9310378572 (spice123)'}</strong>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (slug === 'chai-and-bites') {
-                    setStaffPhone('9988776655');
-                    setStaffPassword('chai123');
-                  } else {
-                    setStaffPhone('9310378572');
-                    setStaffPassword('spice123');
-                  }
-                }}
-                style={{
-                  background: 'var(--primary)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 800,
-                  cursor: 'pointer'
-                }}
-              >
-                Auto-Fill
               </button>
             </div>
 

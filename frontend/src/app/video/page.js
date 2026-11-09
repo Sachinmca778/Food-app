@@ -667,9 +667,9 @@ export default function NonStopVideoStudio() {
                           </div>
                         </div>
 
-                        {/* Phone & Auto OTP */}
+                        {/* Phone & OTP */}
                         <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: 8, borderRadius: 8, fontSize: 11, color: '#1E40AF', marginBottom: 10 }}>
-                          📱 Verified: <strong>+91 93103 78572</strong> (Auto OTP: 123456)
+                          📱 Verified Customer: <strong>+91 93103 78572</strong> (Instant OTP Verified)
                         </div>
 
                         {/* 1-Tap UPI */}
