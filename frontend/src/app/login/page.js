@@ -55,14 +55,14 @@ export default function LoginPage() {
               width: 48,
               height: 48,
               borderRadius: 12,
-              background: '#FFF1F2',
+              background: 'var(--primary-soft)',
               color: 'var(--primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 24,
               marginBottom: 14,
-              border: '1px solid #FECDD3'
+              border: '1px solid var(--primary-border)'
             }}>
               🍲
             </div>

@@ -19,7 +19,7 @@
   --border-highlight: #D1D5DB;
   --border-focus: #E23744;
 
-  /* DirectDine Signature Red */
+  /* DirectDine Signature Brand Palette */
   --primary: #E23744;
   --primary-light: #EF4444;
   --primary-dark: #CB202D;
@@ -337,14 +337,14 @@ button {
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 600px;
-  background: #E23744;
+  background: var(--primary);
   color: #FFFFFF;
   padding: 14px 22px;
   border-radius: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 8px 24px rgba(226, 55, 68, 0.4);
+  box-shadow: 0 8px 24px var(--primary-glow);
   z-index: 99;
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease;
@@ -352,7 +352,7 @@ button {
 
 .dine-float-cart:hover {
   transform: translateX(-50%) translateY(-2px);
-  background: #C9202E;
+  background: var(--primary-dark);
 }
 
 /* No scrollbar utility for smooth swipe carousels on iOS / Android */
@@ -511,7 +511,7 @@ button {
     break-inside: avoid;
     margin: 30px auto !important;
     box-shadow: none !important;
-    border: 3px solid #E23744 !important;
+    border: 3px solid var(--primary) !important;
   }
 
   .batch-standee-item {

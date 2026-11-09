@@ -83,6 +83,48 @@ export default function RestaurantDashboardPage() {
   const [adjustSuccessMsg, setAdjustSuccessMsg] = useState('');
   const [adjustLoading, setAdjustLoading] = useState(false);
 
+  const loadOrders = async () => {
+    try {
+      const res = await fetchAPI('/dashboard/orders');
+      if (res.success) setOrders(res.orders || []);
+    } catch (e) {}
+  };
+
+  const loadMenu = async () => {
+    try {
+      const res = await fetchAPI('/dashboard/menu');
+      if (res.success) {
+        setMenuItems(res.items || []);
+        setCategories(res.categories || []);
+        if (res.categories?.length > 0) {
+          setNewDishCategory(prev => prev || res.categories[0].id);
+        }
+      }
+    } catch (e) {}
+  };
+
+  const loadCustomers = async () => {
+    try {
+      const res = await fetchAPI('/dashboard/customers');
+      if (res.success && res.customers) {
+        setCustomers(res.customers);
+      }
+    } catch (e) {}
+  };
+
+  const loadAnalytics = async () => {
+    try {
+      const res = await fetchAPI('/dashboard/analytics');
+      if (res.success) setAnalytics(res.analytics || res);
+    } catch (e) {}
+  };
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    await Promise.all([loadOrders(), loadMenu(), loadCustomers(), loadAnalytics()]);
+    setLoading(false);
+  };
+
   // Check login token
   useEffect(() => {
     const token = localStorage.getItem('staff_token');
@@ -172,32 +214,6 @@ export default function RestaurantDashboardPage() {
     localStorage.removeItem('staff_token');
     localStorage.removeItem('staff_restaurant');
     setIsLoggedIn(false);
-  };
-
-  const loadDashboardData = async () => {
-    setLoading(true);
-    await Promise.all([loadOrders(), loadMenu(), loadCustomers(), loadAnalytics()]);
-    setLoading(false);
-  };
-
-  const loadOrders = async () => {
-    try {
-      const res = await fetchAPI('/dashboard/orders');
-      if (res.success) setOrders(res.orders || []);
-    } catch (e) {}
-  };
-
-  const loadMenu = async () => {
-    try {
-      const res = await fetchAPI('/dashboard/menu');
-      if (res.success) {
-        setMenuItems(res.items || []);
-        setCategories(res.categories || []);
-        if (res.categories?.length > 0) {
-          setNewDishCategory(prev => prev || res.categories[0].id);
-        }
-      }
-    } catch (e) {}
   };
 
   const handleOpenPhotoModal = (item) => {
@@ -342,16 +358,6 @@ export default function RestaurantDashboardPage() {
     }
   };
 
-
-  const loadCustomers = async () => {
-    try {
-      const res = await fetchAPI('/dashboard/customers');
-      if (res.success && res.customers) {
-        setCustomers(res.customers);
-      }
-    } catch (e) {}
-  };
-
   const handleOpenCustomerProfile = async (cust) => {
     setSelectedCustomerModal(cust);
     setLoadingLedger(true);
@@ -408,13 +414,6 @@ export default function RestaurantDashboardPage() {
     } finally {
       setAdjustLoading(false);
     }
-  };
-
-  const loadAnalytics = async () => {
-    try {
-      const res = await fetchAPI('/dashboard/analytics');
-      if (res.success) setAnalytics(res.analytics || res);
-    } catch (e) {}
   };
 
   const handleUpdateStatus = async (orderId, newStatus, extra = {}) => {
@@ -670,7 +669,7 @@ export default function RestaurantDashboardPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h1 style={{ fontSize: 18, color: '#1C1C1C' }}>{restaurant?.name || 'Spice Garden'}</h1>
-              <span style={{ fontSize: 10.5, background: '#FFF1F2', color: 'var(--primary)', padding: '2px 7px', borderRadius: 4, fontWeight: 800 }}>
+              <span style={{ fontSize: 10.5, background: 'var(--primary-soft)', color: 'var(--primary)', padding: '2px 7px', borderRadius: 4, fontWeight: 800 }}>
                 PARTNER PORTAL
               </span>
             </div>
@@ -692,9 +691,9 @@ export default function RestaurantDashboardPage() {
               borderRadius: 'var(--radius-full)',
               fontSize: 12,
               fontWeight: 700,
-              background: soundEnabled ? '#FFF1F2' : '#F4F5F8',
+              background: soundEnabled ? 'var(--primary-soft)' : '#F4F5F8',
               color: soundEnabled ? 'var(--primary)' : '#696969',
-              border: `1px solid ${soundEnabled ? '#FBCED2' : '#E3E5EB'}`,
+              border: `1px solid ${soundEnabled ? 'var(--primary-border)' : '#E3E5EB'}`,
               display: 'flex',
               alignItems: 'center',
               gap: 5
@@ -711,15 +710,15 @@ export default function RestaurantDashboardPage() {
               borderRadius: 'var(--radius-full)',
               fontSize: 12.5,
               fontWeight: 700,
-              background: restaurant?.is_open ? '#EDF8F0' : '#FEECEE',
-              color: restaurant?.is_open ? '#24963F' : '#E23744',
-              border: `1px solid ${restaurant?.is_open ? '#A7E3B6' : '#FBCED2'}`,
+              background: restaurant?.is_open ? '#EDF8F0' : '#FEF2F2',
+              color: restaurant?.is_open ? '#16A34A' : '#DC2626',
+              border: `1px solid ${restaurant?.is_open ? '#A7E3B6' : '#FECDD3'}`,
               display: 'flex',
               alignItems: 'center',
               gap: 6
             }}
           >
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: restaurant?.is_open ? '#24963F' : '#E23744' }} />
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: restaurant?.is_open ? '#16A34A' : '#DC2626' }} />
             {restaurant?.is_open ? 'Accepting Orders' : 'Store Offline'}
           </button>
 
@@ -1374,9 +1373,9 @@ export default function RestaurantDashboardPage() {
                             borderRadius: 8,
                             fontSize: 12.5,
                             fontWeight: 800,
-                            background: item.is_available ? '#EDF8F0' : '#FEECEE',
-                            color: item.is_available ? '#24963F' : '#E23744',
-                            border: `1.5px solid ${item.is_available ? '#A7E3B6' : '#FBCED2'}`,
+                            background: item.is_available ? '#EDF8F0' : '#FEF2F2',
+                            color: item.is_available ? '#16A34A' : '#DC2626',
+                            border: `1.5px solid ${item.is_available ? '#A7E3B6' : '#FECDD3'}`,
                             cursor: 'pointer'
                           }}
                         >
@@ -1918,7 +1917,7 @@ export default function RestaurantDashboardPage() {
                 <div style={{ background: '#FFFFFF', padding: '20px 22px', borderRadius: 16, border: '1px solid #ECEEF2', boxShadow: 'var(--shadow-sm)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <span style={{ color: '#696969', fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Avg Order Value</span>
-                    <span style={{ fontSize: 11, background: '#FFF1F2', color: 'var(--primary)', padding: '2px 8px', borderRadius: 6, fontWeight: 800 }}>+24% vs Apps</span>
+                    <span style={{ fontSize: 11, background: 'var(--primary-soft)', color: 'var(--primary)', padding: '2px 8px', borderRadius: 6, fontWeight: 800 }}>+24% vs Apps</span>
                   </div>
                   <div style={{ fontSize: 30, fontWeight: 900, color: '#1C1C1C', letterSpacing: '-0.5px' }}>
                     ₹{aovRupees}
@@ -2167,7 +2166,7 @@ export default function RestaurantDashboardPage() {
                     <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1C1C1C' }}>Hourly Rush Heatmap & Kitchen Dayparts</h3>
                     <p style={{ fontSize: 12, color: '#696969' }}>Peak cooking hours to optimize kitchen staff & prep scheduling</p>
                   </div>
-                  <span style={{ fontSize: 11, background: '#FFF1F2', color: 'var(--primary)', padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>
+                  <span style={{ fontSize: 11, background: 'var(--primary-soft)', color: 'var(--primary)', padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>
                     🔥 Dinner Rush is Peak
                   </span>
                 </div>
@@ -2780,7 +2779,7 @@ export default function RestaurantDashboardPage() {
                 <div style={{ fontSize: 16, fontWeight: 900 }}>{restaurant?.name || 'Spice Garden'}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, marginTop: 2 }}>*** KITCHEN ORDER TICKET (KOT) ***</div>
                 <div style={{ fontSize: 11, marginTop: 2 }}>
-                  {new Date(kotOrder.placed_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  {kotOrder.placed_at ? new Date(kotOrder.placed_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                 </div>
               </div>
 
@@ -2907,7 +2906,7 @@ export default function RestaurantDashboardPage() {
 
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FFF1F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
                 📸
               </div>
               <div>
@@ -3241,7 +3240,7 @@ export default function RestaurantDashboardPage() {
                           flex: 1,
                           padding: '9px 12px',
                           borderRadius: 10,
-                          background: newDishVegType === type.id ? '#FFF1F2' : '#F8F9FA',
+                          background: newDishVegType === type.id ? 'var(--primary-soft)' : '#F8F9FA',
                           border: `1.5px solid ${newDishVegType === type.id ? 'var(--primary)' : '#E3E5EB'}`,
                           fontSize: 12.5,
                           fontWeight: 700,
@@ -3551,7 +3550,7 @@ export default function RestaurantDashboardPage() {
                   <div style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1C' }}>
                     🎁 Unlocked VIP Benefits for this Guest:
                   </div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#E23744' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>
                     1 Point = ₹1.00 Direct Cash Discount
                   </div>
                 </div>
@@ -3585,7 +3584,7 @@ export default function RestaurantDashboardPage() {
                 </div>
               </div>
 
-              {/* Points Ledger / Transaction History */}
+              {/* Points Ledger / Activity */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#1C1C1C' }}>
@@ -3598,9 +3597,9 @@ export default function RestaurantDashboardPage() {
                       setAdjustReason('VIP Appreciation Bonus');
                     }}
                     style={{
-                      background: '#FFF1F2',
-                      color: '#E23744',
-                      border: '1px solid #FECDD3',
+                      background: 'var(--primary-soft)',
+                      color: 'var(--primary)',
+                      border: '1px solid var(--primary-border)',
                       padding: '5px 12px',
                       borderRadius: 8,
                       fontSize: 12,
@@ -3721,7 +3720,7 @@ export default function RestaurantDashboardPage() {
                     setAdjustReason('VIP Customer Courtesy');
                   }}
                   style={{
-                    background: '#E23744',
+                    background: 'var(--primary)',
                     color: '#fff',
                     border: 'none',
                     padding: '11px 16px',
@@ -3851,9 +3850,9 @@ export default function RestaurantDashboardPage() {
                     style={{
                       padding: '8px 0',
                       borderRadius: 8,
-                      border: adjustPointsValue === val ? '2px solid #E23744' : '1px solid #D1D5DB',
-                      background: adjustPointsValue === val ? '#FFF1F2' : '#F9FAFB',
-                      color: adjustPointsValue === val ? '#E23744' : '#1C1C1C',
+                      border: adjustPointsValue === val ? '2px solid var(--primary)' : '1px solid #D1D5DB',
+                      background: adjustPointsValue === val ? 'var(--primary-soft)' : '#F9FAFB',
+                      color: adjustPointsValue === val ? 'var(--primary)' : '#1C1C1C',
                       fontWeight: 800,
                       fontSize: 12,
                       cursor: 'pointer'
@@ -3943,7 +3942,7 @@ export default function RestaurantDashboardPage() {
                   disabled={adjustLoading || !adjustPointsValue}
                   style={{
                     flex: 1,
-                    background: '#E23744',
+                    background: 'var(--primary)',
                     color: '#fff',
                     border: 'none',
                     padding: 12,

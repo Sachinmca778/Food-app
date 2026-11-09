@@ -167,7 +167,7 @@ export default function HomePage() {
               <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--primary)' }}>
                 DirectDine
               </span>
-              <span style={{ fontSize: 10, background: '#FEF2F2', color: 'var(--primary)', fontWeight: 800, padding: '2px 7px', borderRadius: 4, border: '1px solid #FECDD3' }}>
+              <span style={{ fontSize: 10, background: 'var(--primary-soft)', color: 'var(--primary)', fontWeight: 800, padding: '2px 7px', borderRadius: 4, border: '1px solid var(--primary-border)' }}>
                 B2B SAAS
               </span>
             </div>
@@ -306,8 +306,8 @@ export default function HomePage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              background: '#FEF2F2',
-              border: '1px solid #FECDD3',
+              background: 'var(--primary-soft)',
+              border: '1px solid var(--primary-border)',
               color: 'var(--primary)',
               padding: '6px 16px',
               borderRadius: 20,
@@ -471,7 +471,7 @@ export default function HomePage() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                     🍛
                   </div>
                   <div>
@@ -479,7 +479,7 @@ export default function HomePage() {
                     <div style={{ fontSize: 11, color: '#16A34A', fontWeight: 700 }}>Direct UPI • Save ₹85 vs Aggregators</div>
                   </div>
                 </div>
-                <span style={{ background: '#FEF2F2', color: 'var(--primary)', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
+                <span style={{ background: 'var(--primary-soft)', color: 'var(--primary)', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6 }}>
                   Direct Store
                 </span>
               </div>
@@ -733,7 +733,7 @@ export default function HomePage() {
             justifyContent: 'space-between'
           }}>
             <div>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 14, border: '1px solid #FECDD3' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 14, border: '1px solid var(--primary-border)' }}>
                 🌐
               </div>
               <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -886,7 +886,7 @@ export default function HomePage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
           <div style={{ background: '#FFFFFF', padding: '26px 20px', borderRadius: 16, textAlign: 'center', border: '1px solid #E5E7EB', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: '#FEF2F2', color: 'var(--primary)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', fontWeight: 900 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--primary-soft)', color: 'var(--primary)', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', fontWeight: 900 }}>
               01
             </div>
             <h3 style={{ fontSize: 17, fontWeight: 800, color: '#111827', marginBottom: 6 }}>Upload Menu (Min 0-5)</h3>
@@ -1139,7 +1139,7 @@ export default function HomePage() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span style={{ fontSize: 28 }}>📱</span>
-                <span style={{ background: '#FEF2F2', color: 'var(--primary)', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                <span style={{ background: 'var(--primary-soft)', color: 'var(--primary)', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
                   Customer Experience
                 </span>
               </div>
@@ -1303,7 +1303,7 @@ export default function HomePage() {
               </button>
               <button
                 onClick={() => handleSendWa('biryani')}
-                style={{ padding: '4px 10px', borderRadius: 20, fontSize: 11, background: '#FFFFFF', color: '#E23744', fontWeight: 700, border: '1px solid #E23744', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                style={{ padding: '4px 10px', borderRadius: 20, fontSize: 11, background: '#FFFFFF', color: 'var(--primary)', fontWeight: 700, border: '1px solid var(--primary)', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 🔍 Search &ldquo;biryani&rdquo;
               </button>
@@ -1390,7 +1390,7 @@ export default function HomePage() {
               &ldquo;Hum pehle har mahine ₹1.4 lakh delivery aggregators ko commission me de rahe the. DirectDine lagane ke baad 40% regular customers direct WhatsApp aur table QR se order karne lage. Pehle 45 dino mein hi ₹1.8 lakh ki net bachat hui!&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
                 👨‍💼
               </div>
               <div>
@@ -1413,7 +1413,7 @@ export default function HomePage() {
               &ldquo;Sabse bada benefit customer data ka hai. Delivery apps par hume customer ka number tak nahi milta tha. Ab hamare paas 2,400+ loyal customers ka WhatsApp database hai jinko hum weekend specials bhejte hain.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
                 👩‍🍳
               </div>
               <div>
@@ -1436,7 +1436,7 @@ export default function HomePage() {
               &ldquo;Daily cash flow dramatically improve ho gaya. Aggregator platforms se 10 din baad payout aata tha, yahan customer ka direct UPI payment seedha hamare bank account me instant credit hota hai.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FEF2F2', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
                 👳‍♂️
               </div>
               <div>

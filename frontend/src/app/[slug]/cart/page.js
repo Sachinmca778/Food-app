@@ -548,7 +548,7 @@ function CartContent() {
                 fontSize: 12.5,
                 fontWeight: 800,
                 border: deliveryScheduleType === 'instant' ? '2px solid var(--primary)' : '1px solid #D1D5DB',
-                background: deliveryScheduleType === 'instant' ? '#FFF1F2' : '#F9FAFB',
+                background: deliveryScheduleType === 'instant' ? 'var(--primary-soft)' : '#F9FAFB',
                 color: deliveryScheduleType === 'instant' ? 'var(--primary)' : '#4B5563',
                 cursor: 'pointer',
                 display: 'flex',
@@ -571,7 +571,7 @@ function CartContent() {
                 fontSize: 12.5,
                 fontWeight: 800,
                 border: deliveryScheduleType === 'scheduled' ? '2px solid var(--primary)' : '1px solid #D1D5DB',
-                background: deliveryScheduleType === 'scheduled' ? '#FFF1F2' : '#F9FAFB',
+                background: deliveryScheduleType === 'scheduled' ? 'var(--primary-soft)' : '#F9FAFB',
                 color: deliveryScheduleType === 'scheduled' ? 'var(--primary)' : '#4B5563',
                 cursor: 'pointer',
                 display: 'flex',
@@ -603,9 +603,9 @@ function CartContent() {
                       borderRadius: 8,
                       fontSize: 12,
                       fontWeight: 700,
-                      border: scheduledDay === day ? '2px solid #E23744' : '1px solid #D1D5DB',
+                      border: scheduledDay === day ? '2px solid var(--primary)' : '1px solid #D1D5DB',
                       background: scheduledDay === day ? '#FFFFFF' : 'transparent',
-                      color: scheduledDay === day ? '#E23744' : '#4B5563',
+                      color: scheduledDay === day ? 'var(--primary)' : '#4B5563',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
@@ -633,12 +633,12 @@ function CartContent() {
                       padding: '8px 10px',
                       borderRadius: 8,
                       textAlign: 'left',
-                      border: scheduledSlot === slot.id ? '2px solid #E23744' : '1px solid #D1D5DB',
-                      background: scheduledSlot === slot.id ? '#FFF1F2' : '#FFFFFF',
+                      border: scheduledSlot === slot.id ? '2px solid var(--primary)' : '1px solid #D1D5DB',
+                      background: scheduledSlot === slot.id ? 'var(--primary-soft)' : '#FFFFFF',
                       cursor: 'pointer'
                     }}
                   >
-                    <div style={{ fontSize: 12, fontWeight: 800, color: scheduledSlot === slot.id ? '#E23744' : '#1C1C1C' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: scheduledSlot === slot.id ? 'var(--primary)' : '#1C1C1C' }}>
                       {slot.label}
                     </div>
                     <div style={{ fontSize: 10.5, color: '#696969' }}>
@@ -1147,13 +1147,13 @@ function CartContent() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             onClick={() => { setCouponCode('WELCOME10'); handleApplyCoupon('WELCOME10'); }}
-            style={{ background: '#FFF1F2', border: '1px dashed var(--primary)', padding: '5px 12px', borderRadius: 6, fontSize: 12, color: 'var(--primary)', fontWeight: 700 }}
+            style={{ background: 'var(--primary-soft)', border: '1px dashed var(--primary)', padding: '5px 12px', borderRadius: 6, fontSize: 12, color: 'var(--primary)', fontWeight: 700 }}
           >
             WELCOME10 (10% OFF)
           </button>
           <button
             onClick={() => { setCouponCode('FLAT50'); handleApplyCoupon('FLAT50'); }}
-            style={{ background: '#FFF1F2', border: '1px dashed var(--primary)', padding: '5px 12px', borderRadius: 6, fontSize: 12, color: 'var(--primary)', fontWeight: 700 }}
+            style={{ background: 'var(--primary-soft)', border: '1px dashed var(--primary)', padding: '5px 12px', borderRadius: 6, fontSize: 12, color: 'var(--primary)', fontWeight: 700 }}
           >
             FLAT50 (₹50 OFF on ₹300+)
           </button>
@@ -1302,7 +1302,7 @@ function CartContent() {
             justifyContent: 'space-between',
             padding: '12px 16px',
             borderRadius: 10,
-            background: paymentMethod === 'upi' ? '#FFF1F2' : '#F8F9FA',
+            background: paymentMethod === 'upi' ? 'var(--primary-soft)' : '#F8F9FA',
             border: `1.5px solid ${paymentMethod === 'upi' ? 'var(--primary)' : '#E3E5EB'}`,
             cursor: 'pointer'
           }}>
@@ -1328,7 +1328,7 @@ function CartContent() {
             justifyContent: 'space-between',
             padding: '12px 16px',
             borderRadius: 10,
-            background: paymentMethod === 'card' ? '#FFF1F2' : '#F8F9FA',
+            background: paymentMethod === 'card' ? 'var(--primary-soft)' : '#F8F9FA',
             border: `1.5px solid ${paymentMethod === 'card' ? 'var(--primary)' : '#E3E5EB'}`,
             cursor: 'pointer'
           }}>
@@ -1354,7 +1354,7 @@ function CartContent() {
             justifyContent: 'space-between',
             padding: '12px 16px',
             borderRadius: 10,
-            background: paymentMethod === 'cod' ? '#FFF1F2' : '#F8F9FA',
+            background: paymentMethod === 'cod' ? 'var(--primary-soft)' : '#F8F9FA',
             border: `1.5px solid ${paymentMethod === 'cod' ? 'var(--primary)' : '#E3E5EB'}`,
             cursor: 'pointer'
           }}>
@@ -1431,17 +1431,17 @@ function CartContent() {
                 style={{
                   padding: '10px 8px',
                   borderRadius: 10,
-                  border: riderTipPaise === tip.paise ? '2px solid #E23744' : '1px solid #E5E7EB',
-                  background: riderTipPaise === tip.paise ? '#FFF1F2' : '#F9FAFB',
+                  border: riderTipPaise === tip.paise ? '2px solid var(--primary)' : '1px solid #E5E7EB',
+                  background: riderTipPaise === tip.paise ? 'var(--primary-soft)' : '#F9FAFB',
                   textAlign: 'center',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
               >
-                <div style={{ fontSize: 14, fontWeight: 900, color: riderTipPaise === tip.paise ? '#E23744' : '#1C1C1C' }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: riderTipPaise === tip.paise ? 'var(--primary)' : '#1C1C1C' }}>
                   {tip.label}
                 </div>
-                <div style={{ fontSize: 10.5, color: riderTipPaise === tip.paise ? '#E23744' : '#666', marginTop: 2 }}>
+                <div style={{ fontSize: 10.5, color: riderTipPaise === tip.paise ? 'var(--primary)' : '#666', marginTop: 2 }}>
                   {tip.sub}
                 </div>
               </button>

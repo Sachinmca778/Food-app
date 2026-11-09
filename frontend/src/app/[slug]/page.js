@@ -848,7 +848,7 @@ function MenuContent() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 18 }}>⭐</span>
                 <h3 style={{ fontSize: 16, fontWeight: 900, color: '#111827', margin: 0 }}>
-                  Chef's Signature Specials & Bestsellers
+                  Chef&apos;s Signature Specials &amp; Bestsellers
                 </h3>
               </div>
               <p style={{ fontSize: 12, color: '#6B7280', margin: '3px 0 0' }}>
@@ -1456,7 +1456,7 @@ function MenuContent() {
               &ldquo;The Dum Biryani arrived piping hot with tender, aromatic meat pieces. Ordering direct gave me 10% points cashback and no aggregator surge fee. Best experience!&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#FEE2E2', color: '#E23744', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
                 R
               </div>
               <div>
@@ -1670,7 +1670,7 @@ function MenuContent() {
             justifyContent: 'center',
             fontSize: 22,
             flexShrink: 0,
-            border: '1px solid #FECDD3'
+            border: '1px solid var(--primary-border)'
           }}>
             👨‍🍳
           </div>
@@ -1750,7 +1750,7 @@ function MenuContent() {
                         justifyContent: 'space-between',
                         padding: '12px 14px',
                         borderRadius: 10,
-                        background: selectedVariant?.id === variant.id ? '#FFF1F2' : '#F8F9FA',
+                        background: selectedVariant?.id === variant.id ? 'var(--primary-soft)' : '#F8F9FA',
                         border: `1.5px solid ${selectedVariant?.id === variant.id ? 'var(--primary)' : '#E3E5EB'}`,
                         cursor: 'pointer'
                       }}
@@ -1798,7 +1798,7 @@ function MenuContent() {
                           justifyContent: 'space-between',
                           padding: '10px 14px',
                           borderRadius: 10,
-                          background: isSelected ? '#FFF1F2' : '#F8F9FA',
+                          background: isSelected ? 'var(--primary-soft)' : '#F8F9FA',
                           border: `1.5px solid ${isSelected ? 'var(--primary)' : '#E3E5EB'}`,
                           cursor: 'pointer'
                         }}
@@ -2573,15 +2573,15 @@ function MenuContent() {
             {occasionSuccessMsg ? (
               <div
                 style={{
-                  background: '#FFF1F2',
-                  border: '1.5px solid #FECDD3',
+                  background: 'var(--primary-soft)',
+                  border: '1.5px solid var(--primary-border)',
                   borderRadius: 14,
                   padding: '24px 20px',
                   textAlign: 'center'
                 }}
               >
                 <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
-                <h4 style={{ fontSize: 17, fontWeight: 900, color: '#9F1239', margin: '0 0 6px' }}>
+                <h4 style={{ fontSize: 17, fontWeight: 900, color: 'var(--primary-dark)', margin: '0 0 6px' }}>
                   Occasion Saved in VIP Club!
                 </h4>
                 <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>
@@ -2591,7 +2591,7 @@ function MenuContent() {
                 <div
                   style={{
                     background: '#FFFFFF',
-                    border: '2px dashed #E23744',
+                    border: '2px dashed var(--primary)',
                     borderRadius: 12,
                     padding: '12px 16px',
                     display: 'flex',
@@ -2602,7 +2602,7 @@ function MenuContent() {
                 >
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontSize: 11, color: '#666', fontWeight: 600 }}>YOUR EXCLUSIVE 15% VIP CODE</div>
-                    <div style={{ fontSize: 18, fontWeight: 900, color: '#E23744', letterSpacing: 1 }}>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary)', letterSpacing: 1 }}>
                       {occasionCouponCode || 'VIPBIRTHDAY15'}
                     </div>
                   </div>
@@ -2615,7 +2615,7 @@ function MenuContent() {
                       }
                     }}
                     style={{
-                      background: '#E23744',
+                      background: 'var(--primary)',
                       color: '#FFFFFF',
                       border: 'none',
                       borderRadius: 8,

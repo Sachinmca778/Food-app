@@ -61,7 +61,7 @@ export default function ExplorePage() {
       locality: 'Fort, Mumbai',
       savingsText: 'Save ₹45 vs Aggregators',
       tags: ['beverages', 'fast_food', 'desserts'],
-      phone: '919876543211'
+      phone: '919310378572'
     }
   ];
 
@@ -152,7 +152,7 @@ export default function ExplorePage() {
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,
-          background: '#FEF2F2',
+          background: 'var(--primary-soft)',
           color: 'var(--primary)',
           padding: '4px 14px',
           borderRadius: 20,

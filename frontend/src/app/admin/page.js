@@ -34,6 +34,17 @@ export default function SuperAdminPage() {
   // QR Preview Modal
   const [selectedRestQr, setSelectedRestQr] = useState(null);
 
+  const loadRestaurants = async () => {
+    setLoading(true);
+    try {
+      const res = await fetchAPI('/admin/restaurants');
+      if (res.success) {
+        setRestaurants(res.restaurants || []);
+      }
+    } catch (e) {}
+    setLoading(false);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('super_admin_token');
     if (token) {
@@ -67,17 +78,6 @@ export default function SuperAdminPage() {
     } finally {
       setLoginLoading(false);
     }
-  };
-
-  const loadRestaurants = async () => {
-    setLoading(true);
-    try {
-      const res = await fetchAPI('/admin/restaurants');
-      if (res.success) {
-        setRestaurants(res.restaurants || []);
-      }
-    } catch (e) {}
-    setLoading(false);
   };
 
   const handleCreateRestaurant = async (e) => {

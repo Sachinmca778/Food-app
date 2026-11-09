@@ -212,13 +212,13 @@ function TrackingContent() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              background: '#FFF1F2',
+              background: 'var(--primary-soft)',
               color: 'var(--primary)',
               padding: '6px 16px',
               borderRadius: 'var(--radius-full)',
               fontSize: 13,
               fontWeight: 800,
-              border: '1px solid #FBCED2'
+              border: '1px solid var(--primary-border)'
             }}>
               <span className="pulse-indicator" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', display: 'inline-block' }} />
               {isDineIn ? `Estimated cooking time: ~${order.prep_minutes || 20} mins` : isPickup ? `Ready for pickup in: ~${order.prep_minutes || 20} mins` : `Estimated delivery: ~${order.prep_minutes || 25} mins`}
@@ -365,7 +365,7 @@ function TrackingContent() {
                   </div>
 
                   {isCurrent && (
-                    <span style={{ fontSize: 11, background: '#FFF1F2', color: 'var(--primary)', padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 800, border: '1px solid #FBCED2' }}>
+                    <span style={{ fontSize: 11, background: 'var(--primary-soft)', color: 'var(--primary)', padding: '2px 8px', borderRadius: 'var(--radius-full)', fontWeight: 800, border: '1px solid var(--primary-border)' }}>
                       IN PROGRESS
                     </span>
                   )}
@@ -526,7 +526,7 @@ function TrackingContent() {
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#4F4F4F', marginBottom: 12 }}>
                 <div>
                   <div><strong>Order:</strong> #{order.order_no}</div>
-                  <div><strong>Date:</strong> {new Date(order.placed_at || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                  <div><strong>Date:</strong> {order.placed_at ? new Date(order.placed_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Today'}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div><strong>Type:</strong> {isDineIn ? `Dine-In (Table #${tableNo})` : isPickup ? 'Takeaway' : 'Delivery'}</div>
