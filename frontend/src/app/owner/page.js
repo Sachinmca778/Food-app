@@ -53,30 +53,12 @@ export default function OwnerDashboard() {
         .catch(e => alert(e.message));
     }
   }, [restaurant]);
-  useEffect(() => {
-    const storedSlug = typeof window !== 'undefined' && localStorage.getItem('owner_restaurant_slug');
-    if (!storedSlug) {
-      setError('No owned restaurant found. Please create a trial first.');
-      setLoading(false);
-      return;
-    }
-    fetchAPI(`/restaurant/${storedSlug}`)
-      .then(res => {
-        if (res.success) {
-          setRestaurant(res.restaurant);
-        } else {
-          setError(res.error || 'Failed to load restaurant');
-        }
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleUpgrade = async (plan) => {
     try {
       const res = await fetchAPI('/payments/create-subscription', {
         method: 'POST',
-        body: JSON.stringify({ slug: restaurant.slug, plan })
+        body: JSON.stringify({ slug: restaurant?.slug, plan })
       });
       if (res.success && res.checkoutUrl) {
         window.location.href = res.checkoutUrl;
@@ -86,7 +68,8 @@ export default function OwnerDashboard() {
     } catch (e) {
       alert(e.message);
     }
-  }; {
+  };
+
     alert('Upgrade flow not yet implemented.');
   };
 
