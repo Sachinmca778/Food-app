@@ -1715,7 +1715,7 @@ export default function HomePage() {
         }}>
           ✨ 7-DAY FREE TRIAL • NO COMMITMENT • SETUP IN 10 MINS
         </div>
-        <h2 style={{ fontSize: 'clamp(24px, 3.8vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 12px' }}>
+        <h2 style={{ fontSize: 'clamp(24px, 3.8vw, 36px)', fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 12px', color: '#FFFFFF' }}>
           {lang === 'hi'
             ? 'Aaj Hi Apna Restaurant Aggregator Commission Se Azaad Karein'
             : 'Start Keeping 100% of Your Hard-Earned Food Revenue'}
